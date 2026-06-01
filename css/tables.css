@@ -1,0 +1,37 @@
+/* ==========================================================================
+   tables.css
+   Estilos para tablas y acciones (botones en celdas, hover, etc.)
+   ========================================================================== */
+
+/* Barras de tabla */
+thead th {
+  letter-spacing: 0.06em;
+}
+
+/* Table Hover Effect */
+tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Action Buttons Table */
+.action-btn {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: rgba(17, 24, 39, 0.06);
+}
+
+.dark .action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
