@@ -8,12 +8,17 @@
     <meta name="color-scheme" content="light dark">
     <title>Bitácora Digital - Comisión de Servicios Informáticos UMICH</title>
     <link rel="icon" type="image/svg+xml" href="./vite.svg">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./assets/logo-umich.png">
+    <meta name="application-name" content="Bitácora Digital">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="./css/tailwind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -118,7 +123,14 @@
 
     <!-- Modal: Solicitud de acceso (Registro) -->
     <div id="modal-register" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeRegisterModal()"></div>
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar registro"
+            onclick="closeRegisterModal()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeRegisterModal()"
+        ></div>
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
                 <div class="flex items-center justify-between">
@@ -259,7 +271,15 @@
         </aside>
 
         <!-- Sidebar Overlay (Mobile) -->
-        <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
+        <div
+            id="sidebar-overlay"
+            class="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden hidden"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar menú"
+            onclick="toggleSidebar()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') toggleSidebar()"
+        ></div>
 
         <!-- Main Content -->
         <main class="flex-1 lg:ml-0 min-h-screen">
@@ -276,6 +296,12 @@
                         </div>
 
                         <div class="flex items-center space-x-3">
+                            <span id="net-status" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border">
+                                —
+                            </span>
+                            <button type="button" onclick="openCommandPalette()" aria-label="Buscar (Ctrl+K)" class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                <i class="fas fa-magnifying-glass text-xl"></i>
+                            </button>
                             <button type="button" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro" class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <i class="fas fa-moon dark:hidden text-xl"></i>
                             <i class="fas fa-sun hidden dark:inline text-xl"></i>
@@ -622,6 +648,10 @@
                                         <i class="fas fa-file-pdf w-5 text-red-500"></i>
                                         <span class="ml-2 font-semibold">Exportar PDF</span>
                                     </button>
+                                    <button onclick="exportActivitiesCSV()" class="w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                        <i class="fas fa-file-csv w-5 text-emerald-600"></i>
+                                        <span class="ml-2 font-semibold">Exportar CSV</span>
+                                    </button>
                                     <div class="border-t border-gray-200 dark:border-gray-800"></div>
                                     <button id="btn-seed-activities" onclick="seedSampleActivities()" class="hidden w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
                                         <i class="fas fa-wand-magic w-5 text-gray-600 dark:text-gray-300"></i>
@@ -775,6 +805,10 @@
                             <button onclick="exportPDF('events')" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
                                 <i class="fas fa-file-pdf mr-2"></i>
                                 Exportar eventos (PDF)
+                            </button>
+                            <button onclick="exportEventsCSV()" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                                <i class="fas fa-file-csv mr-2 text-emerald-600"></i>
+                                Exportar eventos (CSV)
                             </button>
                         </div>
 
@@ -963,6 +997,19 @@
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
                                     <b>Tip:</b> si no tienes internet, usa modo offline y descarga un respaldo al final del día.
                                 </p>
+
+                                <div class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 dark:border-gray-800 p-3 bg-gray-50/60 dark:bg-gray-900/30">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Forzar modo offline</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">
+                                            Útil si Supabase aún no tiene tablas/policies o si quieres trabajar sin internet.
+                                        </p>
+                                    </div>
+                                    <label class="inline-flex items-center gap-2">
+                                        <input id="cfg-force-offline" type="checkbox" class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-black dark:text-white">
+                                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">Activo</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-4">
@@ -1070,6 +1117,10 @@
                                         <button onclick="exportBackup()" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
                                             <i class="fas fa-download mr-2"></i>
                                             Descargar respaldo
+                                        </button>
+                                        <button onclick="clearOfflineData()" class="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-900/40 px-4 py-2 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-all">
+                                            <i class="fas fa-trash mr-2"></i>
+                                            Borrar datos locales
                                         </button>
                                     </div>
                                     <div class="mt-4">
@@ -1189,8 +1240,15 @@
     </div>
 
     <!-- Activity Modal -->
-    <div id="modal-activity" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeActivityModal()"></div>
+    <div id="modal-activity" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-label="Incidencia">
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar incidencia"
+            onclick="closeActivityModal()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityModal()"
+        ></div>
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
             <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
@@ -1427,7 +1485,14 @@
 
     <!-- Modal: Información técnica avanzada -->
     <div id="modal-activity-advanced" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeActivityAdvancedModal()"></div>
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar información técnica"
+            onclick="closeActivityAdvancedModal()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityAdvancedModal()"
+        ></div>
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
             <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
@@ -1523,8 +1588,15 @@
     </div>
 
     <!-- Event Modal -->
-    <div id="modal-event" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEventModal()"></div>
+    <div id="modal-event" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-label="Evento">
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar evento"
+            onclick="closeEventModal()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeEventModal()"
+        ></div>
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
             <div class="border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
@@ -1612,8 +1684,15 @@
     </div>
 
     <!-- User Modal (Admin Only) -->
-    <div id="modal-user" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeUserModal()"></div>
+    <div id="modal-user" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-label="Usuario">
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar usuario"
+            onclick="closeUserModal()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeUserModal()"
+        ></div>
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
             <div class="border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
@@ -1684,6 +1763,50 @@
         </div>
     </div>
 
+    <!-- Command Palette (Ctrl+K) -->
+    <div id="modal-command" class="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 hidden" role="dialog" aria-modal="true" aria-label="Búsqueda rápida">
+        <div
+            class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            role="button"
+            tabindex="0"
+            aria-label="Cerrar búsqueda rápida"
+            onclick="closeCommandPalette()"
+            onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeCommandPalette()"
+        ></div>
+        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <i class="fas fa-magnifying-glass text-gray-700 dark:text-gray-200"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-bold text-gray-900 dark:text-white leading-tight">Búsqueda rápida</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Ctrl+K · Enter abrir · Esc cerrar</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCommandPalette()" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" aria-label="Cerrar búsqueda">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input id="cmdk-input" type="text" autocomplete="off" placeholder="Buscar incidencias y eventos..."
+                        class="w-full pl-11 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-black dark:focus:ring-white focus:border-transparent">
+                </div>
+                <div class="mt-4">
+                    <div id="cmdk-meta" class="text-xs text-gray-500 dark:text-gray-400 mb-2">Escribe para buscar.</div>
+                    <div id="cmdk-results" class="max-h-[55vh] overflow-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-200 dark:divide-gray-800">
+                        <div class="p-4 text-sm text-gray-600 dark:text-gray-300">Sin resultados todavía.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[60] flex flex-col gap-3 pointer-events-none"></div>
+
     <!-- Scripts -->
     <script>
         // Configuración para despliegue en la nube (Supabase)
@@ -1691,6 +1814,18 @@
         window.SUPABASE_URL = window.SUPABASE_URL || 'https://xmbrnfkoocnmwtkpzeuj.supabase.co';
         window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_ybDZLxt7YpcbMNu8PEsoUw_AGdym5XF';
     </script>
-    <script type="module" src="./js/app.js"></script>
+    <!-- Cache-busting para GitHub Pages / navegadores -->
+    <script type="module" src="./js/app.js?v=1.5.2"></script>
+    <script>
+        // Service Worker (PWA / cache offline)
+        (function () {
+            try {
+                if (!('serviceWorker' in navigator)) return;
+                // Evitar problemas en file:// (debe correr en http/https)
+                if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+                navigator.serviceWorker.register('./sw.js?v=4').catch(() => { });
+            } catch { }
+        })();
+    </script>
 </body>
 </html>

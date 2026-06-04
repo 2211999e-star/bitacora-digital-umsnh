@@ -8,7 +8,7 @@
  */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isReviewModeEnabled } from './config.js';
+import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isForceOfflineEnabled, isReviewModeEnabled } from './config.js';
 
 export { createClient };
 
@@ -199,6 +199,14 @@ export function createSupabaseFallback() {
 export function createSupabase() {
   // En modo revisión forzamos persistencia local para que no se alteren datos reales.
   if (isReviewModeEnabled()) return createSupabaseFallback();
+  // Permite forzar modo offline aunque existan credenciales configuradas.
+  if (isForceOfflineEnabled()) return createSupabaseFallback();
   const { url, anonKey } = getSupabaseConfig();
-  return isValidUrl(url) && anonKey ? createClient(url, anonKey) : createSupabaseFallback();
+  if (isValidUrl(url) && anonKey) {
+    const client = createClient(url, anonKey);
+    // Bandera para mantener la misma interfaz que el fallback
+    client.__local = false;
+    return client;
+  }
+  return createSupabaseFallback();
 }

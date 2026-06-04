@@ -265,6 +265,20 @@ export async function exportPDF(_ctx, type, options = {}) {
     const reportFolio = `REP-${new Date().toISOString().replace(/[-:]/g, '').slice(0, 13)}`;
     const folioUsed = options.folio || reportFolio;
 
+    // Metadatos del PDF (más “oficial”)
+    try {
+      const titleMeta = (options.title || '').trim() || (type === 'events' ? 'Reporte de Eventos' : 'Reporte de Incidencias');
+      doc.setProperties({
+        title: `${titleMeta} (${folioUsed})`,
+        subject: 'Bitácora Digital',
+        author: signerName || 'Bitácora Digital',
+        creator: 'Bitácora Digital',
+        keywords: 'bitácora, incidencias, eventos, mantenimiento, UMSNH',
+      });
+    } catch {
+      // noop
+    }
+
     const parseMetaFromObservations = (text = '') => {
       const raw = String(text || '');
       const line = raw.split('\n').find((l) => l.trim().startsWith('__meta__='));
@@ -302,18 +316,23 @@ export async function exportPDF(_ctx, type, options = {}) {
         }
       }
 
-      // Encabezado institucional (formal, centrado)
+      // Encabezado institucional (centrado, configurable)
+      // Nota: orgUnit/faculty se editan desde Reportes → Configuración del PDF
+      const main = orgUnit || 'Universidad Michoacana de San Nicolás de Hidalgo';
+      const y1 = 14;
+      const y2 = 19;
+      const y3 = 24;
+
       doc.setFontSize(11);
-      doc.text('Universidad Michoacana de San Nicolás de Hidalgo', pageWidth / 2, 14, { align: 'center' });
-      doc.text('Facultad de Contaduría y Ciencias Administrativas', pageWidth / 2, 19, { align: 'center' });
-      doc.text('Licenciatura en Informática Administrativa', pageWidth / 2, 24, { align: 'center' });
+      doc.text(main, pageWidth / 2, y1, { align: 'center' });
 
       doc.setFontSize(10);
-      doc.text('Comisión de Servicios Informáticos', pageWidth / 2, 30, { align: 'center' });
-
-      doc.setFontSize(9);
-      if (orgUnit) doc.text(orgUnit, pageWidth / 2, 35, { align: 'center' });
-      if (faculty) doc.text(faculty, pageWidth / 2, 39, { align: 'center' });
+      if (faculty) {
+        doc.text(faculty, pageWidth / 2, y2, { align: 'center' });
+        doc.text('Comisión de Servicios Informáticos', pageWidth / 2, y3, { align: 'center' });
+      } else {
+        doc.text('Comisión de Servicios Informáticos', pageWidth / 2, y2 + 3, { align: 'center' });
+      }
 
       doc.setTextColor(90);
       doc.text(`Folio: ${folioUsed}  ·  Generado: ${formatDate(new Date())}`, pageWidth / 2, 43, { align: 'center' });
@@ -596,7 +615,7 @@ export async function exportPDF(_ctx, type, options = {}) {
       // noop (no bloquear exportación)
     }
 
-    doc.save(`${prefix}_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`${prefix}_${folioUsed}_${new Date().toISOString().split('T')[0]}.pdf`);
 
     Swal.fire({ icon: 'success', title: 'PDF Generado', text: 'El reporte ha sido descargado', timer: 2000, showConfirmButton: false });
   } catch (error) {

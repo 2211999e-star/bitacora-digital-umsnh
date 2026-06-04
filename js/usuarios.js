@@ -132,6 +132,11 @@ export function showUserModal() {
   document.getElementById('form-user').reset();
   document.getElementById('user-id').value = '';
   document.getElementById('user-password-field').classList.remove('hidden');
+
+  // Mejor UX: enfocar primer campo
+  setTimeout(() => {
+    document.getElementById('usr-name')?.focus?.();
+  }, 0);
 }
 
 export function closeUserModal() {

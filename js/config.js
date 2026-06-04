@@ -23,6 +23,17 @@ export function setReviewModeEnabled(enabled) {
   localStorage.setItem(REVIEW_MODE_KEY, enabled ? 'true' : 'false');
 }
 
+// Forzar modo offline (útil cuando Supabase está configurado pero aún no tiene tablas/policies)
+export const FORCE_OFFLINE_KEY = `${LOCAL_STORAGE_PREFIX}forceOffline`; // 'true' | 'false'
+
+export function isForceOfflineEnabled() {
+  return localStorage.getItem(FORCE_OFFLINE_KEY) === 'true';
+}
+
+export function setForceOfflineEnabled(enabled) {
+  localStorage.setItem(FORCE_OFFLINE_KEY, enabled ? 'true' : 'false');
+}
+
 // Preferencia de tema
 export const THEME_KEY = `${LOCAL_STORAGE_PREFIX}theme`; // 'system' | 'light' | 'dark'
 
@@ -158,6 +169,31 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
     modeEl.textContent = supabase?.__local
       ? 'Modo offline (guardado en este navegador).'
       : 'Conectado a Supabase (guardado en la nube).';
+  }
+
+  // Toggle: forzar modo offline
+  const forceOfflineEl = document.getElementById('cfg-force-offline');
+  if (forceOfflineEl) {
+    forceOfflineEl.checked = isForceOfflineEnabled();
+    if (!forceOfflineEl.dataset.initialized) {
+      forceOfflineEl.dataset.initialized = 'true';
+      forceOfflineEl.addEventListener('change', async () => {
+        try {
+          setForceOfflineEnabled(Boolean(forceOfflineEl.checked));
+          await Swal.fire({
+            icon: 'success',
+            title: 'Listo',
+            text: 'Se recargará la página para aplicar el modo de guardado.',
+            timer: 1400,
+            showConfirmButton: false,
+          });
+        } catch {
+          // noop
+        } finally {
+          window.location.reload();
+        }
+      });
+    }
   }
 
   const statusEl = document.getElementById('cfg-supabase-status');
@@ -328,6 +364,12 @@ export function saveSupabaseConfig() {
 
   localStorage.setItem(`${LOCAL_STORAGE_PREFIX}supabaseUrl`, url);
   localStorage.setItem(`${LOCAL_STORAGE_PREFIX}supabaseAnonKey`, key);
+  // Si el usuario está configurando Supabase, asumimos que quiere reintentar modo nube.
+  try {
+    setForceOfflineEnabled(false);
+  } catch {
+    // noop
+  }
 
   Swal.fire({
     icon: 'success',
@@ -376,6 +418,56 @@ export function exportBackup() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+export async function clearOfflineData() {
+  const result = await Swal.fire({
+    title: '¿Borrar datos locales?',
+    text: 'Se borrarán incidencias/eventos/usuarios guardados en este navegador. No afecta Supabase.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, borrar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#dc2626',
+  });
+
+  if (!result.isConfirmed) return;
+
+  const keep = new Set([
+    // Preferencias / configuración
+    `${LOCAL_STORAGE_PREFIX}supabaseUrl`,
+    `${LOCAL_STORAGE_PREFIX}supabaseAnonKey`,
+    `${LOCAL_STORAGE_PREFIX}forceOffline`,
+    `${LOCAL_STORAGE_PREFIX}reviewMode`,
+    `${LOCAL_STORAGE_PREFIX}theme`,
+    `${LOCAL_STORAGE_PREFIX}lastSection`,
+    // compat
+    'darkMode',
+  ]);
+
+  try {
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (key.startsWith(LOCAL_STORAGE_PREFIX) && !keep.has(key)) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // noop
+  }
+
+  await Swal.fire({
+    icon: 'success',
+    title: 'Borrado',
+    text: 'Se borraron los datos locales. Se recargará la página.',
+    timer: 1600,
+    showConfirmButton: false,
+  });
+
+  window.location.reload();
 }
 
 async function importBackupFile(file) {

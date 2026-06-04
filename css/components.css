@@ -383,7 +383,8 @@ pre {
 /* Modal Animations */
 #modal-activity,
 #modal-event,
-#modal-user {
+#modal-user,
+#modal-command {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
   pointer-events: none;
@@ -391,15 +392,75 @@ pre {
 
 #modal-activity.show,
 #modal-event.show,
-#modal-user.show {
+#modal-user.show,
+#modal-command.show {
   opacity: 1;
   pointer-events: auto;
 }
 
 #modal-activity.show > div:last-child,
 #modal-event.show > div:last-child,
-#modal-user.show > div:last-child {
+#modal-user.show > div:last-child,
+#modal-command.show > div:last-child {
   animation: slideUp 0.3s ease-out;
+}
+
+/* -------------------------
+   Toasts (notificaciones ligeras)
+   ------------------------- */
+#toast-container .toast {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 360px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  transform: translateY(-6px);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.dark #toast-container .toast {
+  background: rgba(17, 24, 39, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+#toast-container .toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#toast-container .toast .title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.dark #toast-container .toast .title {
+  color: #f9fafb;
+}
+
+#toast-container .toast .msg {
+  margin-top: 2px;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.dark #toast-container .toast .msg {
+  color: #d1d5db;
+}
+
+.toast.toast-success {
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.toast.toast-warning {
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.toast.toast-error {
+  border-color: rgba(239, 68, 68, 0.25);
 }
 
 /* Hover Effects */

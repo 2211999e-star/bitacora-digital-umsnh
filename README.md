@@ -142,6 +142,17 @@ Luego abrir:
 
 ---
 
+## 4.1) Modo PWA / Offline (Service Worker)
+Este proyecto incluye:
+- `manifest.webmanifest`
+- `sw.js` (cache de archivos locales para mejorar carga y uso offline)
+
+Notas:
+- El Service Worker solo se registra en **http/https** (no en `file://`).
+- Para probar, usa `python -m http.server` o GitHub Pages.
+
+---
+
 ## 5) Despliegue “modo nube” (Supabase + hosting)
 
 Si vas a usar Supabase:
@@ -164,6 +175,13 @@ Pasos:
 4. En el sistema web → **Configuración** pega tu **Supabase URL** y **ANON KEY** (pública).
 
 > Importante: por requisito institucional, el registro crea cuentas **Pendiente** y deben ser aprobadas por el **administrador principal**.
+
+### Solución de problemas (Supabase)
+- Si en consola aparece el error **PGRST205** (por ejemplo: “Could not find the table 'public.activities' in the schema cache”), significa que Supabase está configurado pero **aún no tiene creadas las tablas**.
+  - Ejecuta `supabase_schema.sql` en Supabase → **SQL Editor**.
+  - Verifica que estén creadas al menos: `profiles`, `activities`, `events`, `settings`.
+  - Revisa RLS/policies según tu entorno.
+- La app puede activar automáticamente **modo offline** para evitar que la interfaz “se rompa”. Al guardar Supabase de nuevo en **Configuración**, se reintentará el modo nube.
 
 ---
 

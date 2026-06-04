@@ -3,7 +3,7 @@
  * CRUD de eventos (events) + filtros y modales.
  */
 
-import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass } from './utils.js';
+import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast } from './utils.js';
 import { canEditOwnedOrRole, canDelete } from './permissions.js';
 import { updateNotificationBadge } from './dashboard.js';
 
@@ -25,7 +25,21 @@ function renderEventsGrid(list = state.eventsData) {
   if (!grid) return;
 
   if (!list || list.length === 0) {
-    grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">No hay eventos registrados</div>';
+    grid.innerHTML = `
+      <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+        <div class="mx-auto max-w-md flex flex-col items-center gap-2">
+          <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <i class="fas fa-calendar-days text-gray-500 dark:text-gray-300"></i>
+          </div>
+          <div class="font-semibold">No hay eventos registrados</div>
+          <div class="text-sm">Crea tu primer evento o ajusta los filtros.</div>
+          <button onclick="showEventModal()" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+            <i class="fas fa-plus mr-2"></i>
+            Nuevo evento
+          </button>
+        </div>
+      </div>
+    `;
     return;
   }
 
@@ -122,6 +136,58 @@ export function filterEvents() {
   renderEventsGrid(filtered);
 }
 
+// -------------------------
+// Exportación CSV (eventos)
+// -------------------------
+
+function getFilteredEvents() {
+  const searchText = (document.getElementById('search-events')?.value || '').toLowerCase();
+  const filterStatus = document.getElementById('filter-events-status')?.value || '';
+
+  let filtered = state.eventsData;
+  if (searchText) {
+    filtered = filtered.filter(
+      (e) =>
+        (e.title || '').toLowerCase().includes(searchText) ||
+        (e.description || '').toLowerCase().includes(searchText) ||
+        (e.observations || '').toLowerCase().includes(searchText) ||
+        (e.location || '').toLowerCase().includes(searchText) ||
+        (e.assigned_to || '').toLowerCase().includes(searchText),
+    );
+  }
+  if (filterStatus) filtered = filtered.filter((e) => e.status === filterStatus);
+  return filtered;
+}
+
+export function exportEventsCSV() {
+  try {
+    const rows = getFilteredEvents();
+    const out = [
+      ['Fecha', 'Hora', 'Título', 'Estado', 'Ubicación', 'Asignado a', 'Descripción', 'Observaciones'],
+    ];
+
+    rows.forEach((e) => {
+      out.push([
+        e.event_date || '',
+        e.event_time || '',
+        e.title || '',
+        getStatusText(e.status),
+        e.location || '',
+        e.assigned_to || '',
+        e.description || '',
+        e.observations || '',
+      ]);
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCSV(`eventos_${today}`, out);
+    showToast({ type: 'success', title: 'CSV generado', message: `Registros: ${rows.length}` });
+  } catch (err) {
+    console.error(err);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo exportar el CSV.' });
+  }
+}
+
 export function showEventModal() {
   const modal = document.getElementById('modal-event');
   if (!modal) return;
@@ -139,6 +205,11 @@ export function showEventModal() {
   const timeEl = document.getElementById('evt-time');
   if (dateEl) dateEl.value = today;
   if (timeEl) timeEl.value = now;
+
+  // Mejor UX: enfocar primer campo
+  setTimeout(() => {
+    document.getElementById('evt-title')?.focus?.();
+  }, 0);
 }
 
 export function closeEventModal() {

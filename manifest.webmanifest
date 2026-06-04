@@ -1,0 +1,23 @@
+{
+  "name": "Bitácora Digital",
+  "short_name": "Bitácora",
+  "description": "Bitácora digital para registro de incidencias, eventos y reportes de mantenimiento.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
+  "icons": [
+    {
+      "src": "./assets/logo-umich.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./assets/logo-umich.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

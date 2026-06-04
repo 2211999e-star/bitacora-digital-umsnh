@@ -14,6 +14,8 @@ import {
   randomPick,
   addDays,
   isoDate,
+  downloadCSV,
+  showToast,
 } from './utils.js';
 import { canEditOwnedOrRole, canDelete } from './permissions.js';
 import { updateNotificationBadge, loadDashboardData } from './dashboard.js';
@@ -174,11 +176,31 @@ export function renderActivitiesTable() {
   if (searchText) {
     filtered = filtered.filter(
       (a) =>
-        a.reporter_name.toLowerCase().includes(searchText) ||
-        a.department.toLowerCase().includes(searchText) ||
-        a.description.toLowerCase().includes(searchText) ||
-        (a.coordination || '').toLowerCase().includes(searchText) ||
-        (a.assigned_to || '').toLowerCase().includes(searchText),
+        (() => {
+          const { meta, cleanText } = parseMetaBlock(a.observations || '');
+          const haystack = [
+            a.reporter_name,
+            a.department,
+            a.description,
+            a.coordination,
+            a.assigned_to,
+            a.service_type,
+            a.brand,
+            a.model,
+            a.operating_system,
+            a.folio,
+            meta.folio,
+            meta.edificio,
+            meta.carrera,
+            meta.salon,
+            meta.turno,
+            cleanText,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          return haystack.includes(searchText);
+        })(),
     );
   }
 
@@ -211,7 +233,17 @@ export function renderActivitiesTable() {
     tbody.innerHTML = `
       <tr>
         <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-          No se encontraron actividades
+          <div class="flex flex-col items-center gap-2">
+            <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300"></i>
+            </div>
+            <div class="font-semibold">No se encontraron incidencias</div>
+            <div class="text-sm">Prueba cambiando filtros o crea una nueva incidencia.</div>
+            <button onclick="showActivityModal()" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+              <i class="fas fa-plus mr-2"></i>
+              Nueva incidencia
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -395,6 +427,11 @@ export function showActivityModal() {
     otherArea.value = '';
     otherArea.classList.add('hidden');
   }
+
+  // Mejor UX: enfocar primer campo requerido
+  setTimeout(() => {
+    document.getElementById('act-building')?.focus?.();
+  }, 0);
 }
 
 export function closeActivityModal() {
@@ -544,20 +581,44 @@ export async function viewActivity({ supabase } = {}, id) {
     const canEdit = canEditOwnedOrRole(state.currentUser, data.user_id);
     const canDeliver = canEdit && !['completado', 'cancelado'].includes(String(data.task_status || '').toLowerCase());
 
+    const resumen = [
+      `Folio: ${folio}`,
+      ubicacion ? `Ubicación: ${ubicacion}` : null,
+      `Estado: ${getStatusText(data.task_status)}`,
+      `Prioridad: ${getPriorityText(data.priority)}`,
+      `Recibido: ${formatDate(data.received_date || data.date)}`,
+      data.delivery_date ? `Entrega: ${formatDate(data.delivery_date)}` : null,
+      `Descripción: ${(data.description || '').trim() || '—'}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
     const html = `
       <div style="text-align:left">
         <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
           <div style="font-weight:700">Incidencia</div>
-          <div><span class="badge badge-${getBadgeClass(data.task_status)}">${getStatusText(data.task_status)}</span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-${getBadgeClass(data.task_status)}">${getStatusText(data.task_status)}</span>
+            ${
+              canEdit
+                ? `<button onclick="editActivity('${data.id}')" style="font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:#fff;cursor:pointer">Editar</button>`
+                : ''
+            }
+          </div>
         </div>
         <div style="margin-top:10px;font-size:12px;color:#6b7280">
           Folio: <b>${folio}</b>
+          <button onclick="copyToClipboard(${JSON.stringify(folio)})" style="margin-left:8px;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:#fff;cursor:pointer">Copiar</button>
           ${ubicacion ? ` · Ubicación: <b>${ubicacion}</b>` : ''}
+          ${ubicacion ? `<button onclick="copyToClipboard(${JSON.stringify(ubicacion)})" style="margin-left:8px;font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:#fff;cursor:pointer">Copiar ubicación</button>` : ''}
         </div>
         <div style="margin-top:10px;font-size:12px;color:#6b7280">
           Recibido: <b>${formatDate(data.received_date || data.date)}</b>
           ${data.delivery_date ? ` · Entrega: <b>${formatDate(data.delivery_date)}</b>` : ''}
           · Prioridad: <b>${getPriorityText(data.priority)}</b>
+        </div>
+        <div style="margin-top:10px">
+          <button onclick="copyToClipboard(${JSON.stringify(resumen)})" style="font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:#fff;cursor:pointer">Copiar resumen</button>
         </div>
         <div style="margin-top:12px">
           <div style="font-weight:700;margin-bottom:6px">Descripción</div>
@@ -840,6 +901,104 @@ export async function exportActivityPDF({ supabase } = {}, id) {
     );
   } catch {
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo generar el PDF individual.' });
+  }
+}
+
+// -------------------------
+// Exportación CSV (incidencias)
+// -------------------------
+
+function getFilteredActivities() {
+  const searchText = (document.getElementById('search-activities')?.value || '').toLowerCase();
+  const filterStatus = document.getElementById('filter-status')?.value || '';
+  const filterService = (document.getElementById('filter-service-type')?.value || '').trim();
+  const filterPriority = (document.getElementById('filter-priority')?.value || '').trim();
+
+  let filtered = state.activitiesData;
+
+  if (searchText) {
+    filtered = filtered.filter(
+      (a) =>
+        String(a.reporter_name || '').toLowerCase().includes(searchText) ||
+        String(a.department || '').toLowerCase().includes(searchText) ||
+        String(a.description || '').toLowerCase().includes(searchText) ||
+        String(a.coordination || '').toLowerCase().includes(searchText) ||
+        String(a.assigned_to || '').toLowerCase().includes(searchText) ||
+        String(a.folio || '').toLowerCase().includes(searchText),
+    );
+  }
+
+  if (filterStatus) filtered = filtered.filter((a) => a.task_status === filterStatus);
+  if (filterService) filtered = filtered.filter((a) => (a.service_type || '') === filterService);
+  if (filterPriority) filtered = filtered.filter((a) => String(a.priority || 'media') === filterPriority);
+
+  return filtered;
+}
+
+export function exportActivitiesCSV() {
+  try {
+    const rows = getFilteredActivities();
+    const out = [
+      [
+        'Folio',
+        'Fecha',
+        'Recibido',
+        'Entrega',
+        'Reportante',
+        'Carrera/Departamento',
+        'Edificio',
+        'Salón',
+        'Turno',
+        'Tipo de servicio',
+        'Descripción',
+        'Prioridad',
+        'Estado',
+        'Asignado a',
+        'Equipo',
+        'Sistema operativo',
+      ],
+    ];
+
+    rows.forEach((a) => {
+      const { meta, cleanText } = parseMetaBlock(a.observations || '');
+      const folio = meta.folio || a.folio || '—';
+      const edificio = meta.edificio || a.coordination || '';
+      const carrera = meta.carrera || a.department || '';
+      const salon = meta.salon || '';
+      const turno = meta.turno || '';
+      const tipo = meta.tipo || a.service_type || '';
+
+      const equipo = [a.brand || '', a.model || ''].join(' ').trim();
+      const obs = cleanText ? `Obs: ${cleanText}` : '';
+      const descBase = (a.description || '').trim();
+      const desc = [descBase, obs].filter(Boolean).join(' | ');
+
+      out.push([
+        folio,
+        a.date || '',
+        a.received_date || '',
+        a.delivery_date || '',
+        a.reporter_name || '',
+        carrera,
+        edificio,
+        salon,
+        turno,
+        tipo,
+        desc,
+        getPriorityText(a.priority),
+        getStatusText(a.task_status),
+        a.assigned_to || '',
+        equipo,
+        a.operating_system || '',
+      ]);
+    });
+
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCSV(`incidencias_${today}`, out);
+    showToast({ type: 'success', title: 'CSV generado', message: `Registros: ${rows.length}` });
+  } catch (e) {
+    console.error(e);
+    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo exportar el CSV.' });
   }
 }
 
