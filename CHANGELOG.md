@@ -51,3 +51,12 @@
 
 ### Mejoras
 - Cache-busting en `app.js` y `sw.js` para que GitHub Pages y navegadores carguen la versión más reciente sin “atorarse” con caché.
+
+---
+
+## v1.5.3 — 2026-06-04
+
+### Arreglos / Mejoras
+- Service Worker: soporte correcto para cache-busting (`?v=`) guardando y resolviendo recursos con y sin querystring (mejor offline).
+- Auth: si intentas entrar con credenciales demo, el sistema sugiere activar **Modo revisión** (evita confusión).
+- UX: `Esc` cierra de forma consistente menús `<details>` y overlays; click fuera cierra menús.

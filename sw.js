@@ -113,10 +113,28 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_VERSION);
-      const cached = await cache.match(req);
+      // Cache match exacto; si viene con querystring intentamos también sin query (para cache-busting).
+      let cached = await cache.match(req);
+      if (!cached && url.search) {
+        try {
+          const noSearchReq = new Request(url.origin + url.pathname, { method: 'GET' });
+          cached = await cache.match(noSearchReq);
+        } catch {
+          // noop
+        }
+      }
       if (cached) return cached;
       const fresh = await fetch(req);
-      cache.put(req, fresh.clone());
+      // Guardar con y sin query para que el modo offline funcione aunque cambie ?v=...
+      try {
+        cache.put(req, fresh.clone());
+        if (url.search) {
+          const noSearchReq = new Request(url.origin + url.pathname, { method: 'GET' });
+          cache.put(noSearchReq, fresh.clone());
+        }
+      } catch {
+        // noop
+      }
       return fresh;
     })(),
   );

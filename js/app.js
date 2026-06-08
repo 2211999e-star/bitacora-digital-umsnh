@@ -89,33 +89,6 @@ function loadCmdkRecents() {
   } catch {
     return [];
   }
-
-  // Escape global: cerrar modales si están abiertos
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-
-    // 1) Command Palette
-    if (cmdk.open) {
-      e.preventDefault();
-      closeCommandPalette();
-      return;
-    }
-
-    // 2) Modales principales (si existen)
-    const tryClose = (id, fn) => {
-      const modal = document.getElementById(id);
-      if (modal && modal.classList.contains('show') && typeof fn === 'function') {
-        fn();
-        return true;
-      }
-      return false;
-    };
-
-    if (tryClose('modal-activity', window.closeActivityModal)) return;
-    if (tryClose('modal-event', window.closeEventModal)) return;
-    if (tryClose('modal-user', window.closeUserModal)) return;
-    if (tryClose('modal-register', window.closeRegisterModal)) return;
-  });
 }
 
 function saveCmdkRecent(query) {
@@ -693,6 +666,53 @@ function initializeEventListeners() {
           setTimeout(() => window.editEvent?.(it.id), 50);
         }
       }
+    });
+  }
+
+  // Escape global: cerrar modales/overlays si están abiertos
+  if (!document.body.dataset.escapeWired) {
+    document.body.dataset.escapeWired = 'true';
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+
+      // 1) Command Palette
+      if (cmdk.open) {
+        e.preventDefault();
+        closeCommandPalette();
+        return;
+      }
+
+      // 2) Dropdowns <details>
+      const openDetails = document.querySelectorAll('details[open]');
+      if (openDetails.length) {
+        openDetails.forEach((d) => d.removeAttribute('open'));
+        return;
+      }
+
+      // 3) Modales principales (si existen)
+      const tryClose = (id, fn) => {
+        const modal = document.getElementById(id);
+        if (modal && modal.classList.contains('show') && typeof fn === 'function') {
+          fn();
+          return true;
+        }
+        return false;
+      };
+
+      if (tryClose('modal-activity', window.closeActivityModal)) return;
+      if (tryClose('modal-event', window.closeEventModal)) return;
+      if (tryClose('modal-user', window.closeUserModal)) return;
+      if (tryClose('modal-register', window.closeRegisterModal)) return;
+    });
+  }
+
+  // Cierre automático de menús tipo <details> al hacer click fuera
+  if (!document.body.dataset.detailsWired) {
+    document.body.dataset.detailsWired = 'true';
+    document.addEventListener('click', (e) => {
+      document.querySelectorAll('details[open]').forEach((d) => {
+        if (!d.contains(e.target)) d.removeAttribute('open');
+      });
     });
   }
 }

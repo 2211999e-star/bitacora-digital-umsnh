@@ -68,6 +68,30 @@ export async function handleLogin(ctx, e) {
   try {
     showLoader();
 
+    // Tip UX: si el usuario intenta entrar con credenciales demo, guiar para activar Modo revisión
+    const isDemoAttempt =
+      String(email || '').toLowerCase().startsWith('demo.') &&
+      String(email || '').toLowerCase().endsWith('@umich.mx') &&
+      String(password || '') === 'demo1234';
+    if (isDemoAttempt && !isReviewModeEnabled()) {
+      const res = await Swal.fire({
+        icon: 'info',
+        title: 'Modo revisión',
+        html:
+          'Detecté que intentas usar un <b>acceso demo</b>.<br><br>' +
+          'Para que funcione, primero activa <b>Modo revisión</b> (no toca datos reales).<br><br>' +
+          '¿Quieres activarlo ahora?',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, activar',
+        cancelButtonText: 'Cancelar',
+      });
+      if (res.isConfirmed) {
+        localStorage.setItem(`${LOCAL_STORAGE_PREFIX}reviewMode`, 'true');
+        window.location.reload();
+        return;
+      }
+    }
+
     // =========================
     // Modo revisión: accesos demo (no toca datos reales)
     // =========================
