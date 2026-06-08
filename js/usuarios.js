@@ -76,7 +76,7 @@ function renderUsersTable() {
               <i class="fas fa-user text-gray-500 dark:text-gray-400"></i>
             </div>
             <div class="ml-3">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">${user.full_name}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">${user.full_name || String(user.email || '').split('@')[0] || 'Usuario'}</p>
             </div>
           </div>
         </td>
@@ -245,7 +245,9 @@ export async function handleUserSubmit({ supabase } = {}, e) {
     Swal.fire({
       icon: 'success',
       title: id ? 'Actualizado' : 'Creado',
-      text: id ? 'El usuario ha sido actualizado' : 'El usuario ha sido creado',
+      text: id
+        ? `El usuario ha sido actualizado por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`
+        : `El usuario ha sido creado por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`,
       timer: 2000,
       showConfirmButton: false,
     });

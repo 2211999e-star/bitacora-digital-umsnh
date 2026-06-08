@@ -338,6 +338,52 @@ pre {
   border-color: rgba(245, 158, 11, 0.35);
 }
 
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px);
+}
+
+.dark .user-chip {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: rgba(17, 24, 39, 0.82);
+}
+
+.user-chip-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  background: rgba(17, 24, 39, 0.08);
+  color: #111827;
+}
+
+.dark .user-chip-avatar {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f9fafb;
+}
+
+.settings-summary-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(249, 250, 251, 0.92));
+}
+
+.dark .settings-summary-card {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.85), rgba(17, 24, 39, 0.96));
+}
+
 /* Modales */
 .modal-shell {
   box-shadow: 0 28px 70px rgba(17, 24, 39, 0.2);

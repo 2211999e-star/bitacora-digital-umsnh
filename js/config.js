@@ -166,6 +166,10 @@ export async function setAppSetting({ supabase } = {}, key, value) {
 export function initializeSettingsControls({ supabase, currentUser } = {}) {
   const modeEl = document.getElementById('storage-mode');
   const modeBadgeEl = document.getElementById('storage-mode-badge');
+  const summaryStorageEl = document.getElementById('cfg-summary-storage');
+  const summaryReviewEl = document.getElementById('cfg-summary-review');
+  const summaryUserEl = document.getElementById('cfg-summary-user');
+  const summaryRoleEl = document.getElementById('cfg-summary-role');
   if (modeEl) {
     modeEl.textContent = supabase?.__local
       ? 'Modo offline (guardado en este navegador).'
@@ -175,6 +179,9 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
     const isOffline = Boolean(supabase?.__local);
     modeBadgeEl.textContent = isOffline ? 'Offline' : 'Nube';
     modeBadgeEl.className = `status-chip ${isOffline ? 'status-warning' : 'status-success'}`;
+  }
+  if (summaryStorageEl) {
+    summaryStorageEl.textContent = supabase?.__local ? 'Trabajando en offline' : 'Guardado en la nube';
   }
 
   // Toggle: forzar modo offline
@@ -221,6 +228,16 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
   const reviewStatusEl = document.getElementById('cfg-review-mode-status');
   const reviewActionBtn = document.getElementById('cfg-review-mode-action');
   const reviewEnabled = isReviewModeEnabled();
+  if (summaryReviewEl) {
+    summaryReviewEl.textContent = reviewEnabled ? 'Modo revisión activo' : 'Modo revisión desactivado';
+  }
+  if (summaryUserEl) {
+    summaryUserEl.textContent = currentUser?.full_name || String(currentUser?.email || '').split('@')[0] || 'Usuario actual';
+  }
+  if (summaryRoleEl) {
+    const roleMap = { admin: 'Administrador', coordinator: 'Coordinador', practitioner: 'Practicante' };
+    summaryRoleEl.textContent = roleMap[currentUser?.role] || 'Sin rol definido';
+  }
   if (reviewStatusEl) {
     reviewStatusEl.textContent = reviewEnabled ? 'Activo' : 'Desactivado';
     reviewStatusEl.className = `status-chip ${reviewEnabled ? 'status-warning' : 'status-muted'}`;

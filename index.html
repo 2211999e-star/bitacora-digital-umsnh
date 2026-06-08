@@ -299,6 +299,13 @@
                             <span id="net-status" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border">
                                 —
                             </span>
+                            <div class="user-chip hidden md:inline-flex">
+                                <span id="user-chip-avatar" class="user-chip-avatar">U</span>
+                                <div class="leading-tight">
+                                    <div id="user-name-top" class="text-sm font-semibold text-gray-900 dark:text-white">Usuario</div>
+                                    <div id="user-role-top" class="text-[11px] text-gray-500 dark:text-gray-400">Sesión</div>
+                                </div>
+                            </div>
                             <button type="button" onclick="openCommandPalette()" aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)" class="icon-button">
                                 <i class="fas fa-magnifying-glass text-xl"></i>
                             </button>
@@ -333,9 +340,91 @@
                             </button>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-[1.5fr_.9fr] gap-6 mb-8">
+                        <div class="dashboard-hero-panel bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Centro de control</p>
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">Visión general del sistema de mantenimiento</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Seguimiento preventivo y correctivo con prioridad, recordatorios y trazabilidad.</p>
+                                </div>
+                                <div class="rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-3 bg-gray-50/70 dark:bg-gray-800/40">
+                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Actualizado</p>
+                                    <p id="dashboard-updated-at" class="text-sm font-semibold text-gray-900 dark:text-white mt-1">Ahora mismo</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mt-6">
+                                <button onclick="showSection('activities')" class="dashboard-hero-action text-left">
+                                    <i class="fas fa-screwdriver-wrench text-gray-700 dark:text-gray-200"></i>
+                                    <span>Ver mantenimientos</span>
+                                </button>
+                                <button onclick="showActivityModal('correctivo')" class="dashboard-hero-action text-left">
+                                    <i class="fas fa-plus text-gray-700 dark:text-gray-200"></i>
+                                    <span>Nueva correctiva</span>
+                                </button>
+                                <button onclick="showActivityModal('preventivo')" class="dashboard-hero-action text-left">
+                                    <i class="fas fa-shield-heart text-gray-700 dark:text-gray-200"></i>
+                                    <span>Nueva preventiva</span>
+                                </button>
+                                <button onclick="showSection('reports')" class="dashboard-hero-action text-left">
+                                    <i class="fas fa-chart-line text-gray-700 dark:text-gray-200"></i>
+                                    <span>Ver reportes</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">Alerta operativa</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Prioridades inmediatas del día.</p>
+                                </div>
+                                <span id="dashboard-alert-badge" class="status-chip status-warning">0 alertas</span>
+                            </div>
+                            <div id="dashboard-alerts" class="space-y-3 mt-4">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Cargando alertas...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('completado')" class="dashboard-health-card dashboard-health-btn text-left">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-300">OK</p>
+                                    <p id="dashboard-health-ok" class="text-3xl font-bold text-gray-900 dark:text-white mt-2">0</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Completadas y controladas</p>
+                                </div>
+                                <i class="fas fa-circle-check text-2xl text-emerald-500"></i>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('activos')" class="dashboard-health-card dashboard-health-btn text-left">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wider text-amber-700 dark:text-amber-300">Atención</p>
+                                    <p id="dashboard-health-warning" class="text-3xl font-bold text-gray-900 dark:text-white mt-2">0</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Pendientes y en proceso</p>
+                                </div>
+                                <i class="fas fa-triangle-exclamation text-2xl text-amber-500"></i>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="showSection('activities'); setActivitiesDeliveryFilter('overdue')" class="dashboard-health-card dashboard-health-btn text-left">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wider text-red-700 dark:text-red-300">Urgente</p>
+                                    <p id="dashboard-health-urgent" class="text-3xl font-bold text-gray-900 dark:text-white mt-2">0</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Críticas o vencidas</p>
+                                </div>
+                                <i class="fas fa-bolt text-2xl text-red-500"></i>
+                            </div>
+                        </button>
+                    </div>
                     <!-- Stats Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
-                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6 mb-8">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset()" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow text-left">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Total Incidencias</p>
@@ -345,9 +434,9 @@
                                     <i class="fas fa-clipboard-list text-gray-600 dark:text-gray-400 text-lg"></i>
                                 </div>
                             </div>
-                        </div>
+                        </button>
 
-                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('pendiente','','','','delivery_asc')" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow text-left">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
@@ -357,9 +446,9 @@
                                     <i class="fas fa-clock text-orange-500 text-lg"></i>
                                 </div>
                             </div>
-                        </div>
+                        </button>
 
-                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('completado')" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow text-left">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Completadas</p>
@@ -369,9 +458,9 @@
                                     <i class="fas fa-check-circle text-green-500 text-lg"></i>
                                 </div>
                             </div>
-                        </div>
+                        </button>
 
-                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('en_proceso','','','','delivery_asc')" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow text-left">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">En Proceso</p>
@@ -381,9 +470,9 @@
                                     <i class="fas fa-spinner text-blue-500 text-lg"></i>
                                 </div>
                             </div>
-                        </div>
+                        </button>
 
-                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('cancelado')" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow text-left">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Canceladas</p>
@@ -392,6 +481,70 @@
                                 <div class="w-11 h-11 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                                     <i class="fas fa-ban text-gray-600 dark:text-gray-300 text-lg"></i>
                                 </div>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('','','','overdue','delivery_asc')" class="stat-card dashboard-stat-card dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-red-200 dark:border-red-900/40 p-5 hover:shadow-lg transition-shadow text-left">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-red-700 dark:text-red-300">Críticas</p>
+                                    <p id="stat-critical-open" class="text-3xl font-bold text-red-700 dark:text-red-300 mt-1">0</p>
+                                </div>
+                                <div class="w-11 h-11 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-triangle-exclamation text-red-500 text-lg"></i>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('','','','','date_desc')" class="dashboard-panel dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 text-left">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Histórico</p>
+                                    <p id="stat-history-total" class="text-4xl font-bold text-gray-900 dark:text-white mt-2">0</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ejecuciones registradas</p>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Ver incidencias</span>
+                            </div>
+                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                                <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Cierre del sistema</p>
+                                <p id="stat-history-completion" class="text-lg font-semibold text-gray-900 dark:text-white mt-2">0% completadas</p>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('','correctivo','','','delivery_asc')" class="dashboard-panel dashboard-stat-btn bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 text-left">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Correctivas</p>
+                                    <p id="stat-corrective-total" class="text-4xl font-bold text-gray-900 dark:text-white mt-2">0</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Total de correctivas</p>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Ver todas</span>
+                            </div>
+                            <div class="mt-4 grid grid-cols-2 gap-3">
+                                <div class="rounded-xl border border-orange-200 dark:border-orange-900/40 bg-orange-50/60 dark:bg-orange-900/10 p-4">
+                                    <p class="text-xs uppercase tracking-wider text-orange-700 dark:text-orange-300">Abiertas</p>
+                                    <p id="stat-corrective-open" class="text-2xl font-bold text-orange-700 dark:text-orange-300 mt-2">0</p>
+                                </div>
+                                <div class="rounded-xl border border-green-200 dark:border-green-900/40 bg-green-50/60 dark:bg-green-900/10 p-4">
+                                    <p class="text-xs uppercase tracking-wider text-green-700 dark:text-green-300">Concluidas</p>
+                                    <p id="stat-corrective-closed" class="text-2xl font-bold text-green-700 dark:text-green-300 mt-2">0</p>
+                                </div>
+                            </div>
+                        </button>
+
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Calendario de mantenimiento</h3>
+                                    <p id="dashboard-calendar-month" class="text-sm text-gray-600 dark:text-gray-400">Mes actual</p>
+                                </div>
+                                <span class="status-chip status-muted">Operativo</span>
+                            </div>
+                            <div id="dashboard-calendar" class="dashboard-calendar"></div>
+                            <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                                <p id="dashboard-calendar-summary" class="text-sm text-gray-700 dark:text-gray-300">Sin eventos próximos en calendario.</p>
                             </div>
                         </div>
                     </div>
@@ -535,13 +688,13 @@
                     </div>
 
                     <!-- Quick Actions + Maintenance Summary -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Acciones rápidas</h3>
                             <div class="quick-action-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button onclick="showActivityModal()" class="px-4 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-left">
+                                <button onclick="showActivityModal('correctivo')" class="px-4 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-left">
                                     <i class="fas fa-plus mr-2"></i>
-                                    Nueva incidencia
+                                    Nueva correctiva
                                 </button>
                                 <button onclick="showEventModal()" class="px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-left">
                                     <i class="fas fa-calendar-plus mr-2"></i>
@@ -557,6 +710,16 @@
                                 </button>
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-4">Tip: si trabajas sin internet, activa “modo offline” (se guarda en este navegador) y descarga un respaldo.</p>
+                        </div>
+
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Distribución por estado</h3>
+                                <button onclick="showSection('activities')" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:underline">Ver lista</button>
+                            </div>
+                            <div id="dashboard-status-distribution" class="space-y-3">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Cargando distribución...</p>
+                            </div>
                         </div>
 
                         <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
@@ -578,6 +741,34 @@
                                     <b>Preventivo</b>: para evitar fallas (revisión, limpieza, actualizaciones). <br />
                                     <b>Correctivo</b>: para corregir fallas (reparación/reemplazo).
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ítems críticos</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Alta prioridad, urgentes o con entrega vencida.</p>
+                                </div>
+                                <span id="badge-critical-open" class="status-chip status-warning">0 abiertas</span>
+                            </div>
+                            <div id="dashboard-critical-items" class="space-y-3">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Cargando ítems críticos...</p>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Próximos 7 días</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Eventos y entregas que requieren seguimiento cercano.</p>
+                                </div>
+                                <span id="badge-next-seven" class="status-chip status-success">0 registros</span>
+                            </div>
+                            <div id="dashboard-next-window" class="space-y-3">
+                                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Cargando agenda próxima...</p>
                             </div>
                         </div>
                     </div>
@@ -629,12 +820,27 @@
                         <div>
                             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Incidencias</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Registro y seguimiento de mantenimientos y soporte.</p>
+                            <div class="mt-3 inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white/70 dark:bg-gray-900/40">
+                                <button type="button" onclick="setActivitiesMaintenanceFilter('')" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    Todas
+                                </button>
+                                <button type="button" onclick="setActivitiesMaintenanceFilter('preventivo')" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-emerald-800 dark:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors">
+                                    Preventivo
+                                </button>
+                                <button type="button" onclick="setActivitiesMaintenanceFilter('correctivo')" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-orange-800 dark:text-orange-200 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors">
+                                    Correctivo
+                                </button>
+                            </div>
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button onclick="showActivityModal()" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+                            <button onclick="showActivityModal('correctivo')" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
                                 <i class="fas fa-plus mr-2"></i>
-                                Nueva incidencia
+                                Nueva correctiva
+                            </button>
+                            <button onclick="showActivityModal('preventivo')" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-shield-heart mr-2"></i>
+                                Nueva preventiva
                             </button>
 
                             <!-- Menú de acciones secundarias -->
@@ -647,6 +853,14 @@
                                     <button onclick="exportPDF('activities')" class="w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
                                         <i class="fas fa-file-pdf w-5 text-red-500"></i>
                                         <span class="ml-2 font-semibold">Exportar PDF</span>
+                                    </button>
+                                    <button onclick="exportMaintenanceReport('preventivo')" class="w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                        <i class="fas fa-file-pdf w-5 text-emerald-600"></i>
+                                        <span class="ml-2 font-semibold">PDF Preventivo</span>
+                                    </button>
+                                    <button onclick="exportMaintenanceReport('correctivo')" class="w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
+                                        <i class="fas fa-file-pdf w-5 text-orange-600"></i>
+                                        <span class="ml-2 font-semibold">PDF Correctivo</span>
                                     </button>
                                     <button onclick="exportActivitiesCSV()" class="w-full text-left px-4 py-3 text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors">
                                         <i class="fas fa-file-csv w-5 text-emerald-600"></i>
@@ -682,21 +896,31 @@
                                     Filtros
                                 </summary>
                                 <div class="absolute right-0 mt-2 w-[min(92vw,720px)] rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-4 z-20">
-                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                         <div>
-                                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Servicio</label>
+                                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Tipo de servicio</label>
                                             <select id="filter-service-type" onchange="filterActivities()"
                                                 class="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
                                                 <option value="">Todos</option>
-                                                <option value="Mantenimiento preventivo">Mantenimiento preventivo</option>
-                                                <option value="Mantenimiento correctivo">Mantenimiento correctivo</option>
-                                                <option value="Reparación de equipos">Reparación de equipos</option>
-                                                <option value="Booteos">Booteos</option>
-                                                <option value="Soporte WiFi UMICH">Soporte WiFi UMICH</option>
-                                                <option value="Soporte en eventos">Soporte en eventos</option>
-                                                <option value="Configuración de impresoras">Configuración de impresoras</option>
-                                                <option value="Instalación de software">Instalación de software</option>
-                                                <option value="Actualización de equipos">Actualización de equipos</option>
+                                                <option value="Computadora">Computadora</option>
+                                                <option value="Proyector">Proyector</option>
+                                                <option value="Impresora">Impresora</option>
+                                                <option value="Internet">Internet</option>
+                                                <option value="Red">Red</option>
+                                                <option value="Software">Software</option>
+                                                <option value="Hardware">Hardware</option>
+                                                <option value="Laboratorio">Laboratorio</option>
+                                                <option value="Otro">Otro</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Mantenimiento</label>
+                                            <select id="filter-maint-type" onchange="filterActivities()"
+                                                class="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
+                                                <option value="">Todos</option>
+                                                <option value="preventivo">Preventivo</option>
+                                                <option value="correctivo">Correctivo</option>
                                             </select>
                                         </div>
 
@@ -717,10 +941,23 @@
                                             <select id="filter-status" onchange="filterActivities()"
                                                 class="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
                                                 <option value="">Todos</option>
+                                                <option value="activos">Activos (Pendiente + En proceso)</option>
                                                 <option value="pendiente">Pendiente</option>
                                                 <option value="en_proceso">En Proceso</option>
                                                 <option value="completado">Completado</option>
                                                 <option value="cancelado">Cancelado</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Entrega</label>
+                                            <select id="filter-delivery" onchange="filterActivities()"
+                                                class="w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
+                                                <option value="">Todas</option>
+                                                <option value="overdue">Vencidas</option>
+                                                <option value="today">Hoy</option>
+                                                <option value="next7">Próximos 7 días</option>
+                                                <option value="none">Sin fecha</option>
                                             </select>
                                         </div>
                                     </div>
@@ -738,6 +975,14 @@
                                 <i class="fas fa-broom mr-2"></i>
                                 Limpiar
                             </button>
+                            <select id="activities-sort" onchange="filterActivities()"
+                                class="px-4 py-2.5 rounded-lg bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <option value="date_desc">Más recientes</option>
+                                <option value="date_asc">Más antiguas</option>
+                                <option value="delivery_asc">Entrega más próxima</option>
+                                <option value="priority_desc">Mayor prioridad</option>
+                                <option value="status_open">Abiertas primero</option>
+                            </select>
                         </div>
                     </div>
 
@@ -756,6 +1001,7 @@
                                         <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Equipo</th>
                                         <th class="hidden xl:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">SO</th>
                                         <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Servicio</th>
+                                        <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Mantenimiento</th>
                                         <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Prioridad</th>
                                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Estado</th>
                                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Responsable</th>
@@ -764,7 +1010,7 @@
                                 </thead>
                                 <tbody id="table-activities" class="divide-y divide-gray-200 dark:divide-gray-800">
                                     <tr>
-                                        <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="12" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                             No hay actividades registradas
                                         </td>
                                     </tr>
@@ -823,11 +1069,22 @@
                             <select id="filter-events-status" onchange="filterEvents()"
                                 class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
                                 <option value="">Todos</option>
+                                <option value="activos">Activos</option>
                                 <option value="pendiente">Pendiente</option>
                                 <option value="en_proceso">En Proceso</option>
                                 <option value="completado">Completado</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
+                            <select id="filter-events-date" onchange="filterEvents()"
+                                class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg border border-transparent focus:border-gray-300 dark:focus:border-gray-600 transition-all">
+                                <option value="">Todas las fechas</option>
+                                <option value="today">Hoy</option>
+                                <option value="next7">Próximos 7 días</option>
+                                <option value="overdue">Atrasados</option>
+                            </select>
+                            <button type="button" onclick="clearEventsFilters()" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                                Limpiar
+                            </button>
                         </div>
                     </div>
 
@@ -985,6 +1242,23 @@
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Configuración</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Preferencias del sistema, conexión a la nube y formatos de impresión.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="settings-summary-card">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Guardado</p>
+                            <div id="cfg-summary-storage" class="mt-2 text-base font-semibold text-gray-900 dark:text-white">Cargando...</div>
+                            <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Define si trabajas local o en la nube.</p>
+                        </div>
+                        <div class="settings-summary-card">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Revisión</p>
+                            <div id="cfg-summary-review" class="mt-2 text-base font-semibold text-gray-900 dark:text-white">Cargando...</div>
+                            <p class="mt-1 text-xs text-gray-600 dark:text-gray-400">Ideal para demo, pruebas y capacitación.</p>
+                        </div>
+                        <div class="settings-summary-card">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Sesión actual</p>
+                            <div id="cfg-summary-user" class="mt-2 text-base font-semibold text-gray-900 dark:text-white">Usuario</div>
+                            <p id="cfg-summary-role" class="mt-1 text-xs text-gray-600 dark:text-gray-400">Rol</p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
@@ -1291,6 +1565,7 @@
                 <input type="hidden" id="act-folio">
                 <input type="hidden" id="act-service-type" value="">
                 <input type="hidden" id="act-quick-desc" value="">
+                <input type="hidden" id="act-maint-type" value="correctivo">
                 <input type="hidden" id="act-priority" value="media">
                 <input type="hidden" id="act-task-status" value="pendiente">
                 <input type="hidden" id="act-room-other" value="">
@@ -1367,6 +1642,18 @@
                     <div class="mb-4">
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wide">Problema</h3>
                         <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Elige tipo y una descripción rápida. Si es “Otro”, escribe una línea.</p>
+                    </div>
+
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Tipo de mantenimiento *</label>
+                    <div class="grid grid-cols-2 gap-2 mb-4">
+                        <button type="button" class="act-maint-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="correctivo">
+                            <i class="fas fa-screwdriver-wrench mr-2"></i>
+                            Correctivo
+                        </button>
+                        <button type="button" class="act-maint-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="preventivo">
+                            <i class="fas fa-shield-heart mr-2"></i>
+                            Preventivo
+                        </button>
                     </div>
 
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Tipo de servicio *</label>

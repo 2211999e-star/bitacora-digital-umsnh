@@ -20,6 +20,396 @@ import {
 const REMINDER_EVENT_DAYS = 3; // Eventos próximos: 3 días
 const REMINDER_DELIVERY_DAYS = 1; // Entregas próximas: 1 día
 
+function parseEmbeddedMeta(text = '') {
+  const raw = String(text || '');
+  const lines = raw.split('\n');
+  const idx = lines.findIndex((l) => l.trim().startsWith('__meta__='));
+  if (idx === -1) return { meta: {}, cleanText: raw };
+  try {
+    const meta = JSON.parse(lines[idx].trim().slice('__meta__='.length));
+    return {
+      meta: meta && typeof meta === 'object' ? meta : {},
+      cleanText: lines.filter((_, i) => i !== idx).join('\n').trim(),
+    };
+  } catch {
+    return { meta: {}, cleanText: lines.filter((_, i) => i !== idx).join('\n').trim() };
+  }
+}
+
+function getActivityDisplayName(activity = {}) {
+  const { meta } = parseEmbeddedMeta(activity.observations || '');
+  return (
+    activity.brand ||
+    activity.model ||
+    meta.folio ||
+    activity.reporter_name ||
+    activity.department ||
+    'Incidencia'
+  );
+}
+
+function getMaintenanceType(activity = {}) {
+  const { meta } = parseEmbeddedMeta(activity.observations || '');
+  const raw = String(meta.mantenimiento || '').toLowerCase().trim();
+  if (raw === 'preventivo' || raw === 'correctivo') return raw;
+
+  const st = String(activity.service_type || '').toLowerCase();
+  if (st.includes('mantenimiento preventivo')) return 'preventivo';
+  if (st.includes('mantenimiento correctivo')) return 'correctivo';
+  return 'correctivo';
+}
+
+function getCriticalActivities(limit = 5) {
+  return (state.activitiesData || [])
+    .filter((a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase()))
+    .map((a) => ({ ...a, __deliveryDays: a.delivery_date ? daysDiffFromToday(a.delivery_date) : null }))
+    .filter((a) => {
+      const priority = String(a.priority || '').toLowerCase();
+      return priority === 'urgente' || priority === 'alta' || (typeof a.__deliveryDays === 'number' && a.__deliveryDays < 0);
+    })
+    .sort((a, b) => {
+      const pa = String(a.priority || '').toLowerCase() === 'urgente' ? 3 : String(a.priority || '').toLowerCase() === 'alta' ? 2 : 1;
+      const pb = String(b.priority || '').toLowerCase() === 'urgente' ? 3 : String(b.priority || '').toLowerCase() === 'alta' ? 2 : 1;
+      const da = typeof a.__deliveryDays === 'number' ? a.__deliveryDays : 9999;
+      const db = typeof b.__deliveryDays === 'number' ? b.__deliveryDays : 9999;
+      if (da !== db) return da - db;
+      return pb - pa;
+    })
+    .slice(0, limit);
+}
+
+function getNextSevenWindow(limit = 7) {
+  const events = (state.eventsData || [])
+    .filter((e) => e && e.event_date)
+    .filter((e) => !['completado', 'cancelado'].includes(String(e.status || '').toLowerCase()))
+    .map((e) => ({
+      ...e,
+      __type: 'event',
+      __days: daysDiffFromToday(e.event_date),
+      __label: e.title || 'Evento',
+      __when: e.event_date,
+    }))
+    .filter((e) => typeof e.__days === 'number' && e.__days >= 0 && e.__days <= 7);
+
+  const deliveries = (state.activitiesData || [])
+    .filter((a) => a && a.delivery_date)
+    .filter((a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase()))
+    .map((a) => ({
+      ...a,
+      __type: 'delivery',
+      __days: daysDiffFromToday(a.delivery_date),
+      __label: getActivityDisplayName(a),
+      __when: a.delivery_date,
+    }))
+    .filter((a) => typeof a.__days === 'number' && a.__days >= 0 && a.__days <= 7);
+
+  return [...events, ...deliveries]
+    .sort((a, b) => {
+      if (a.__days !== b.__days) return a.__days - b.__days;
+      return String(a.__when || '').localeCompare(String(b.__when || ''));
+    })
+    .slice(0, limit);
+}
+
+function renderMaintenanceCalendar() {
+  const container = document.getElementById('dashboard-calendar');
+  const monthEl = document.getElementById('dashboard-calendar-month');
+  const summaryEl = document.getElementById('dashboard-calendar-summary');
+  if (!container) return;
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+  const startWeekDay = monthStart.getDay();
+  const totalDays = monthEnd.getDate();
+  const todayKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const eventMap = new Map();
+  (state.eventsData || []).forEach((e) => {
+    if (!e?.event_date) return;
+    eventMap.set(e.event_date, { ...(eventMap.get(e.event_date) || {}), event: true });
+  });
+  (state.activitiesData || []).forEach((a) => {
+    if (!a?.delivery_date) return;
+    const prev = eventMap.get(a.delivery_date) || {};
+    const overdue = daysDiffFromToday(a.delivery_date) < 0 && !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase());
+    eventMap.set(a.delivery_date, { ...prev, delivery: true, overdue: prev.overdue || overdue });
+  });
+
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+  const weekDays = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+  if (monthEl) monthEl.textContent = `${monthNames[month]} ${year}`;
+
+  const cells = [];
+  weekDays.forEach((d) => cells.push(`<div class="dashboard-calendar-day">${d}</div>`));
+  for (let i = 0; i < startWeekDay; i++) {
+    cells.push('<div class="dashboard-calendar-cell is-muted"></div>');
+  }
+  for (let day = 1; day <= totalDays; day++) {
+    const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const flags = eventMap.get(key) || {};
+    const classes = [
+      'dashboard-calendar-cell',
+      key === todayKey ? 'is-today' : '',
+      flags.overdue ? 'is-overdue' : '',
+      !flags.overdue && flags.delivery ? 'has-delivery' : '',
+      !flags.overdue && flags.event ? 'has-event' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const interactive = flags.event || flags.delivery || flags.overdue;
+    cells.push(
+      `<div class="${classes}${interactive ? ' is-interactive' : ''}" ${interactive ? `data-date="${key}"` : ''} title="${key}">${day}</div>`,
+    );
+  }
+
+  container.innerHTML = cells.join('');
+  wireCalendarClicks();
+
+  const nextRows = getNextSevenWindow(4);
+  if (summaryEl) {
+    summaryEl.innerHTML = nextRows.length
+      ? nextRows
+          .map((row) => `${row.__type === 'event' ? 'Evento' : 'Entrega'}: <b>${row.__label}</b> ${row.__days === 0 ? '(Hoy)' : row.__days === 1 ? '(Mañana)' : `(En ${row.__days} días)`}`)
+          .join('<br>')
+      : 'Sin eventos ni entregas cercanas en los próximos 7 días.';
+  }
+}
+
+function wireCalendarClicks() {
+  const container = document.getElementById('dashboard-calendar');
+  if (!container || container.dataset.wired) return;
+  container.dataset.wired = 'true';
+
+  container.addEventListener('click', (e) => {
+    const cell = e.target?.closest?.('.dashboard-calendar-cell[data-date]');
+    const dateKey = cell?.getAttribute?.('data-date');
+    if (!dateKey) return;
+    showCalendarAgenda(dateKey);
+  });
+}
+
+export function showCalendarAgenda(dateKey) {
+  try {
+    const events = (state.eventsData || [])
+      .filter((e) => e && e.event_date === dateKey)
+      .filter((e) => !['completado', 'cancelado'].includes(String(e.status || '').toLowerCase()));
+
+    const deliveries = (state.activitiesData || [])
+      .filter((a) => a && a.delivery_date === dateKey)
+      .filter((a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase()));
+
+    const html = `
+      <div class="text-left">
+        <p class="text-sm text-gray-600 dark:text-gray-300">Agenda del día</p>
+        <p class="text-sm font-semibold text-gray-900 dark:text-white mt-1">${formatDate(dateKey)}</p>
+
+        ${events.length ? `
+          <div class="mt-4">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white">Eventos</p>
+            <div class="mt-2 space-y-2">
+              ${events
+                .slice(0, 8)
+                .map(
+                  (ev) => `
+                    <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${ev.title || 'Evento'}</p>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">${ev.event_time ? `${ev.event_time} • ` : ''}${ev.location || 'Sin ubicación'}</p>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs font-semibold" onclick="window.showSection?.('events'); setTimeout(() => window.editEvent?.('${ev.id}'), 50)">Ver</button>
+                      </div>
+                    </div>
+                  `,
+                )
+                .join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${deliveries.length ? `
+          <div class="mt-4">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white">Entregas</p>
+            <div class="mt-2 space-y-2">
+              ${deliveries
+                .slice(0, 8)
+                .map(
+                  (a) => `
+                    <div class="p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${getActivityDisplayName(a)}</p>
+                          <p class="text-xs text-gray-600 dark:text-gray-400">${a.department || 'Sin área'} • ${getStatusText(a.task_status)}${a.priority ? ` • ${getPriorityText(a.priority)}` : ''}</p>
+                        </div>
+                        <button class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs font-semibold" onclick="window.showSection?.('activities'); setTimeout(() => window.viewActivity?.('${a.id}'), 50)">Ver</button>
+                      </div>
+                    </div>
+                  `,
+                )
+                .join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${!events.length && !deliveries.length ? `
+          <div class="mt-4 rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/30">
+            <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sin agenda</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">No hay eventos ni entregas programadas para este día.</p>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    Swal.fire({
+      icon: 'info',
+      title: 'Calendario',
+      html,
+      showCancelButton: true,
+      confirmButtonText: 'Ir a Dashboard',
+      cancelButtonText: 'Cerrar',
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderOperationalSummary() {
+  const total = state.activitiesData.length;
+  const completed = state.activitiesData.filter((a) => a.task_status === 'completado').length;
+  const corrective = state.activitiesData.filter((a) => getMaintenanceType(a) === 'correctivo');
+  const correctiveOpen = corrective.filter((a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase())).length;
+  const historyEl = document.getElementById('stat-history-total');
+  const historyCompletionEl = document.getElementById('stat-history-completion');
+  const correctiveTotalEl = document.getElementById('stat-corrective-total');
+  const correctiveOpenEl = document.getElementById('stat-corrective-open');
+  const correctiveClosedEl = document.getElementById('stat-corrective-closed');
+
+  if (historyEl) historyEl.textContent = String(total);
+  if (historyCompletionEl) historyCompletionEl.textContent = `${total ? Math.round((completed / total) * 100) : 0}% completadas`;
+  if (correctiveTotalEl) correctiveTotalEl.textContent = String(corrective.length);
+  if (correctiveOpenEl) correctiveOpenEl.textContent = String(correctiveOpen);
+  if (correctiveClosedEl) correctiveClosedEl.textContent = String(corrective.filter((a) => a.task_status === 'completado').length);
+
+  const updatedAtEl = document.getElementById('dashboard-updated-at');
+  if (updatedAtEl) {
+    const now = new Date();
+    updatedAtEl.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} · ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+  }
+}
+
+export function renderHealthSummary() {
+  const okEl = document.getElementById('dashboard-health-ok');
+  const warningEl = document.getElementById('dashboard-health-warning');
+  const urgentEl = document.getElementById('dashboard-health-urgent');
+
+  const all = state.activitiesData || [];
+  const ok = all.filter((a) => String(a.task_status || '').toLowerCase() === 'completado').length;
+  const warning = all.filter((a) => ['pendiente', 'en_proceso'].includes(String(a.task_status || '').toLowerCase())).length;
+  const urgent = all.filter((a) => {
+    const priority = String(a.priority || '').toLowerCase();
+    const overdue = a.delivery_date ? daysDiffFromToday(a.delivery_date) < 0 : false;
+    return priority === 'urgente' || overdue;
+  }).length;
+
+  if (okEl) okEl.textContent = String(ok);
+  if (warningEl) warningEl.textContent = String(warning);
+  if (urgentEl) urgentEl.textContent = String(urgent);
+}
+
+export function renderStatusDistribution() {
+  const container = document.getElementById('dashboard-status-distribution');
+  if (!container) return;
+
+  const rows = [
+    { key: 'pendiente', label: 'Pendiente', color: '#f59e0b' },
+    { key: 'en_proceso', label: 'En proceso', color: '#3b82f6' },
+    { key: 'completado', label: 'Completado', color: '#10b981' },
+    { key: 'cancelado', label: 'Cancelado', color: '#6b7280' },
+  ];
+  const total = (state.activitiesData || []).length || 1;
+
+  container.innerHTML = rows
+    .map((row) => {
+      const count = (state.activitiesData || []).filter((a) => a.task_status === row.key).length;
+      const percent = Math.round((count / total) * 100);
+      return `
+        <div class="space-y-2">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${row.color}"></span>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">${row.label}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">${count}</p>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400">${percent}%</p>
+            </div>
+          </div>
+          <div class="dashboard-meter-track">
+            <div class="dashboard-meter-fill" style="width:${percent}%; background:${row.color}"></div>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+export function renderExecutiveAlerts() {
+  const container = document.getElementById('dashboard-alerts');
+  const badgeEl = document.getElementById('dashboard-alert-badge');
+  if (!container) return;
+
+  const urgentActivities = (state.activitiesData || [])
+    .filter((a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase()))
+    .filter((a) => {
+      const p = String(a.priority || '').toLowerCase();
+      const dd = a.delivery_date ? daysDiffFromToday(a.delivery_date) : null;
+      return p === 'urgente' || (typeof dd === 'number' && dd <= 1);
+    })
+    .slice(0, 3);
+
+  const urgentEvents = getUpcomingEvents(1).slice(0, 2);
+  const totalAlerts = urgentActivities.length + urgentEvents.length;
+  if (badgeEl) badgeEl.textContent = `${totalAlerts} alertas`;
+
+  if (!totalAlerts) {
+    container.innerHTML = `
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/30">
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Operación estable</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">No hay urgencias ni vencimientos inmediatos.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const blocks = [
+    ...urgentActivities.map((a) => {
+      const dd = a.delivery_date ? daysDiffFromToday(a.delivery_date) : null;
+      return `
+        <div class="rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10 p-4">
+          <p class="text-sm font-semibold text-red-800 dark:text-red-200">${getActivityDisplayName(a)}</p>
+          <p class="text-xs text-red-700/80 dark:text-red-300/80 mt-1">${a.service_type || 'Servicio'} • ${a.department || 'Sin área'}</p>
+          <p class="text-xs text-red-700/80 dark:text-red-300/80 mt-2">${dd == null ? 'Prioridad urgente' : dd < 0 ? 'Entrega vencida' : dd === 0 ? 'Entrega hoy' : 'Entrega mañana'}</p>
+        </div>
+      `;
+    }),
+    ...urgentEvents.map((e) => `
+      <div class="rounded-xl border border-blue-200 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-900/10 p-4">
+        <p class="text-sm font-semibold text-blue-800 dark:text-blue-200">${e.title || 'Evento'}</p>
+        <p class="text-xs text-blue-700/80 dark:text-blue-300/80 mt-1">${formatDate(e.event_date)}${e.event_time ? ` • ${e.event_time}` : ''}${e.location ? ` • ${e.location}` : ''}</p>
+        <p class="text-xs text-blue-700/80 dark:text-blue-300/80 mt-2">${e.__days === 0 ? 'Programado hoy' : 'Programado mañana'}</p>
+      </div>
+    `),
+  ];
+
+  container.innerHTML = blocks.join('');
+}
+
 function getUpcomingEvents(daysAhead = REMINDER_EVENT_DAYS) {
   return (state.eventsData || [])
     .filter((e) => e && e.event_date)
@@ -260,6 +650,111 @@ export function renderDashboardInsights() {
   }
 }
 
+export function renderCriticalItems() {
+  const container = document.getElementById('dashboard-critical-items');
+  const statEl = document.getElementById('stat-critical-open');
+  const badgeEl = document.getElementById('badge-critical-open');
+  if (!container) return;
+
+  const critical = getCriticalActivities(5);
+  const totalCritical = getCriticalActivities(999).length;
+  if (statEl) statEl.textContent = String(totalCritical);
+  if (badgeEl) badgeEl.textContent = `${totalCritical} abiertas`;
+
+  if (!critical.length) {
+    container.innerHTML = `
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/30">
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sin críticos activos</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">No hay incidencias urgentes, altas o vencidas en este momento.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = critical
+    .map((item) => {
+      const overdue = typeof item.__deliveryDays === 'number' && item.__deliveryDays < 0;
+      return `
+        <div class="rounded-xl border ${overdue ? 'border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-900/10' : 'border-gray-200 dark:border-gray-800'} p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">${getActivityDisplayName(item)}</p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                ${item.service_type || 'Servicio'} • ${item.department || 'Sin área'}${item.coordination ? ` • ${item.coordination}` : ''}
+              </p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                Estado: ${getStatusText(item.task_status)} • Prioridad: ${getPriorityText(item.priority)}
+              </p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <span class="badge badge-${getBadgeClass(item.task_status)}">${getStatusText(item.task_status)}</span>
+              <button class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs font-semibold" onclick="window.showSection?.('activities'); setTimeout(() => window.viewActivity?.('${item.id}'), 50)">Ver</button>
+            </div>
+          </div>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            ${overdue ? `<span class="status-chip status-warning">Entrega vencida</span>` : ''}
+            ${String(item.priority || '').toLowerCase() === 'urgente' ? `<span class="status-chip status-warning">Urgente</span>` : ''}
+            ${String(item.priority || '').toLowerCase() === 'alta' ? `<span class="status-chip status-muted">Alta prioridad</span>` : ''}
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+export function renderNextSevenDays() {
+  const container = document.getElementById('dashboard-next-window');
+  const badgeEl = document.getElementById('badge-next-seven');
+  if (!container) return;
+
+  const rows = getNextSevenWindow(7);
+  if (badgeEl) badgeEl.textContent = `${rows.length} registros`;
+
+  const formatWhen = (days) => {
+    if (days === 0) return 'Hoy';
+    if (days === 1) return 'Mañana';
+    return `En ${days} días`;
+  };
+
+  if (!rows.length) {
+    container.innerHTML = `
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/30">
+        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sin actividad próxima</p>
+        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">No hay eventos ni entregas programadas para los próximos 7 días.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = rows
+    .map((row) => `
+      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] px-2 py-1 rounded-full ${row.__type === 'event' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-800' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-200 border border-orange-200 dark:border-orange-800'}">
+                ${row.__type === 'event' ? 'Evento' : 'Entrega'}
+              </span>
+            </div>
+            <p class="text-sm font-semibold text-gray-900 dark:text-white mt-2 truncate">${row.__label}</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              ${formatDate(row.__when)}${row.__type === 'event' && row.event_time ? ` • ${row.event_time}` : ''}${row.location ? ` • ${row.location}` : ''}${row.department ? ` • ${row.department}` : ''}
+            </p>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <span class="text-xs font-semibold ${row.__type === 'event' ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'} whitespace-nowrap">${formatWhen(row.__days)}</span>
+            <button class="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs font-semibold" onclick="${
+              row.__type === 'event'
+                ? `window.showSection?.('events'); setTimeout(() => window.editEvent?.('${row.id}'), 50)`
+                : `window.showSection?.('activities'); setTimeout(() => window.viewActivity?.('${row.id}'), 50)`
+            }">Ver</button>
+          </div>
+        </div>
+      </div>
+    `)
+    .join('');
+}
+
 export function showNotifications() {
   const upcoming = getUpcomingEvents(REMINDER_EVENT_DAYS).slice(0, 8);
   const due = getDeliveryDueActivities(REMINDER_DELIVERY_DAYS).slice(0, 8);
@@ -421,9 +916,9 @@ export async function loadDashboardData({ supabase } = {}) {
     const canceledEl = document.getElementById('stat-canceled');
     if (canceledEl) canceledEl.textContent = String(canceled);
 
-    // Resumen de mantenimiento (preventivo/correctivo)
-    const prev = state.activitiesData.filter((a) => a.service_type === 'Mantenimiento preventivo');
-    const corr = state.activitiesData.filter((a) => a.service_type === 'Mantenimiento correctivo');
+    // Resumen de mantenimiento (preventivo/correctivo) - basado en meta (observaciones)
+    const prev = state.activitiesData.filter((a) => getMaintenanceType(a) === 'preventivo');
+    const corr = state.activitiesData.filter((a) => getMaintenanceType(a) === 'correctivo');
     const prevPending = prev.filter((a) => a.task_status === 'pendiente').length;
     const corrPending = corr.filter((a) => a.task_status === 'pendiente').length;
 
@@ -449,6 +944,13 @@ export async function loadDashboardData({ supabase } = {}) {
     updateNotificationBadge();
     renderDashboardReminders();
     renderDashboardInsights();
+    renderCriticalItems();
+    renderNextSevenDays();
+    renderOperationalSummary();
+    renderMaintenanceCalendar();
+    renderStatusDistribution();
+    renderExecutiveAlerts();
+    renderHealthSummary();
 
     // Estadísticas para sección de reportes
     updateReportStats();
@@ -467,8 +969,8 @@ export function updateReportStats() {
   const completedInc = state.activitiesData.filter((a) => a.task_status === 'completado').length;
   const canceledInc = state.activitiesData.filter((a) => a.task_status === 'cancelado').length;
 
-  const prev = state.activitiesData.filter((a) => a.service_type === 'Mantenimiento preventivo');
-  const corr = state.activitiesData.filter((a) => a.service_type === 'Mantenimiento correctivo');
+  const prev = state.activitiesData.filter((a) => getMaintenanceType(a) === 'preventivo');
+  const corr = state.activitiesData.filter((a) => getMaintenanceType(a) === 'correctivo');
 
   const totalEv = state.eventsData.length;
   const pendingEv = state.eventsData.filter((e) => e.status === 'pendiente').length;

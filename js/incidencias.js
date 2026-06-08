@@ -76,6 +76,16 @@ function ensureIncidenciaUXWired() {
   if (!form || form.dataset.uxWired === 'true') return;
   form.dataset.uxWired = 'true';
 
+  // Tipo de mantenimiento (preventivo/correctivo) - se guarda en meta (observaciones)
+  const maintInput = document.getElementById('act-maint-type');
+  document.querySelectorAll('.act-maint-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-value') || 'correctivo';
+      if (maintInput) maintInput.value = v;
+      setSelectedByDataAttr('.act-maint-btn', v);
+    });
+  });
+
   // Servicio (tarjetas)
   const serviceInput = document.getElementById('act-service-type');
   document.querySelectorAll('.act-service-card').forEach((btn) => {
@@ -155,11 +165,30 @@ export async function loadActivities({ supabase } = {}) {
     if (error) throw error;
 
     state.activitiesData = data || [];
+    populateServiceTypeFilterOptions();
     renderActivitiesTable();
     updateNotificationBadge();
   } catch (error) {
     console.error('Error loading activities:', error);
   }
+}
+
+function populateServiceTypeFilterOptions() {
+  const sel = document.getElementById('filter-service-type');
+  if (!sel) return;
+
+  const current = sel.value || '';
+  const fixed = Array.from(sel.querySelectorAll('option'))
+    .map((o) => o.value)
+    .filter((v) => v && v.trim());
+  const fromData = (state.activitiesData || [])
+    .map((a) => String(a.service_type || '').trim())
+    .filter(Boolean);
+  const merged = Array.from(new Set([...fixed, ...fromData])).sort((a, b) => a.localeCompare(b, 'es'));
+
+  sel.innerHTML =
+    `<option value="">Todos</option>` + merged.map((v) => `<option value="${v.replaceAll('"', '&quot;')}">${v}</option>`).join('');
+  sel.value = merged.includes(current) ? current : '';
 }
 
 export function renderActivitiesTable() {
@@ -170,6 +199,9 @@ export function renderActivitiesTable() {
   const filterStatus = document.getElementById('filter-status')?.value || '';
   const filterService = (document.getElementById('filter-service-type')?.value || '').trim();
   const filterPriority = (document.getElementById('filter-priority')?.value || '').trim();
+  const filterMaint = (document.getElementById('filter-maint-type')?.value || '').trim().toLowerCase();
+  const filterDelivery = (document.getElementById('filter-delivery')?.value || '').trim().toLowerCase();
+  const sortBy = (document.getElementById('activities-sort')?.value || 'date_desc').trim();
 
   let filtered = state.activitiesData;
 
@@ -204,9 +236,67 @@ export function renderActivitiesTable() {
     );
   }
 
-  if (filterStatus) filtered = filtered.filter((a) => a.task_status === filterStatus);
+  if (filterMaint) {
+    filtered = filtered.filter((a) => {
+      const { meta } = parseMetaBlock(a.observations || '');
+      const raw = String(meta.mantenimiento || '').toLowerCase().trim();
+      const inferred =
+        raw ||
+        (String(a.service_type || '').toLowerCase().includes('mantenimiento preventivo') ? 'preventivo' : '') ||
+        (String(a.service_type || '').toLowerCase().includes('mantenimiento correctivo') ? 'correctivo' : '') ||
+        'correctivo';
+      return inferred === filterMaint;
+    });
+  }
+  if (filterStatus) {
+    if (filterStatus === 'activos') filtered = filtered.filter((a) => ['pendiente', 'en_proceso'].includes(String(a.task_status || '').toLowerCase()));
+    else filtered = filtered.filter((a) => a.task_status === filterStatus);
+  }
   if (filterService) filtered = filtered.filter((a) => (a.service_type || '') === filterService);
   if (filterPriority) filtered = filtered.filter((a) => String(a.priority || 'media') === filterPriority);
+
+  if (filterDelivery) {
+    const today = new Date().toISOString().split('T')[0];
+    const isOpen = (a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase());
+    const inNext7 = (iso) => {
+      if (!iso) return false;
+      const d0 = new Date(today);
+      const d1 = new Date(String(iso).slice(0, 10));
+      const diff = Math.floor((d1 - d0) / (1000 * 60 * 60 * 24));
+      return diff >= 0 && diff <= 7;
+    };
+    filtered = filtered.filter((a) => {
+      const d = a.delivery_date ? String(a.delivery_date).slice(0, 10) : '';
+      if (filterDelivery === 'none') return !d;
+      if (!d) return false;
+      if (filterDelivery === 'today') return isOpen(a) && d === today;
+      if (filterDelivery === 'overdue') return isOpen(a) && d < today;
+      if (filterDelivery === 'next7') return isOpen(a) && inNext7(d);
+      return true;
+    });
+  }
+
+  const priorityWeight = { urgente: 4, alta: 3, media: 2, baja: 1 };
+  const openWeight = { pendiente: 1, en_proceso: 2, completado: 3, cancelado: 4 };
+  filtered = [...filtered].sort((a, b) => {
+    const ad = String(a.date || '');
+    const bd = String(b.date || '');
+    const adel = a.delivery_date ? String(a.delivery_date).slice(0, 10) : '9999-12-31';
+    const bdel = b.delivery_date ? String(b.delivery_date).slice(0, 10) : '9999-12-31';
+    switch (sortBy) {
+      case 'date_asc':
+        return ad.localeCompare(bd);
+      case 'delivery_asc':
+        return adel.localeCompare(bdel) || ad.localeCompare(bd);
+      case 'priority_desc':
+        return (priorityWeight[String(b.priority || 'media')] || 0) - (priorityWeight[String(a.priority || 'media')] || 0) || adel.localeCompare(bdel);
+      case 'status_open':
+        return (openWeight[String(a.task_status || '')] || 99) - (openWeight[String(b.task_status || '')] || 99) || adel.localeCompare(bdel);
+      case 'date_desc':
+      default:
+        return bd.localeCompare(ad);
+    }
+  });
 
   // Summary cards
   renderActivitiesSummary(filtered);
@@ -232,16 +322,16 @@ export function renderActivitiesTable() {
   if (paginated.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="11" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+        <td colspan="12" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
           <div class="flex flex-col items-center gap-2">
             <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300"></i>
             </div>
             <div class="font-semibold">No se encontraron incidencias</div>
             <div class="text-sm">Prueba cambiando filtros o crea una nueva incidencia.</div>
-            <button onclick="showActivityModal()" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+            <button onclick="showActivityModal('correctivo')" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
               <i class="fas fa-plus mr-2"></i>
-              Nueva incidencia
+              Nueva correctiva
             </button>
           </div>
         </td>
@@ -265,6 +355,18 @@ export function renderActivitiesTable() {
           <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.brand || '-'} ${activity.model || ''}</td>
           <td class="hidden xl:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.operating_system || '-'}</td>
           <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.service_type}</td>
+          <td class="hidden lg:table-cell px-6 py-4">
+            ${(() => {
+              const { meta } = parseMetaBlock(activity.observations || '');
+              const t = String(meta.mantenimiento || '').toLowerCase().trim() || 'correctivo';
+              const isPrev = t === 'preventivo';
+              const label = isPrev ? 'Preventivo' : 'Correctivo';
+              const cls = isPrev
+                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800'
+                : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-200 border border-orange-200 dark:border-orange-800';
+              return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${label}</span>`;
+            })()}
+          </td>
           <td class="hidden lg:table-cell px-6 py-4">
             <span class="badge badge-priority-${String(activity.priority || 'media')}">${getPriorityText(activity.priority)}</span>
           </td>
@@ -359,15 +461,75 @@ export function clearActivitiesFilters() {
   const st = document.getElementById('filter-status');
   const sv = document.getElementById('filter-service-type');
   const pr = document.getElementById('filter-priority');
+  const mt = document.getElementById('filter-maint-type');
+  const dlv = document.getElementById('filter-delivery');
+  const sort = document.getElementById('activities-sort');
   if (s) s.value = '';
   if (st) st.value = '';
   if (sv) sv.value = '';
   if (pr) pr.value = '';
+  if (mt) mt.value = '';
+  if (dlv) dlv.value = '';
+  if (sort) sort.value = 'date_desc';
   state.currentPage = 1;
   renderActivitiesTable();
 }
 
 export function filterActivities() {
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function setActivitiesMaintenanceFilter(value = '') {
+  const mt = document.getElementById('filter-maint-type');
+  if (mt) mt.value = value;
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function setActivitiesStatusFilter(value = '') {
+  const st = document.getElementById('filter-status');
+  if (st) st.value = value;
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function setActivitiesPriorityFilter(value = '') {
+  const pr = document.getElementById('filter-priority');
+  if (pr) pr.value = value;
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function setActivitiesDeliveryFilter(value = '') {
+  const dlv = document.getElementById('filter-delivery');
+  if (dlv) dlv.value = value;
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function setActivitiesSort(value = 'date_desc') {
+  const sort = document.getElementById('activities-sort');
+  if (sort) sort.value = value;
+  state.currentPage = 1;
+  renderActivitiesTable();
+}
+
+export function openActivitiesPreset(status = '', maint = '', priority = '', delivery = '', sort = 'date_desc') {
+  const st = document.getElementById('filter-status');
+  const mt = document.getElementById('filter-maint-type');
+  const pr = document.getElementById('filter-priority');
+  const dlv = document.getElementById('filter-delivery');
+  const sortEl = document.getElementById('activities-sort');
+  const search = document.getElementById('search-activities');
+  const service = document.getElementById('filter-service-type');
+  if (search) search.value = '';
+  if (service) service.value = '';
+  if (st) st.value = status;
+  if (mt) mt.value = maint;
+  if (pr) pr.value = priority;
+  if (dlv) dlv.value = delivery;
+  if (sortEl) sortEl.value = sort || 'date_desc';
   state.currentPage = 1;
   renderActivitiesTable();
 }
@@ -392,7 +554,7 @@ export function nextPage() {
 // Modales
 // -------------------------
 
-export function showActivityModal() {
+export function showActivityModal(defaultMaintType = 'correctivo') {
   const modal = document.getElementById('modal-activity');
   if (!modal) return;
 
@@ -414,11 +576,17 @@ export function showActivityModal() {
   // Defaults
   const pri = document.getElementById('act-priority');
   const st = document.getElementById('act-task-status');
+  const maint = document.getElementById('act-maint-type');
+  const maintNormalized = ['preventivo', 'correctivo'].includes(String(defaultMaintType).toLowerCase())
+    ? String(defaultMaintType).toLowerCase()
+    : 'correctivo';
   if (pri) pri.value = 'media';
   if (st) st.value = 'pendiente';
+  if (maint) maint.value = maintNormalized;
 
   setSelectedByDataAttr('.act-priority-card', 'media');
   setSelectedByDataAttr('.act-status-chip', 'pendiente');
+  setSelectedByDataAttr('.act-maint-btn', maintNormalized);
   setSelectedByDataAttr('.act-service-card', '');
   setSelectedByDataAttr('.act-quick-chip', '');
 
@@ -469,6 +637,14 @@ export async function editActivity({ supabase } = {}, id) {
     document.getElementById('activity-id').value = data.id;
 
     const { meta, cleanText } = parseMetaBlock(data.observations || '');
+    const maintHidden = document.getElementById('act-maint-type');
+    const inferredMaint =
+      String(meta.mantenimiento || '').toLowerCase().trim() ||
+      (String(data.service_type || '').toLowerCase().includes('mantenimiento preventivo') ? 'preventivo' : '') ||
+      (String(data.service_type || '').toLowerCase().includes('mantenimiento correctivo') ? 'correctivo' : '') ||
+      'correctivo';
+    if (maintHidden) maintHidden.value = inferredMaint;
+    setSelectedByDataAttr('.act-maint-btn', inferredMaint);
 
     // Ubicación (mapeo actual: coordination=edificio, department=carrera)
     const building = meta.edificio || data.coordination || '';
@@ -569,6 +745,14 @@ export async function viewActivity({ supabase } = {}, id) {
 
     const { meta, cleanText } = parseMetaBlock(data.observations || '');
     const folio = meta.folio || '—';
+    const maintType =
+      String(meta.mantenimiento || '').toLowerCase().trim() ||
+      (String(data.service_type || '').toLowerCase().includes('mantenimiento preventivo') ? 'preventivo' : '') ||
+      (String(data.service_type || '').toLowerCase().includes('mantenimiento correctivo') ? 'correctivo' : '') ||
+      'correctivo';
+    const maintLabel = maintType === 'preventivo' ? 'Preventivo' : 'Correctivo';
+    const createdBy = meta.creado_por || data.reporter_name || 'Usuario';
+    const createdByEmail = meta.creado_email || '';
     const ubicacion = [
       meta.edificio || data.coordination || '',
       meta.carrera || data.department || '',
@@ -585,9 +769,11 @@ export async function viewActivity({ supabase } = {}, id) {
       `Folio: ${folio}`,
       ubicacion ? `Ubicación: ${ubicacion}` : null,
       `Estado: ${getStatusText(data.task_status)}`,
+      `Mantenimiento: ${maintLabel}`,
       `Prioridad: ${getPriorityText(data.priority)}`,
       `Recibido: ${formatDate(data.received_date || data.date)}`,
       data.delivery_date ? `Entrega: ${formatDate(data.delivery_date)}` : null,
+      `Registró: ${createdBy}${createdByEmail ? ` (${createdByEmail})` : ''}`,
       `Descripción: ${(data.description || '').trim() || '—'}`,
     ]
       .filter(Boolean)
@@ -615,7 +801,11 @@ export async function viewActivity({ supabase } = {}, id) {
         <div style="margin-top:10px;font-size:12px;color:#6b7280">
           Recibido: <b>${formatDate(data.received_date || data.date)}</b>
           ${data.delivery_date ? ` · Entrega: <b>${formatDate(data.delivery_date)}</b>` : ''}
+          · Mantenimiento: <b>${maintLabel}</b>
           · Prioridad: <b>${getPriorityText(data.priority)}</b>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:#6b7280">
+          Registró: <b>${createdBy}</b>${createdByEmail ? ` · <span>${createdByEmail}</span>` : ''}
         </div>
         <div style="margin-top:10px">
           <button onclick="copyToClipboard(${JSON.stringify(resumen)})" style="font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.08);background:#fff;cursor:pointer">Copiar resumen</button>
@@ -928,9 +1118,44 @@ function getFilteredActivities() {
     );
   }
 
-  if (filterStatus) filtered = filtered.filter((a) => a.task_status === filterStatus);
+  if (filterMaint) {
+    filtered = filtered.filter((a) => {
+      const { meta } = parseMetaBlock(a.observations || '');
+      const raw = String(meta.mantenimiento || '').toLowerCase().trim();
+      const inferred =
+        raw ||
+        (String(a.service_type || '').toLowerCase().includes('mantenimiento preventivo') ? 'preventivo' : '') ||
+        (String(a.service_type || '').toLowerCase().includes('mantenimiento correctivo') ? 'correctivo' : '');
+      return inferred === filterMaint;
+    });
+  }
+  if (filterStatus) {
+    if (filterStatus === 'activos') filtered = filtered.filter((a) => ['pendiente', 'en_proceso'].includes(a.task_status));
+    else filtered = filtered.filter((a) => a.task_status === filterStatus);
+  }
   if (filterService) filtered = filtered.filter((a) => (a.service_type || '') === filterService);
   if (filterPriority) filtered = filtered.filter((a) => String(a.priority || 'media') === filterPriority);
+
+  if (filterDelivery) {
+    const today = new Date().toISOString().split('T')[0];
+    const isOpen = (a) => !['completado', 'cancelado'].includes(String(a.task_status || '').toLowerCase());
+    const inNext7 = (iso) => {
+      if (!iso) return false;
+      const d0 = new Date(today);
+      const d1 = new Date(String(iso).slice(0, 10));
+      const diff = Math.floor((d1 - d0) / (1000 * 60 * 60 * 24));
+      return diff >= 0 && diff <= 7;
+    };
+    filtered = filtered.filter((a) => {
+      const d = a.delivery_date ? String(a.delivery_date).slice(0, 10) : '';
+      if (filterDelivery === 'none') return !d;
+      if (!d) return false;
+      if (filterDelivery === 'today') return isOpen(a) && d === today;
+      if (filterDelivery === 'overdue') return isOpen(a) && d < today;
+      if (filterDelivery === 'next7') return isOpen(a) && inNext7(d);
+      return true;
+    });
+  }
 
   return filtered;
 }
@@ -1049,6 +1274,9 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
     const room = roomSel === 'Otro' ? (roomOther || 'Otro') : roomSel;
     const shift = document.getElementById('act-shift')?.value || '';
 
+    const maintTypeRaw = document.getElementById('act-maint-type')?.value || 'correctivo';
+    const maintType = ['preventivo', 'correctivo'].includes(String(maintTypeRaw).toLowerCase()) ? String(maintTypeRaw).toLowerCase() : 'correctivo';
+
     const service = document.getElementById('act-service-type')?.value || '';
     const quick = document.getElementById('act-quick-desc')?.value || '';
     const otherText = document.getElementById('act-problem-other')?.value?.trim() || '';
@@ -1091,14 +1319,33 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
     const assigned_to = document.getElementById('act-assigned')?.value?.trim() || null;
     const diagnosis = document.getElementById('act-diagnosis')?.value?.trim() || null;
 
+    let creatorMeta = {
+      creado_por: state.currentUser?.full_name || state.currentUser?.email || 'Usuario',
+      creado_email: state.currentUser?.email || null,
+    };
+    if (id) {
+      try {
+        const { data: existing } = await supabase.from('activities').select('observations').eq('id', id).single();
+        const prev = parseMetaBlock(existing?.observations || '').meta || {};
+        creatorMeta = {
+          creado_por: prev.creado_por || creatorMeta.creado_por,
+          creado_email: prev.creado_email || creatorMeta.creado_email,
+        };
+      } catch {
+        // noop
+      }
+    }
+
     const meta = {
       folio,
       edificio: building,
       carrera: career,
       salon: room,
       turno: shift || null,
+      mantenimiento: maintType,
       tipo: service,
       rapido: quick,
+      ...creatorMeta,
     };
 
     const description = quick === 'Otro' ? otherText : quick;
@@ -1150,7 +1397,9 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
     Swal.fire({
       icon: 'success',
       title: id ? 'Actualizada' : 'Registrada',
-      text: id ? 'La actividad ha sido actualizada' : 'La actividad ha sido registrada',
+      text: id
+        ? `La actividad ha sido actualizada por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`
+        : `La actividad ha sido registrada por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`,
       timer: 2000,
       showConfirmButton: false,
     });

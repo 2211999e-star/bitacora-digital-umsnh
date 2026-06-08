@@ -48,7 +48,10 @@ export async function loadUserProfile({ supabase, state, ui }, userId) {
       return;
     }
 
-    state.currentUser = data;
+    state.currentUser = {
+      ...data,
+      full_name: data?.full_name || String(data?.email || '').split('@')[0] || 'Usuario',
+    };
     ui.updateUserDisplay();
     ui.updateAdminMenu();
   } catch (error) {
@@ -146,8 +149,10 @@ export async function handleLogin(ctx, e) {
           JSON.stringify({
             user: {
               id: state.currentUser.id,
+              email: state.currentUser.email,
               user_metadata: {
                 full_name: state.currentUser.full_name,
+                email: state.currentUser.email,
                 role: state.currentUser.role,
               },
             },

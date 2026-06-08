@@ -74,3 +74,103 @@
 - Nuevo bloque más claro para **Modo revisión** dentro de Configuración.
 - Indicador visual para **modo de guardado** (Offline / Nube).
 - Service Worker mejor preparado para convivir con cache-busting y modo offline.
+
+---
+
+## v1.6.1 — 2026-06-04
+
+### Mejoras
+- El nombre del usuario actual ahora se muestra mejor en la interfaz superior y con mejores fallbacks si falta `full_name`.
+- Configuración: nuevo resumen superior con estado de guardado, modo revisión y sesión actual.
+- Incidencias y eventos ahora muestran mejor quién registró el elemento.
+- Mensajes de éxito más claros al crear/editar usuarios, incidencias y eventos.
+
+---
+
+## v1.6.2 — 2026-06-04
+
+### Inspirado en referencias de mantenimiento
+- Dashboard con indicador de **críticas** en la cabecera.
+- Nuevo panel de **Ítems críticos** para incidencias urgentes, altas o vencidas.
+- Nuevo panel de **Próximos 7 días** con eventos y entregas cercanas.
+- Enfoque más tipo “centro de control” para operación y seguimiento.
+
+---
+
+## v1.6.3 — 2026-06-04
+
+### Inspirado en SISMANUT
+- Dashboard reforzado con bloques de **Histórico**, **Correctivas** y **Calendario de mantenimiento**.
+- Más cercanía visual a una interfaz de mantenimiento industrial, pero conservando el estilo propio del sistema.
+- Mejor jerarquía de monitoreo para seguimiento diario.
+
+---
+
+## v1.6.4 — 2026-06-04
+
+### Centro de control
+- Encabezado del dashboard más fuerte, con visión general y acciones principales.
+- Nuevo bloque de **Alerta operativa** para urgencias y vencimientos inmediatos.
+- Nueva **Distribución por estado** con barras visuales para seguimiento rápido.
+
+---
+
+## v1.6.5 — 2026-06-04
+
+### Lectura rápida
+- Nuevo resumen de salud operativa con tarjetas `OK`, `Atención` y `Urgente`.
+- Más lectura inmediata del estado general al entrar al dashboard.
+
+---
+
+## v1.6.6 — 2026-06-04
+
+### Interacciones
+- Calendario del dashboard ahora es interactivo (click en días con agenda para ver eventos/entregas).
+- Paneles de **Ítems críticos** y **Próximos 7 días** ahora incluyen botón directo para ver el registro.
+
+---
+
+## v1.6.7 — 2026-06-04
+
+### Preventivo / Correctivo (más tipo SISMANUT)
+- Se agregó selector de **Tipo de mantenimiento** (Preventivo/Correctivo) en el registro de incidencias.
+- Se guarda como metadata (`mantenimiento`) dentro de Observaciones para mantener compatibilidad sin migraciones.
+- Nuevo filtro en Incidencias para **Mantenimiento: Preventivo/Correctivo**.
+- Dashboard y Reportes ahora calculan preventivo/correctivo desde esa metadata (con fallback a datos antiguos).
+
+---
+
+## v1.6.8 — 2026-06-04
+
+### UX (flujo tipo SISMANUT)
+- Accesos rápidos para **Nueva correctiva** y **Nueva preventiva** desde dashboard y sección de incidencias.
+- “Tabs” rápidos en Incidencias para filtrar: Todas / Preventivo / Correctivo.
+- El filtro de “Tipo de servicio” ahora se auto-completa con valores detectados en tus registros (compatibilidad con datos viejos).
+
+---
+
+## v1.6.9 — 2026-06-04
+
+### Claridad
+- Tabla de Incidencias ahora muestra columna **Mantenimiento** (Preventivo/Correctivo).
+- El detalle de una incidencia ahora incluye “Mantenimiento” en el resumen/copia rápida.
+
+---
+
+## v1.7.0 — 2026-06-04
+
+### Filtros más tipo “sistema de mantenimiento”
+- Nuevo estado agrupado: **Activos** (Pendiente + En proceso).
+- Nuevo filtro por **Entrega**: vencidas, hoy, próximos 7 días, sin fecha.
+- Tarjetas de salud del dashboard ahora son clickeables para navegar a Incidencias con filtros aplicados.
+
+---
+
+## v1.7.1 — 2026-06-04
+
+### Navegación operativa
+- Tarjetas principales del dashboard ahora navegan a Incidencias con filtros/presets.
+- Bloques de **Histórico** y **Correctivas** también abren vistas filtradas útiles.
+- Incidencias ahora permite ordenar por fecha, entrega, prioridad y abiertas primero.
+- Eventos mejora con filtros de fecha: hoy, próximos 7 días y atrasados.

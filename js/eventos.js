@@ -7,6 +7,29 @@ import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass
 import { canEditOwnedOrRole, canDelete } from './permissions.js';
 import { updateNotificationBadge } from './dashboard.js';
 
+function buildEventMeta(meta = {}) {
+  try {
+    return `__meta__=${JSON.stringify(meta)}`;
+  } catch {
+    return '';
+  }
+}
+
+function parseEventMeta(text = '') {
+  const raw = String(text || '');
+  const lines = raw.split('\n');
+  const metaLineIndex = lines.findIndex((l) => l.trim().startsWith('__meta__='));
+  if (metaLineIndex === -1) return { meta: {}, cleanText: raw };
+  const metaRaw = lines[metaLineIndex].trim().slice('__meta__='.length);
+  const cleanLines = lines.filter((_, idx) => idx !== metaLineIndex);
+  try {
+    const meta = JSON.parse(metaRaw);
+    return { meta: meta && typeof meta === 'object' ? meta : {}, cleanText: cleanLines.join('\n').trim() };
+  } catch {
+    return { meta: {}, cleanText: cleanLines.join('\n').trim() };
+  }
+}
+
 export async function loadEvents({ supabase } = {}) {
   try {
     const { data, error } = await supabase.from('events').select('*').order('event_date', { ascending: true });
@@ -47,6 +70,9 @@ function renderEventsGrid(list = state.eventsData) {
     .map((event) => {
       const canEdit = canEditOwnedOrRole(state.currentUser, event.user_id);
       const canDel = canDelete(state.currentUser);
+      const { meta, cleanText } = parseEventMeta(event.observations || '');
+      const createdBy = meta.creado_por || '';
+      const createdByEmail = meta.creado_email || '';
 
       return `
         <div class="event-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
@@ -57,9 +83,9 @@ function renderEventsGrid(list = state.eventsData) {
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">${event.description || 'Sin descripción'}</p>
             ${
-              event.observations
-                ? `<p class="text-xs text-gray-500 dark:text-gray-400 mb-4"><b>Observaciones:</b> ${(event.observations || '').slice(0, 140)}${
-                    (event.observations || '').length > 140 ? '…' : ''
+              cleanText
+                ? `<p class="text-xs text-gray-500 dark:text-gray-400 mb-4"><b>Observaciones:</b> ${(cleanText || '').slice(0, 140)}${
+                    (cleanText || '').length > 140 ? '…' : ''
                   }</p>`
                 : ''
             }
@@ -74,6 +100,16 @@ function renderEventsGrid(list = state.eventsData) {
                 <div class="flex items-center text-gray-700 dark:text-gray-300">
                   <i class="fas fa-map-marker-alt w-5 text-gray-400"></i>
                   <span>${event.location}</span>
+                </div>
+              `
+                  : ''
+              }
+              ${
+                createdBy
+                  ? `
+                <div class="flex items-center text-gray-700 dark:text-gray-300">
+                  <i class="fas fa-user-pen w-5 text-gray-400"></i>
+                  <span>Registró: ${createdBy}${createdByEmail ? ` · ${createdByEmail}` : ''}</span>
                 </div>
               `
                   : ''
@@ -119,6 +155,8 @@ function renderEventsGrid(list = state.eventsData) {
 export function filterEvents() {
   const searchText = (document.getElementById('search-events')?.value || '').toLowerCase();
   const filterStatus = document.getElementById('filter-events-status')?.value || '';
+  const filterDate = document.getElementById('filter-events-date')?.value || '';
+  const today = new Date().toISOString().split('T')[0];
 
   let filtered = state.eventsData;
   if (searchText) {
@@ -126,14 +164,41 @@ export function filterEvents() {
       (e) =>
         (e.title || '').toLowerCase().includes(searchText) ||
         (e.description || '').toLowerCase().includes(searchText) ||
-        (e.observations || '').toLowerCase().includes(searchText) ||
+        (() => {
+          const { meta, cleanText } = parseEventMeta(e.observations || '');
+          return [cleanText, meta.creado_por, meta.creado_email].filter(Boolean).join(' ').toLowerCase().includes(searchText);
+        })() ||
         (e.location || '').toLowerCase().includes(searchText) ||
         (e.assigned_to || '').toLowerCase().includes(searchText),
     );
   }
-  if (filterStatus) filtered = filtered.filter((e) => e.status === filterStatus);
+  if (filterStatus) {
+    if (filterStatus === 'activos') filtered = filtered.filter((e) => ['pendiente', 'en_proceso'].includes(String(e.status || '').toLowerCase()));
+    else filtered = filtered.filter((e) => e.status === filterStatus);
+  }
+  if (filterDate) {
+    filtered = filtered.filter((e) => {
+      const d = String(e.event_date || '').slice(0, 10);
+      if (!d) return false;
+      const diff = Math.floor((new Date(d) - new Date(today)) / (1000 * 60 * 60 * 24));
+      if (filterDate === 'today') return d === today;
+      if (filterDate === 'next7') return diff >= 0 && diff <= 7;
+      if (filterDate === 'overdue') return diff < 0 && !['completado', 'cancelado'].includes(String(e.status || '').toLowerCase());
+      return true;
+    });
+  }
 
   renderEventsGrid(filtered);
+}
+
+export function clearEventsFilters() {
+  const search = document.getElementById('search-events');
+  const status = document.getElementById('filter-events-status');
+  const date = document.getElementById('filter-events-date');
+  if (search) search.value = '';
+  if (status) status.value = '';
+  if (date) date.value = '';
+  filterEvents();
 }
 
 // -------------------------
@@ -143,6 +208,8 @@ export function filterEvents() {
 function getFilteredEvents() {
   const searchText = (document.getElementById('search-events')?.value || '').toLowerCase();
   const filterStatus = document.getElementById('filter-events-status')?.value || '';
+  const filterDate = document.getElementById('filter-events-date')?.value || '';
+  const today = new Date().toISOString().split('T')[0];
 
   let filtered = state.eventsData;
   if (searchText) {
@@ -150,12 +217,29 @@ function getFilteredEvents() {
       (e) =>
         (e.title || '').toLowerCase().includes(searchText) ||
         (e.description || '').toLowerCase().includes(searchText) ||
-        (e.observations || '').toLowerCase().includes(searchText) ||
+        (() => {
+          const { meta, cleanText } = parseEventMeta(e.observations || '');
+          return [cleanText, meta.creado_por, meta.creado_email].filter(Boolean).join(' ').toLowerCase().includes(searchText);
+        })() ||
         (e.location || '').toLowerCase().includes(searchText) ||
         (e.assigned_to || '').toLowerCase().includes(searchText),
     );
   }
-  if (filterStatus) filtered = filtered.filter((e) => e.status === filterStatus);
+  if (filterStatus) {
+    if (filterStatus === 'activos') filtered = filtered.filter((e) => ['pendiente', 'en_proceso'].includes(String(e.status || '').toLowerCase()));
+    else filtered = filtered.filter((e) => e.status === filterStatus);
+  }
+  if (filterDate) {
+    filtered = filtered.filter((e) => {
+      const d = String(e.event_date || '').slice(0, 10);
+      if (!d) return false;
+      const diff = Math.floor((new Date(d) - new Date(today)) / (1000 * 60 * 60 * 24));
+      if (filterDate === 'today') return d === today;
+      if (filterDate === 'next7') return diff >= 0 && diff <= 7;
+      if (filterDate === 'overdue') return diff < 0 && !['completado', 'cancelado'].includes(String(e.status || '').toLowerCase());
+      return true;
+    });
+  }
   return filtered;
 }
 
@@ -175,7 +259,7 @@ export function exportEventsCSV() {
         e.location || '',
         e.assigned_to || '',
         e.description || '',
-        e.observations || '',
+        parseEventMeta(e.observations || '').cleanText || '',
       ]);
     });
 
@@ -241,7 +325,7 @@ export async function editEvent({ supabase } = {}, id) {
     document.getElementById('evt-status').value = data.status;
     document.getElementById('evt-assigned').value = data.assigned_to || '';
     const obs = document.getElementById('evt-observations');
-    if (obs) obs.value = data.observations || '';
+    if (obs) obs.value = parseEventMeta(data.observations || '').cleanText || '';
   } catch (error) {
     console.error('Error loading event:', error);
     Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el evento' });
@@ -286,6 +370,23 @@ export async function handleEventSubmit({ supabase } = {}, e) {
     showLoader();
 
     const id = document.getElementById('event-id').value;
+    const observationsUser = (document.getElementById('evt-observations')?.value || '').trim();
+    let creatorMeta = {
+      creado_por: state.currentUser?.full_name || state.currentUser?.email || 'Usuario',
+      creado_email: state.currentUser?.email || null,
+    };
+    if (id) {
+      try {
+        const { data: existing } = await supabase.from('events').select('observations').eq('id', id).single();
+        const prev = parseEventMeta(existing?.observations || '').meta || {};
+        creatorMeta = {
+          creado_por: prev.creado_por || creatorMeta.creado_por,
+          creado_email: prev.creado_email || creatorMeta.creado_email,
+        };
+      } catch {
+        // noop
+      }
+    }
     const eventData = {
       title: document.getElementById('evt-title').value,
       description: document.getElementById('evt-description').value || null,
@@ -294,7 +395,7 @@ export async function handleEventSubmit({ supabase } = {}, e) {
       location: document.getElementById('evt-location').value || null,
       status: document.getElementById('evt-status').value,
       assigned_to: document.getElementById('evt-assigned').value || null,
-      observations: (document.getElementById('evt-observations')?.value || '').trim() || null,
+      observations: [buildEventMeta(creatorMeta), observationsUser].filter(Boolean).join('\n').trim() || null,
       user_id: state.currentUser.id,
     };
 
@@ -315,7 +416,9 @@ export async function handleEventSubmit({ supabase } = {}, e) {
     Swal.fire({
       icon: 'success',
       title: id ? 'Actualizado' : 'Registrado',
-      text: id ? 'El evento ha sido actualizado' : 'El evento ha sido registrado',
+      text: id
+        ? `El evento ha sido actualizado por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`
+        : `El evento ha sido registrado por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`,
       timer: 2000,
       showConfirmButton: false,
     });

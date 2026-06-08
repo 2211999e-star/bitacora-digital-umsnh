@@ -290,6 +290,16 @@ export async function exportPDF(_ctx, type, options = {}) {
       }
     };
 
+    const getMaintenanceTypeFromRow = (row = {}) => {
+      const meta = parseMetaFromObservations(row.observations || '');
+      const raw = String(meta.mantenimiento || '').toLowerCase().trim();
+      if (raw === 'preventivo' || raw === 'correctivo') return raw;
+      const st = String(row.service_type || '').toLowerCase();
+      if (st.includes('mantenimiento preventivo')) return 'preventivo';
+      if (st.includes('mantenimiento correctivo')) return 'correctivo';
+      return '';
+    };
+
     const addHeader = () => {
       doc.setTextColor(0, 0, 0);
 
@@ -357,6 +367,7 @@ export async function exportPDF(_ctx, type, options = {}) {
       const start = document.getElementById('report-date-start')?.value;
       const end = document.getElementById('report-date-end')?.value;
       const serviceTypeFilter = (options.serviceType || '').trim();
+      const maintenanceTypeFilter = String(options.maintenanceType || '').trim().toLowerCase();
       const reportTitle = (options.title || '').trim() || (serviceTypeFilter ? `Reporte de ${serviceTypeFilter}` : 'Reporte de Incidencias');
 
       const inRange = (d) => {
@@ -368,7 +379,10 @@ export async function exportPDF(_ctx, type, options = {}) {
 
       const base = Array.isArray(options.rows) ? options.rows : start || end ? state.activitiesData.filter((a) => inRange(a.date)) : [...state.activitiesData];
 
-      const rows = serviceTypeFilter && !Array.isArray(options.rows) ? base.filter((a) => (a.service_type || '') === serviceTypeFilter) : base;
+      let rows = serviceTypeFilter && !Array.isArray(options.rows) ? base.filter((a) => (a.service_type || '') === serviceTypeFilter) : base;
+      if (maintenanceTypeFilter && !Array.isArray(options.rows)) {
+        rows = rows.filter((a) => getMaintenanceTypeFromRow(a) === maintenanceTypeFilter);
+      }
 
       addHeader();
 
@@ -384,7 +398,9 @@ export async function exportPDF(_ctx, type, options = {}) {
           ? `Recibido: ${formatDate(rows[0].received_date || rows[0].date)}${rows[0].delivery_date ? `  |  Entrega: ${formatDate(rows[0].delivery_date)}` : ''}${
               rows[0].priority ? `  |  Prioridad: ${getPriorityText(rows[0].priority)}` : ''
             }`
-          : `Periodo: ${(start || '—')} a ${(end || '—')}  |  Total: ${rows.length}${serviceTypeFilter ? `  |  Filtro: ${serviceTypeFilter}` : ''}`;
+          : `Periodo: ${(start || '—')} a ${(end || '—')}  |  Total: ${rows.length}${
+              serviceTypeFilter ? `  |  Servicio: ${serviceTypeFilter}` : ''
+            }${maintenanceTypeFilter ? `  |  Mantenimiento: ${maintenanceTypeFilter}` : ''}`;
       doc.text(metaLine, 15, metaY);
 
       const tableData = rows.map((a) => {
@@ -630,14 +646,14 @@ export function exportMaintenanceReport(ctx, kind) {
   const normalized = String(kind || '').toLowerCase();
   if (normalized === 'preventivo') {
     return exportPDF(ctx, 'activities', {
-      serviceType: 'Mantenimiento preventivo',
+      maintenanceType: 'preventivo',
       title: 'Reporte de Mantenimiento preventivo',
       filenamePrefix: 'reporte_mantenimiento_preventivo',
     });
   }
   if (normalized === 'correctivo') {
     return exportPDF(ctx, 'activities', {
-      serviceType: 'Mantenimiento correctivo',
+      maintenanceType: 'correctivo',
       title: 'Reporte de Mantenimiento correctivo',
       filenamePrefix: 'reporte_mantenimiento_correctivo',
     });

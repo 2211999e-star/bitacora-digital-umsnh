@@ -28,6 +28,12 @@ import { loadDashboardData, updateReportStats, showNotifications, updateCharts }
 import {
   loadActivities,
   filterActivities,
+  setActivitiesMaintenanceFilter,
+  setActivitiesStatusFilter,
+  setActivitiesPriorityFilter,
+  setActivitiesDeliveryFilter,
+  setActivitiesSort,
+  openActivitiesPreset,
   clearActivitiesFilters,
   prevPage,
   nextPage,
@@ -48,7 +54,7 @@ import {
   copyMsinfoCommand,
   downloadMsinfoScript,
 } from './incidencias.js';
-import { loadEvents, filterEvents, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js';
+import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js';
 import {
   loadUsers,
   showUserModal,
@@ -473,12 +479,39 @@ function showApp() {
   })();
 }
 
+function getFriendlyUserName(user = {}) {
+  const fullName = String(user.full_name || '').trim();
+  if (fullName) return fullName;
+
+  const email = String(user.email || '').trim();
+  if (email) return email.split('@')[0];
+
+  return 'Usuario';
+}
+
 function updateUserDisplay() {
+  if (!state.currentUser) return;
+
+  const displayName = getFriendlyUserName(state.currentUser);
+  const roleText = getRoleName(state.currentUser.role);
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((x) => x[0]?.toUpperCase?.() || '')
+    .join('') || 'U';
+
   const nameEl = document.getElementById('user-name');
   const roleEl = document.getElementById('user-role');
-  if (!nameEl || !roleEl || !state.currentUser) return;
-  nameEl.textContent = state.currentUser.full_name;
-  roleEl.textContent = getRoleName(state.currentUser.role);
+  if (nameEl) nameEl.textContent = displayName;
+  if (roleEl) roleEl.textContent = roleText;
+
+  const topNameEl = document.getElementById('user-name-top');
+  const topRoleEl = document.getElementById('user-role-top');
+  const avatarEl = document.getElementById('user-chip-avatar');
+  if (topNameEl) topNameEl.textContent = displayName;
+  if (topRoleEl) topRoleEl.textContent = roleText;
+  if (avatarEl) avatarEl.textContent = initials;
 }
 
 function updateAdminMenu() {
@@ -735,7 +768,8 @@ async function initializeApp() {
         const meta = session.user?.user_metadata || {};
         state.currentUser = {
           id: session.user?.id || 'local-user',
-          full_name: meta.full_name || 'Usuario',
+          email: session.user?.email || meta.email || '',
+          full_name: meta.full_name || meta.name || '',
           role: meta.role || 'admin',
         };
         updateUserDisplay();
@@ -848,9 +882,17 @@ window.clearOfflineData = clearOfflineData;
 // Incidencias
 window.clearActivitiesFilters = clearActivitiesFilters;
 window.filterActivities = filterActivities;
+window.setActivitiesMaintenanceFilter = setActivitiesMaintenanceFilter;
+window.setActivitiesStatusFilter = setActivitiesStatusFilter;
+window.setActivitiesPriorityFilter = setActivitiesPriorityFilter;
+window.setActivitiesDeliveryFilter = setActivitiesDeliveryFilter;
+window.setActivitiesSort = setActivitiesSort;
+window.openActivitiesPreset = openActivitiesPreset;
 window.prevPage = prevPage;
 window.nextPage = nextPage;
 window.showActivityModal = showActivityModal;
+window.showPreventiveModal = () => showActivityModal('preventivo');
+window.showCorrectiveModal = () => showActivityModal('correctivo');
 window.closeActivityModal = closeActivityModal;
 window.openActivityAdvancedModal = openActivityAdvancedModal;
 window.closeActivityAdvancedModal = closeActivityAdvancedModal;
@@ -869,6 +911,7 @@ window.downloadMsinfoScript = downloadMsinfoScript;
 
 // Eventos
 window.filterEvents = filterEvents;
+window.clearEventsFilters = clearEventsFilters;
 window.showEventModal = showEventModal;
 window.closeEventModal = closeEventModal;
 window.editEvent = (id) => editEvent(dbCtx, id);
