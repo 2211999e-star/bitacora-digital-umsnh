@@ -165,10 +165,16 @@ export async function setAppSetting({ supabase } = {}, key, value) {
 
 export function initializeSettingsControls({ supabase, currentUser } = {}) {
   const modeEl = document.getElementById('storage-mode');
+  const modeBadgeEl = document.getElementById('storage-mode-badge');
   if (modeEl) {
     modeEl.textContent = supabase?.__local
       ? 'Modo offline (guardado en este navegador).'
       : 'Conectado a Supabase (guardado en la nube).';
+  }
+  if (modeBadgeEl) {
+    const isOffline = Boolean(supabase?.__local);
+    modeBadgeEl.textContent = isOffline ? 'Offline' : 'Nube';
+    modeBadgeEl.className = `status-chip ${isOffline ? 'status-warning' : 'status-success'}`;
   }
 
   // Toggle: forzar modo offline
@@ -210,6 +216,24 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
   const keyInput = document.getElementById('cfg-supabase-key');
   if (urlInput) urlInput.value = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}supabaseUrl`) || url || '';
   if (keyInput) keyInput.value = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}supabaseAnonKey`) || anonKey || '';
+
+  // Modo revisión
+  const reviewStatusEl = document.getElementById('cfg-review-mode-status');
+  const reviewActionBtn = document.getElementById('cfg-review-mode-action');
+  const reviewEnabled = isReviewModeEnabled();
+  if (reviewStatusEl) {
+    reviewStatusEl.textContent = reviewEnabled ? 'Activo' : 'Desactivado';
+    reviewStatusEl.className = `status-chip ${reviewEnabled ? 'status-warning' : 'status-muted'}`;
+  }
+  if (reviewActionBtn) {
+    reviewActionBtn.innerHTML = reviewEnabled
+      ? '<i class="fas fa-toggle-off mr-2"></i>Desactivar modo revisión'
+      : '<i class="fas fa-flask mr-2"></i>Activar modo revisión';
+    reviewActionBtn.setAttribute('onclick', reviewEnabled ? 'disableReviewMode()' : 'enableReviewMode()');
+    reviewActionBtn.className = reviewEnabled
+      ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-lg font-medium hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all'
+      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all';
+  }
 
   // Configuración institucional para PDF (sin duplicar lógica: se guarda en los mismos keys de reportes)
   const bindMirror = (cfgId, reportId, storageKey, fallbackValue = '') => {
@@ -303,16 +327,13 @@ export async function testSupabaseConnection({ supabase } = {}) {
   const setStatus = (text, kind) => {
     if (!statusEl) return;
     statusEl.textContent = text;
-    statusEl.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs border';
+    statusEl.className = 'status-chip';
     if (kind === 'ok')
-      statusEl.className +=
-        ' bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+      statusEl.className += ' status-success';
     else if (kind === 'warn')
-      statusEl.className +=
-        ' bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-800';
+      statusEl.className += ' status-warning';
     else
-      statusEl.className +=
-        ' bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800';
+      statusEl.className += ' status-muted';
   };
 
   try {

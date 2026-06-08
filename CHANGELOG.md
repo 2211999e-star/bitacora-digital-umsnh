@@ -60,3 +60,17 @@
 - Service Worker: soporte correcto para cache-busting (`?v=`) guardando y resolviendo recursos con y sin querystring (mejor offline).
 - Auth: si intentas entrar con credenciales demo, el sistema sugiere activar **Modo revisión** (evita confusión).
 - UX: `Esc` cierra de forma consistente menús `<details>` y overlays; click fuera cierra menús.
+
+---
+
+## v1.6.0 — 2026-06-04
+
+### Mejoras de interfaz
+- Botones de icono unificados en topbar, cierres de modal y acciones rápidas.
+- Focus, hover y estados disabled más consistentes en botones, formularios y archivos.
+- Tarjetas de configuración más claras visualmente, con badges de estado.
+
+### Configuración
+- Nuevo bloque más claro para **Modo revisión** dentro de Configuración.
+- Indicador visual para **modo de guardado** (Offline / Nube).
+- Service Worker mejor preparado para convivir con cache-busting y modo offline.

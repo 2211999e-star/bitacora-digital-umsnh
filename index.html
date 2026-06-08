@@ -262,7 +262,7 @@
                             <p id="user-name" class="text-sm font-medium text-gray-900 dark:text-white truncate">Usuario</p>
                             <p id="user-role" class="text-xs text-gray-500 dark:text-gray-400">Rol</p>
                         </div>
-                        <button type="button" onclick="logout()" aria-label="Cerrar sesión" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                        <button type="button" onclick="logout()" aria-label="Cerrar sesión" title="Cerrar sesión" class="icon-button hover:!text-red-500 dark:hover:!text-red-400">
                             <i class="fas fa-sign-out-alt"></i>
                         </button>
                     </div>
@@ -288,7 +288,7 @@
                 <div class="max-w-7xl mx-auto">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
-                            <button type="button" onclick="toggleSidebar()" aria-label="Abrir menú" class="lg:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                            <button type="button" onclick="toggleSidebar()" aria-label="Abrir menú" title="Abrir menú" class="icon-button lg:hidden">
                             <i class="fas fa-bars text-xl"></i>
                             </button>
 
@@ -299,15 +299,15 @@
                             <span id="net-status" class="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border">
                                 —
                             </span>
-                            <button type="button" onclick="openCommandPalette()" aria-label="Buscar (Ctrl+K)" class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <button type="button" onclick="openCommandPalette()" aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)" class="icon-button">
                                 <i class="fas fa-magnifying-glass text-xl"></i>
                             </button>
-                            <button type="button" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro" class="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <button type="button" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro" title="Cambiar tema" class="icon-button">
                             <i class="fas fa-moon dark:hidden text-xl"></i>
                             <i class="fas fa-sun hidden dark:inline text-xl"></i>
                             </button>
 
-                            <button type="button" onclick="showNotifications()" aria-label="Ver notificaciones" class="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                            <button type="button" onclick="showNotifications()" aria-label="Ver notificaciones" title="Ver notificaciones" class="relative icon-button">
                             <i class="fas fa-bell text-xl"></i>
                             <span id="notification-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-600 text-white text-[11px] leading-[18px] text-center rounded-full"></span>
                             </button>
@@ -335,7 +335,7 @@
                     </div>
                     <!-- Stats Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Total Incidencias</p>
@@ -347,7 +347,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
@@ -359,7 +359,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Completadas</p>
@@ -371,7 +371,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">En Proceso</p>
@@ -383,7 +383,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
+                        <div class="stat-card dashboard-stat-card bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg transition-shadow">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">Canceladas</p>
@@ -397,7 +397,7 @@
                     </div>
 
                     <!-- Indicadores clave (más información sin saturar) -->
-                    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
+                    <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
                         <div class="flex items-center justify-between gap-3 mb-4">
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Indicadores clave</h3>
@@ -409,7 +409,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-3">
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Eventos (3 días)</p>
                                 <p id="kpi-upcoming-events" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">0</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Próximos</p>
@@ -419,7 +419,7 @@
                                 <p id="kpi-overdue-events" class="text-2xl font-bold text-red-700 dark:text-red-300 mt-2">0</p>
                                 <p class="text-xs text-red-700/80 dark:text-red-300/80 mt-1">Atrasados</p>
                             </div>
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Entregas (1 día)</p>
                                 <p id="kpi-due-deliveries" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">0</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Próximas</p>
@@ -429,12 +429,12 @@
                                 <p id="kpi-overdue-deliveries" class="text-2xl font-bold text-red-700 dark:text-red-300 mt-2">0</p>
                                 <p class="text-xs text-red-700/80 dark:text-red-300/80 mt-1">Atrasadas</p>
                             </div>
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tasa de cierre</p>
                                 <p id="kpi-completion-rate" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">0%</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Completadas / total</p>
                             </div>
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tiempo promedio</p>
                                 <p id="kpi-avg-resolution" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">—</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">De recibido a entrega</p>
@@ -442,12 +442,12 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Hoy</p>
                                 <p id="kpi-created-today" class="text-2xl font-bold text-gray-900 dark:text-white mt-2">0</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Incidencias creadas</p>
                             </div>
-                            <div class="rounded-xl border border-green-200 dark:border-green-900/40 p-4 bg-green-50/60 dark:bg-green-900/10">
+                            <div class="dashboard-kpi-card rounded-xl border border-green-200 dark:border-green-900/40 p-4 bg-green-50/60 dark:bg-green-900/10">
                                 <p class="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wider">Hoy</p>
                                 <p id="kpi-delivered-today" class="text-2xl font-bold text-green-700 dark:text-green-300 mt-2">0</p>
                                 <p class="text-xs text-green-700/80 dark:text-green-300/80 mt-1">Entregadas (completadas)</p>
@@ -455,7 +455,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white">Top departamentos</p>
                                     <button onclick="showSection('activities')" class="text-xs font-medium text-gray-700 dark:text-gray-300 hover:underline">Ver incidencias</button>
@@ -465,7 +465,7 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                            <div class="dashboard-kpi-card rounded-xl border border-gray-200 dark:border-gray-800 p-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white">Top tipos de servicio</p>
                                     <button onclick="showSection('activities')" class="text-xs font-medium text-gray-700 dark:text-gray-300 hover:underline">Ver incidencias</button>
@@ -478,7 +478,7 @@
                     </div>
 
                     <!-- Análisis (Gráficas) - compacto para que no “esté amontonado” -->
-                    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
+                    <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
                         <details>
                             <summary class="cursor-pointer select-none flex items-center justify-between">
                                 <div>
@@ -536,9 +536,9 @@
 
                     <!-- Quick Actions + Maintenance Summary -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Acciones rápidas</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="quick-action-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <button onclick="showActivityModal()" class="px-4 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-left">
                                     <i class="fas fa-plus mr-2"></i>
                                     Nueva incidencia
@@ -559,7 +559,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-4">Tip: si trabajas sin internet, activa “modo offline” (se guarda en este navegador) y descarga un respaldo.</p>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Resumen de mantenimiento</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
@@ -584,7 +584,7 @@
 
                     <!-- Recent + Reminders + Pending -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Incidencias recientes</h3>
                                 <button onclick="showSection('activities')" class="text-sm font-medium text-gray-700 dark:text-gray-300 hover:underline">Ver todas</button>
@@ -594,7 +594,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recordatorios</h3>
@@ -607,7 +607,7 @@
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+                        <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Eventos pendientes</h3>
@@ -744,7 +744,7 @@
                     <div id="activities-summary" class="mb-4"></div>
 
                     <!-- Table -->
-                    <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div class="table-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="sticky top-0 z-10">
@@ -778,11 +778,11 @@
                                 Mostrando <span id="showing-start">0</span> - <span id="showing-end">0</span> de <span id="total-records">0</span> registros
                             </p>
                             <div class="flex items-center space-x-2">
-                                <button onclick="prevPage()" class="px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+                                <button onclick="prevPage()" class="table-pager-btn px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
                                     <i class="fas fa-chevron-left"></i>
                                 </button>
                                 <span id="current-page" class="text-sm text-gray-700 dark:text-gray-300">Página 1</span>
-                                <button onclick="nextPage()" class="px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+                                <button onclick="nextPage()" class="table-pager-btn px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
                                     <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>
@@ -991,8 +991,11 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Configuración del sistema</h3>
                             <p class="text-gray-600 dark:text-gray-400 mb-4">Ajustes de funcionamiento, conexión y respaldos.</p>
 
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-4">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Modo de guardado</p>
+                            <div class="settings-card mb-4">
+                                <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Modo de guardado</p>
+                                    <span id="storage-mode-badge" class="status-chip status-muted">Cargando</span>
+                                </div>
                                 <p id="storage-mode" class="text-sm text-gray-700 dark:text-gray-300">Cargando...</p>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
                                     <b>Tip:</b> si no tienes internet, usa modo offline y descarga un respaldo al final del día.
@@ -1012,7 +1015,24 @@
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-4">
+                            <div class="settings-card mb-4">
+                                <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">Modo revisión</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Usa accesos demo y datos de prueba sin tocar datos reales.</p>
+                                    </div>
+                                    <span id="cfg-review-mode-status" class="status-chip status-muted">Desactivado</span>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" id="cfg-review-mode-action" onclick="enableReviewMode()" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                                        <i class="fas fa-flask mr-2"></i>
+                                        Activar modo revisión
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-3">Úsalo para presentar el sistema o probar sin afectar información institucional.</p>
+                            </div>
+
+                            <div class="settings-card mb-4">
                                 <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Apariencia</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     <button type="button" onclick="setThemePreference('system')" id="btn-theme-system"
@@ -1032,7 +1052,7 @@
                             </div>
 
                             <div class="space-y-4">
-                                <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                                <div class="settings-card">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Conexión a Supabase (opcional)</p>
                                     <div class="space-y-3">
                                         <div>
@@ -1074,7 +1094,7 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 mb-4">
+                                <div class="settings-card mb-4">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Usuarios y seguridad</p>
                                     <div class="space-y-3 text-sm">
                                         <div class="flex items-center justify-between gap-3">
@@ -1111,7 +1131,7 @@
                                     </div>
                                 </div>
 
-                                <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+                                <div class="settings-card">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Respaldo (modo offline)</p>
                                     <div class="flex flex-wrap gap-2">
                                         <button onclick="exportBackup()" class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
@@ -1249,8 +1269,8 @@
             onclick="closeActivityModal()"
             onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityModal()"
         ></div>
-        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
-            <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
+        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+            <div class="modal-header-soft sticky top-0 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 id="modal-activity-title" class="text-xl font-bold text-gray-900 dark:text-white">Nueva incidencia</h2>
@@ -1260,13 +1280,13 @@
                             Se guardan fecha, hora y usuario automáticamente
                         </p>
                     </div>
-                    <button onclick="closeActivityModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button onclick="closeActivityModal()" class="icon-button" title="Cerrar">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="form-activity" class="p-7 space-y-6">
+            <form id="form-activity" class="modal-form-layout p-7 space-y-6">
                 <input type="hidden" id="activity-id">
                 <input type="hidden" id="act-folio">
                 <input type="hidden" id="act-service-type" value="">
@@ -1493,14 +1513,14 @@
             onclick="closeActivityAdvancedModal()"
             onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityAdvancedModal()"
         ></div>
-        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
-            <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
+        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+            <div class="modal-header-soft sticky top-0 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Información técnica avanzada</h2>
                         <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Opcional. Úsalo solo si necesitas registrar características del equipo.</p>
                     </div>
-                    <button onclick="closeActivityAdvancedModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button onclick="closeActivityAdvancedModal()" class="icon-button" title="Cerrar">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -1597,17 +1617,20 @@
             onclick="closeEventModal()"
             onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeEventModal()"
         ></div>
-        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
-            <div class="border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
+        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
+            <div class="modal-header-soft border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <h2 id="modal-event-title" class="text-xl font-bold text-gray-900 dark:text-white">Nuevo Evento</h2>
-                    <button onclick="closeEventModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <div>
+                        <h2 id="modal-event-title" class="text-xl font-bold text-gray-900 dark:text-white">Nuevo Evento</h2>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Agenda, seguimiento y responsable en un solo lugar.</p>
+                    </div>
+                    <button onclick="closeEventModal()" class="icon-button" title="Cerrar">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="form-event" class="p-7 space-y-6">
+            <form id="form-event" class="modal-form-layout p-7 space-y-6">
                 <input type="hidden" id="event-id">
 
                 <div>
@@ -1693,17 +1716,20 @@
             onclick="closeUserModal()"
             onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeUserModal()"
         ></div>
-        <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
-            <div class="border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
+        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
+            <div class="modal-header-soft border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
                 <div class="flex items-center justify-between">
-                    <h2 id="modal-user-title" class="text-xl font-bold text-gray-900 dark:text-white">Nuevo Usuario</h2>
-                    <button onclick="closeUserModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <div>
+                        <h2 id="modal-user-title" class="text-xl font-bold text-gray-900 dark:text-white">Nuevo Usuario</h2>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Alta de cuenta, rol y estado de acceso.</p>
+                    </div>
+                    <button onclick="closeUserModal()" class="icon-button" title="Cerrar">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="form-user" class="p-7 space-y-6">
+            <form id="form-user" class="modal-form-layout p-7 space-y-6">
                 <input type="hidden" id="user-id">
 
                 <div>
@@ -1784,7 +1810,7 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Ctrl+K · Enter abrir · Esc cerrar</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeCommandPalette()" class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" aria-label="Cerrar búsqueda">
+                <button type="button" onclick="closeCommandPalette()" class="icon-button" aria-label="Cerrar búsqueda" title="Cerrar búsqueda">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>

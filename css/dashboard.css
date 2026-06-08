@@ -23,6 +23,58 @@
   transform: translateY(-1px);
 }
 
+.dashboard-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stat-card::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -35% auto;
+  width: 110px;
+  height: 110px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(17, 24, 39, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.dark .dashboard-stat-card::after {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%);
+}
+
+#section-dashboard .dashboard-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+#section-dashboard .dashboard-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(17, 24, 39, 0.12), transparent);
+  pointer-events: none;
+}
+
+.dark #section-dashboard .dashboard-panel::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+#section-dashboard .dashboard-kpi-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(249, 250, 251, 0.9));
+}
+
+.dark #section-dashboard .dashboard-kpi-card {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.92));
+}
+
+#section-dashboard .quick-action-grid button {
+  min-height: 4rem;
+}
+
 /* Chart Container */
 canvas {
   max-width: 100%;

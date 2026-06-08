@@ -10,6 +10,11 @@ thead th {
   top: 0;
   z-index: 5;
   background-color: inherit; /* respeta clases bg-... del thead */
+  box-shadow: inset 0 -1px 0 rgba(229, 231, 235, 0.65);
+}
+
+.dark thead th {
+  box-shadow: inset 0 -1px 0 rgba(55, 65, 81, 0.8);
 }
 
 /* Table Hover Effect */
@@ -27,6 +32,19 @@ tbody tr:nth-child(even) {
 }
 .dark tbody tr:nth-child(even) {
   background-color: rgba(255, 255, 255, 0.01);
+}
+
+.table-panel {
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.06);
+}
+
+.dark .table-panel {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+}
+
+.table-pager-btn {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
 }
 
 /* Action Buttons Table */
