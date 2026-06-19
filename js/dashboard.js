@@ -12,7 +12,7 @@ import {
   getBadgeClass,
   getStatusColor,
   getPriorityText,
-} from './utils.js';
+} from './utils.js?v=1.5.4';
 
 // =========================
 // Notificaciones / recordatorios por fechas
@@ -320,6 +320,28 @@ export function renderHealthSummary() {
   if (okEl) okEl.textContent = String(ok);
   if (warningEl) warningEl.textContent = String(warning);
   if (urgentEl) urgentEl.textContent = String(urgent);
+}
+
+export function renderTicketPipeline() {
+  const openEl = document.getElementById('stat-open');
+  const waitingEl = document.getElementById('stat-waiting');
+  const resolvedEl = document.getElementById('stat-resolved');
+  const criticalEl = document.getElementById('stat-critical');
+
+  const all = state.activitiesData || [];
+  const pending = all.filter((a) => String(a.task_status || '').toLowerCase() === 'pendiente').length;
+  const inProgress = all.filter((a) => String(a.task_status || '').toLowerCase() === 'en_proceso').length;
+  const completed = all.filter((a) => String(a.task_status || '').toLowerCase() === 'completado').length;
+  const critical = all.filter((a) => {
+    const priority = String(a.priority || '').toLowerCase();
+    const overdue = a.delivery_date ? daysDiffFromToday(a.delivery_date) < 0 : false;
+    return priority === 'urgente' || overdue;
+  }).length;
+
+  if (openEl) openEl.textContent = String(pending + inProgress);
+  if (waitingEl) waitingEl.textContent = String(inProgress);
+  if (resolvedEl) resolvedEl.textContent = String(completed);
+  if (criticalEl) criticalEl.textContent = String(critical);
 }
 
 export function renderStatusDistribution() {
@@ -951,6 +973,7 @@ export async function loadDashboardData({ supabase } = {}) {
     renderStatusDistribution();
     renderExecutiveAlerts();
     renderHealthSummary();
+    renderTicketPipeline();
 
     // Estadísticas para sección de reportes
     updateReportStats();

@@ -4,8 +4,10 @@
  * con los onclick inline del HTML.
  */
 
-import { createSupabase } from './database.js';
-import { state, hideLoader, copyToClipboard, showToast } from './utils.js';
+console.log('app.js: módulo importándose...');
+
+import { createSupabase } from './database.js?v=1.5.4';
+import { state, hideLoader, copyToClipboard, showToast } from './utils.js?v=1.5.4';
 import {
   applyThemePreference,
   getThemePreference,
@@ -21,10 +23,10 @@ import {
   isReviewModeEnabled,
   setReviewModeEnabled,
   setForceOfflineEnabled,
-} from './config.js';
-import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js';
-import { handleRegister } from './auth.js';
-import { loadDashboardData, updateReportStats, showNotifications, updateCharts } from './dashboard.js';
+} from './config.js?v=1.5.4';
+import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.5.4';
+import { handleRegister } from './auth.js?v=1.5.4';
+import { loadDashboardData, updateReportStats, showNotifications, updateCharts } from './dashboard.js?v=1.5.4';
 import {
   loadActivities,
   filterActivities,
@@ -37,6 +39,7 @@ import {
   clearActivitiesFilters,
   prevPage,
   nextPage,
+  openMaintenanceFormSection,
   showActivityModal,
   closeActivityModal,
   openActivityAdvancedModal,
@@ -53,8 +56,9 @@ import {
   handleMsInfoUpload,
   copyMsinfoCommand,
   downloadMsinfoScript,
-} from './incidencias.js';
-import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js';
+  initializeIndependentMaintenanceForms,
+} from './incidencias.js?v=1.5.5';
+import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.5.4';
 import {
   loadUsers,
   showUserModal,
@@ -66,8 +70,8 @@ import {
   suspendUser,
   activateUser,
   getRoleName,
-} from './usuarios.js';
-import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js';
+} from './usuarios.js?v=1.5.4';
+import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js?v=1.5.4';
 
 let supabase = createSupabase();
 const dbCtx = { supabase };
@@ -369,6 +373,22 @@ function updateNetStatusPill() {
   setClasses('ok');
 }
 
+function updateLoginNetworkStatus() {
+  const el = document.getElementById('login-network-status');
+  if (!el) return;
+
+  const online = typeof navigator !== 'undefined' ? navigator.onLine : true;
+  if (!online) {
+    el.classList.remove('hidden');
+    el.textContent = 'Sin internet. Usa modo local o modo revisión para continuar.';
+    el.classList.remove('bg-green-100', 'text-green-700', 'border-green-200', 'dark:bg-green-900/20', 'dark:text-green-300', 'dark:border-green-900/40');
+    el.classList.add('bg-yellow-50', 'text-yellow-900', 'border-yellow-200', 'dark:bg-yellow-900/20', 'dark:text-yellow-100', 'dark:border-yellow-800');
+    return;
+  }
+
+  el.classList.add('hidden');
+}
+
 function isMissingSupabaseSchemaError(err) {
   const code = err?.code ? String(err.code) : '';
   const msg = err?.message ? String(err.message) : '';
@@ -423,8 +443,10 @@ async function ensureDbReady() {
 function showLogin() {
   document.getElementById('login-screen')?.classList.remove('hidden');
   document.getElementById('app-container')?.classList.add('hidden');
-  // Modal de registro (si quedó abierto)
   document.getElementById('modal-register')?.classList.add('hidden');
+  document.getElementById('review-banner')?.classList.add('hidden');
+  updateLoginNetworkStatus();
+  hideLoader();
 }
 
 function openRegisterModal() {
@@ -433,6 +455,33 @@ function openRegisterModal() {
 
 function closeRegisterModal() {
   document.getElementById('modal-register')?.classList.add('hidden');
+}
+
+function initializeGlobalErrorHandling() {
+  if (window.__appGlobalErrorsWired) return;
+  window.__appGlobalErrorsWired = true;
+
+  window.addEventListener('error', (event) => {
+    console.error('Global JS error:', event.error || event.message, event);
+    if (event.filename?.includes('/js/') || event.error) {
+      showToast({
+        type: 'error',
+        title: 'Error de la app',
+        message: 'Ocurrió un problema interno. Revisa la consola para más detalles.',
+        durationMs: 5000,
+      });
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    showToast({
+      type: 'error',
+      title: 'Error inesperado',
+      message: 'Ocurrió un fallo en una operación asíncrona. Revisa la consola.',
+      durationMs: 5000,
+    });
+  });
 }
 
 function enableReviewMode() {
@@ -517,7 +566,7 @@ function updateUserDisplay() {
 function updateAdminMenu() {
   const adminMenu = document.getElementById('admin-menu');
   // Solo el admin principal ve el menú de administración
-  const isPrimary = Boolean(state.currentUser) && state.currentUser.role === 'admin' && String(state.currentUser.email || '').toLowerCase() === '2211999e@umich.mx';
+  const isPrimary = Boolean(state.currentUser) && state.currentUser.role === 'admin' && String(state.currentUser.email || '').toLowerCase() === '22119993@umich.mx';
   if (adminMenu) adminMenu.classList.toggle('hidden', !isPrimary);
 
   // Controles especiales en incidencias (muestra)
@@ -613,6 +662,7 @@ function initializeEventListeners() {
 
   // Activity Form
   document.getElementById('form-activity')?.addEventListener('submit', (e) => handleActivitySubmit(dbCtx, e));
+  initializeIndependentMaintenanceForms(dbCtx);
 
   // Event Form
   document.getElementById('form-event')?.addEventListener('submit', (e) => handleEventSubmit(dbCtx, e));
@@ -650,8 +700,15 @@ function initializeEventListeners() {
   initializeSettingsControls({ supabase, currentUser: state.currentUser });
 
   // Estado de red (online/offline)
-  window.addEventListener('online', updateNetStatusPill);
-  window.addEventListener('offline', updateNetStatusPill);
+  window.addEventListener('online', () => {
+    updateNetStatusPill();
+    updateLoginNetworkStatus();
+  });
+  window.addEventListener('offline', () => {
+    updateNetStatusPill();
+    updateLoginNetworkStatus();
+  });
+  updateLoginNetworkStatus();
 
   // Atajo: Ctrl+K (o Cmd+K) abre buscador global
   document.addEventListener('keydown', (e) => {
@@ -752,15 +809,42 @@ function initializeEventListeners() {
 
 async function initializeApp() {
   try {
+    initializeGlobalErrorHandling();
+    initializeEventListeners();
+
     // Modo revisión: datos demo (solo local)
     if (isReviewModeEnabled() && supabase.__local) {
-      await seedReviewModeData();
+      try {
+        await seedReviewModeData();
+      } catch (e) {
+        console.warn('Error seeding review data:', e);
+      }
     }
 
-    // Check for existing session
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Si estamos en modo fallback (sin credenciales válidas), 
+    // mostrar login directamente sin esperar por Supabase
+    if (supabase.__local) {
+      showLogin();
+      hideLoader();
+      updateNetStatusPill();
+      return;
+    }
+
+    // Check for existing session with timeout
+    let session = null;
+    try {
+      // Timeout de 5 segundos para getSession()
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session check timeout')), 5000)
+      );
+      const result = await Promise.race([
+        supabase.auth.getSession(),
+        timeoutPromise
+      ]);
+      session = result?.data?.session;
+    } catch (e) {
+      console.warn('Error getting session or timeout:', e);
+    }
 
     if (session) {
       // Local fallback session (sin Supabase)
@@ -776,8 +860,13 @@ async function initializeApp() {
         updateAdminMenu();
         showApp();
       } else {
-        await loadUserProfile({ supabase, state, ui }, session.user.id);
-        showApp();
+        try {
+          await loadUserProfile({ supabase, state, ui }, session.user.id);
+          showApp();
+        } catch (e) {
+          console.warn('Error loading user profile:', e);
+          showLogin();
+        }
       }
     } else {
       showLogin();
@@ -791,15 +880,23 @@ async function initializeApp() {
     }
 
     // Set up auth state listener
-    supabase.auth.onAuthStateChange(async (event, session2) => {
-      if (event === 'SIGNED_IN' && session2) {
-        await loadUserProfile({ supabase, state, ui }, session2.user.id);
-        showApp();
-      } else if (event === 'SIGNED_OUT') {
-        state.currentUser = null;
-        showLogin();
-      }
-    });
+    try {
+      supabase.auth.onAuthStateChange(async (event, session2) => {
+        if (event === 'SIGNED_IN' && session2) {
+          try {
+            await loadUserProfile({ supabase, state, ui }, session2.user.id);
+            showApp();
+          } catch (e) {
+            console.warn('Error in auth state change:', e);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          state.currentUser = null;
+          showLogin();
+        }
+      });
+    } catch {
+      // noop
+    }
 
     // Initialize event listeners
     initializeEventListeners();
@@ -808,8 +905,24 @@ async function initializeApp() {
     hideLoader();
   } catch (error) {
     console.error('Error initializing app:', error);
+    if (String(error?.message || '').toLowerCase().includes('failed to fetch') || String(error?.message || '').toLowerCase().includes('network')) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No se pudo conectar con Supabase',
+        text: 'El servicio backend no está disponible. Usa modo revisión o modo offline para continuar.',
+        confirmButtonText: 'Entendido',
+      });
+    }
     hideLoader();
     showLogin();
+  } finally {
+    // Fallback absolute: asegurar que el loader se oculta
+    setTimeout(() => {
+      const loader = document.getElementById('loader');
+      if (loader && loader.offsetParent !== null) {
+        hideLoader();
+      }
+    }, 100);
   }
 }
 
@@ -890,9 +1003,10 @@ window.setActivitiesSort = setActivitiesSort;
 window.openActivitiesPreset = openActivitiesPreset;
 window.prevPage = prevPage;
 window.nextPage = nextPage;
+window.openMaintenanceFormSection = openMaintenanceFormSection;
 window.showActivityModal = showActivityModal;
-window.showPreventiveModal = () => showActivityModal('preventivo');
-window.showCorrectiveModal = () => showActivityModal('correctivo');
+window.showPreventiveModal = () => openMaintenanceFormSection('preventivo');
+window.showCorrectiveModal = () => openMaintenanceFormSection('correctivo');
 window.closeActivityModal = closeActivityModal;
 window.openActivityAdvancedModal = openActivityAdvancedModal;
 window.closeActivityAdvancedModal = closeActivityAdvancedModal;

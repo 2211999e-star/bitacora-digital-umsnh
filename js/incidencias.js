@@ -16,11 +16,11 @@ import {
   isoDate,
   downloadCSV,
   showToast,
-} from './utils.js';
-import { canEditOwnedOrRole, canDelete } from './permissions.js';
-import { updateNotificationBadge, loadDashboardData } from './dashboard.js';
-import { exportPDF } from './reportes.js';
-import { LOCAL_STORAGE_PREFIX } from './config.js';
+} from './utils.js?v=1.5.4';
+import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
+import { updateNotificationBadge, loadDashboardData } from './dashboard.js?v=1.5.4';
+import { exportPDF } from './reportes.js?v=1.5.4';
+import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
 
 /**
  * Construye un bloque de metadata embebido en Observaciones para mantener compatibilidad
@@ -65,16 +65,506 @@ function makeFolio() {
   return `UMSNH-${y}${m}${day}-${rand}`;
 }
 
+function getMaintenanceServiceType(type = 'correctivo') {
+  return String(type).toLowerCase() === 'preventivo'
+    ? 'Mantenimiento preventivo'
+    : 'Mantenimiento correctivo';
+}
+
+function getMaintenanceLabel(type = 'correctivo') {
+  return String(type).toLowerCase() === 'preventivo' ? 'preventivo' : 'correctivo';
+}
+
+function setInlineSubmitState(form, isLoading = false) {
+  const button = form?.querySelector('button[type="submit"]');
+  if (!button) return;
+
+  const label = button.querySelector('span');
+  const defaultText = button.dataset.defaultText || label?.textContent || 'Guardar';
+
+  if (isLoading) {
+    button.disabled = true;
+    button.classList.add('opacity-80', 'cursor-not-allowed');
+    if (label) label.textContent = 'Guardando...';
+  } else {
+    button.disabled = false;
+    button.classList.remove('opacity-80', 'cursor-not-allowed');
+    if (label) label.textContent = defaultText;
+  }
+}
+
+function emphasizeMaintenanceForm(form) {
+  if (!form) return;
+  form.classList.add('ring-2', 'ring-offset-2', 'ring-gray-300', 'dark:ring-gray-600');
+  setTimeout(() => {
+    form.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-300', 'dark:ring-gray-600');
+  }, 1600);
+}
+
+function getActivityUiMeta(activity = {}) {
+  const { meta, cleanText } = parseMetaBlock(activity.observations || '');
+  const maintenanceType = String(meta.mantenimiento || '').toLowerCase().trim() ||
+    (String(activity.service_type || '').toLowerCase().includes('mantenimiento preventivo') ? 'preventivo' : '') ||
+    (String(activity.service_type || '').toLowerCase().includes('mantenimiento correctivo') ? 'correctivo' : '') ||
+    'correctivo';
+  const isPreventive = maintenanceType === 'preventivo';
+
+  return {
+    meta,
+    cleanText,
+    maintenanceType,
+    maintenanceLabel: isPreventive ? 'Preventivo' : 'Correctivo',
+    maintenanceBadgeClass: isPreventive
+      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800'
+      : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-200 border border-orange-200 dark:border-orange-800',
+    location: meta.edificio || activity.coordination || 'Sin ubicación',
+    area: meta.carrera || activity.department || 'Sin área',
+    folio: meta.folio || activity.folio || '—',
+  };
+}
+
+function buildActivityActionButtons(activity, { canEdit = false, canDel = false, canDeliver = false, compact = false } = {}) {
+  const baseClass = compact
+    ? 'inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+    : 'inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors';
+
+  return `
+    <button onclick="viewActivity('${activity.id}')" class="${baseClass}" title="Ver detalle">
+      <i class="fas fa-eye"></i>${compact ? '' : '<span>Ver</span>'}
+    </button>
+    <button onclick="exportActivityPDF('${activity.id}')" class="${baseClass}" title="PDF individual">
+      <i class="fas fa-file-pdf text-red-500"></i>${compact ? '' : '<span>PDF</span>'}
+    </button>
+    ${canDeliver ? `
+      <button onclick="markDelivered('${activity.id}')" class="${baseClass}" title="Marcar entregado">
+        <i class="fas fa-check-double text-green-600"></i>${compact ? '' : '<span>Finalizar</span>'}
+      </button>
+    ` : ''}
+    ${canEdit ? `
+      <button onclick="editActivity('${activity.id}')" class="${baseClass}" title="Editar">
+        <i class="fas fa-pen text-blue-500"></i>${compact ? '' : '<span>Editar</span>'}
+      </button>
+    ` : ''}
+    ${canDel ? `
+      <button onclick="deleteActivity('${activity.id}')" class="${baseClass}" title="Eliminar">
+        <i class="fas fa-trash text-red-500"></i>${compact ? '' : '<span>Eliminar</span>'}
+      </button>
+    ` : ''}
+  `;
+}
+
+function renderActivitiesCards(list = []) {
+  const grid = document.getElementById('activities-records-grid');
+  if (!grid) return;
+
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/30 p-10 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+          <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300 text-xl"></i>
+        </div>
+        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mt-4">No hay incidencias registradas</h4>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Puedes crear una nueva incidencia preventiva o correctiva desde los formularios superiores.</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = list.map((activity) => {
+    const canEdit = canEditOwnedOrRole(state.currentUser, activity.user_id);
+    const canDel = canDelete(state.currentUser);
+    const canDeliver = canEdit && !['completado', 'cancelado'].includes(String(activity.task_status || '').toLowerCase());
+    const ui = getActivityUiMeta(activity);
+    const statusLabel = getStatusText(activity.task_status);
+    const statusClass = `badge badge-${getBadgeClass(activity.task_status)}`;
+    const priorityLabel = getPriorityText(activity.priority);
+    const priorityClass = `badge badge-priority-${String(activity.priority || 'media')}`;
+    const technicalInfo = [activity.brand, activity.model].filter(Boolean).join(' · ') || 'Sin datos técnicos';
+    const extraText = ui.cleanText || 'Sin observaciones adicionales';
+
+    return `
+      <article class="rounded-3xl border ${ui.maintenanceType === 'preventivo' ? 'border-emerald-200/80 dark:border-emerald-900/30' : 'border-orange-200/80 dark:border-orange-900/30'} bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+        <div class="px-5 py-4 border-b ${ui.maintenanceType === 'preventivo' ? 'border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-950/20 dark:to-gray-900' : 'border-orange-100 dark:border-orange-900/30 bg-gradient-to-r from-orange-50 to-white dark:from-orange-950/20 dark:to-gray-900'}">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${ui.maintenanceBadgeClass}">${ui.maintenanceLabel}</span>
+                <span class="${statusClass}">${statusLabel}</span>
+                <span class="${priorityClass}">${priorityLabel}</span>
+              </div>
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mt-3">${activity.reporter_name || 'Sin reportante'}</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${ui.area}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Folio</p>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-1">${ui.folio}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">${formatDate(activity.date)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
+              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Ubicación</p>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-2">${ui.location}</p>
+            </div>
+            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
+              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Servicio</p>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-2">${activity.service_type || ui.maintenanceLabel}</p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
+            <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Descripción</p>
+            <p class="text-sm text-gray-700 dark:text-gray-200 mt-2 leading-6">${activity.description || 'Sin descripción registrada'}</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
+              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Datos técnicos</p>
+              <p class="text-sm text-gray-700 dark:text-gray-200 mt-2">${technicalInfo}</p>
+            </div>
+            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
+              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Observaciones</p>
+              <p class="text-sm text-gray-700 dark:text-gray-200 mt-2">${extraText}</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            ${buildActivityActionButtons(activity, { canEdit, canDel, canDeliver, compact: false })}
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+export function openMaintenanceFormSection(type = 'correctivo') {
+  const normalized = getMaintenanceLabel(type);
+  try {
+    if (typeof window._showSection === 'function') window._showSection('activities');
+    else if (typeof window.showSection === 'function') window.showSection('activities');
+  } catch {
+    // noop
+  }
+
+  const formId = normalized === 'preventivo' ? 'preventive-maintenance-form' : 'corrective-maintenance-form';
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  setTimeout(() => {
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    emphasizeMaintenanceForm(form);
+    const firstField = form.querySelector('input[type="text"], textarea, select');
+    firstField?.focus?.();
+  }, 80);
+}
+
+async function handleIndependentMaintenanceSubmit({ supabase } = {}, event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  if (!form) return;
+
+  const formData = new FormData(form);
+  const maintenanceType = getMaintenanceLabel(formData.get('maintenance_kind') || 'correctivo');
+  const commission = String(formData.get('commission') || '').trim();
+  const reporterName = String(formData.get('reporter_name') || '').trim();
+  const location = String(formData.get('location') || '').trim();
+  const description = String(formData.get('description') || '').trim();
+  const taskStatusRaw = String(formData.get('status') || 'pendiente').trim().toLowerCase();
+  const taskStatus = ['pendiente', 'en_proceso', 'completado'].includes(taskStatusRaw) ? taskStatusRaw : 'pendiente';
+
+  const validationErrors = [];
+  if (!commission) validationErrors.push('Comisión Académica o Área');
+  if (!reporterName) validationErrors.push('Nombre Completo de Quien Reporta');
+  if (!location) validationErrors.push('Ubicación Específica');
+  if (!description) validationErrors.push('Descripción de la actividad');
+
+  if (validationErrors.length > 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Completa los campos requeridos',
+      html: `<div style="text-align:left">${validationErrors.map((item) => `<div style="margin:6px 0">• ${item}</div>`).join('')}</div>`,
+      confirmButtonText: 'Entendido',
+    });
+    return;
+  }
+
+  setInlineSubmitState(form, true);
+
+  try {
+    showLoader();
+
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    const time = now.toTimeString().slice(0, 5);
+    const folio = makeFolio();
+    const serviceType = getMaintenanceServiceType(maintenanceType);
+    const creatorName = state.currentUser?.full_name || state.currentUser?.email || reporterName;
+
+    const meta = {
+      folio,
+      edificio: location,
+      carrera: commission,
+      salon: '',
+      turno: null,
+      mantenimiento: maintenanceType,
+      tipo: serviceType,
+      rapido: description,
+      creado_por: creatorName,
+      creado_email: state.currentUser?.email || null,
+      formulario: 'bitacora_independiente',
+    };
+
+    const observations = buildMetaBlock(meta);
+    const activityData = {
+      date,
+      time,
+      received_date: date,
+      delivery_date: taskStatus === 'completado' ? date : null,
+      reporter_name: reporterName,
+      department: commission,
+      coordination: location,
+      service_type: serviceType,
+      description,
+      priority: 'media',
+      task_status: taskStatus,
+      observations,
+      assigned_to: null,
+      user_id: state.currentUser?.id,
+    };
+
+    const { error } = await supabase.from('activities').insert(activityData);
+    if (error) throw error;
+
+    form.reset();
+    await loadActivities({ supabase });
+    await loadDashboardData({ supabase });
+
+    const maintenanceLabel = maintenanceType === 'preventivo' ? 'Preventivo' : 'Correctivo';
+    Swal.fire({
+      icon: 'success',
+      title: 'Registro guardado',
+      html: `<div style="text-align:center"><b>${maintenanceLabel}</b> registrado con folio <b>${folio}</b>.</div>`,
+      timer: 2200,
+      showConfirmButton: false,
+    });
+    showToast({ type: 'success', title: 'Guardado', message: `Folio: ${folio}` });
+  } catch (error) {
+    console.error('Error saving independent maintenance form:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al guardar',
+      text: error?.message || 'No se pudo guardar el formulario de mantenimiento.',
+      confirmButtonText: 'Entendido',
+    });
+  } finally {
+    hideLoader();
+    setInlineSubmitState(form, false);
+  }
+}
+
+export function initializeIndependentMaintenanceForms({ supabase } = {}) {
+  ['preventive-maintenance-form', 'corrective-maintenance-form'].forEach((formId) => {
+    const form = document.getElementById(formId);
+    if (!form || form.dataset.wired === 'true') return;
+    form.dataset.wired = 'true';
+    form.addEventListener('submit', (event) => handleIndependentMaintenanceSubmit({ supabase }, event));
+  });
+}
+
 function setSelectedByDataAttr(selector, value) {
-  document.querySelectorAll(selector).forEach((b) => b.classList.remove('ring-2', 'ring-black', 'dark:ring-white'));
-  if (!value) return;
-  document.querySelectorAll(`${selector}[data-value="${value}"]`).forEach((b) => b.classList.add('ring-2', 'ring-black', 'dark:ring-white'));
+  // Para segmented control (maint-btn)
+  if (selector === '.act-maint-btn') {
+    document.querySelectorAll(selector).forEach((b) => {
+      b.classList.remove('bg-black', 'dark:bg-white', 'text-white', 'dark:text-black', 'shadow-md');
+      b.classList.add('bg-transparent', 'text-gray-700', 'dark:text-gray-300');
+    });
+    if (value) {
+      document.querySelectorAll(`${selector}[data-value="${value}"]`).forEach((b) => {
+        b.classList.remove('bg-transparent', 'text-gray-700', 'dark:text-gray-300');
+        b.classList.add('bg-black', 'dark:bg-white', 'text-white', 'dark:text-black', 'shadow-md');
+      });
+    }
+  } else {
+    // Para otros selectores
+    document.querySelectorAll(selector).forEach((b) => b.classList.remove('ring-2', 'ring-black', 'dark:ring-white'));
+    if (!value) return;
+    document.querySelectorAll(`${selector}[data-value="${value}"]`).forEach((b) => b.classList.add('ring-2', 'ring-black', 'dark:ring-white'));
+  }
+}
+
+function renderLocationFieldsByMaintenanceType(type) {
+  const fieldsContainer = document.getElementById('maint-location-fields');
+  const titleEl = document.getElementById('maint-location-title');
+  const subtitleEl = document.getElementById('maint-location-subtitle');
+
+  if (!fieldsContainer) return;
+
+  if (type === 'preventivo') {
+    titleEl.textContent = '### Ubicación - Mantenimiento Preventivo';
+    subtitleEl.textContent = 'Selecciona el área/acción académica y responsable.';
+    
+    fieldsContainer.innerHTML = `
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Acción Académica / Área *</label>
+        <select id="act-building" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all">
+          <option value="">Selecciona…</option>
+          <option value="Coordinación CSI">Coordinación CSI</option>
+          <option value="Soporte Técnico">Soporte Técnico</option>
+          <option value="Infraestructura">Infraestructura</option>
+          <option value="Redes">Redes</option>
+          <option value="Desarrollo">Desarrollo</option>
+          <option value="Otro">Otro…</option>
+        </select>
+        <input type="text" id="act-building-other-input" class="hidden mt-2 w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Especifica el área">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Nombre Completo de Quien Reporta *</label>
+        <input type="text" id="act-career" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Ej. Juan Pérez García">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Ubicación Específica *</label>
+        <input type="text" id="act-room" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Ej. Edificio A, Aula 5">
+      </div>
+    `;
+  } else {
+    // Correctivo
+    titleEl.textContent = '### Ubicación - Mantenimiento Correctivo';
+    subtitleEl.textContent = 'Selecciona el área/acción académica y responsable.';
+    
+    fieldsContainer.innerHTML = `
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Acción Académica / Área *</label>
+        <select id="act-building" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all">
+          <option value="">Selecciona…</option>
+          <option value="Coordinación CSI">Coordinación CSI</option>
+          <option value="Soporte Técnico">Soporte Técnico</option>
+          <option value="Infraestructura">Infraestructura</option>
+          <option value="Redes">Redes</option>
+          <option value="Desarrollo">Desarrollo</option>
+          <option value="Otro">Otro…</option>
+        </select>
+        <input type="text" id="act-building-other-input" class="hidden mt-2 w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Especifica el área">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Nombre Completo de Quien Reporta *</label>
+        <input type="text" id="act-career" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Ej. Juan Pérez García">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Ubicación Específica *</label>
+        <input type="text" id="act-room" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Ej. Edificio A, Aula 5">
+      </div>
+    `;
+  }
+
+  // Re-wire event listeners after rendering
+  rewireLocationFields();
+}
+
+function rewireLocationFields() {
+  // Building "Otro"
+  const buildingSel = document.getElementById('act-building');
+  const buildingOther = document.getElementById('act-building-other-input');
+  const buildingOtherHidden = document.getElementById('act-building-other');
+  if (buildingSel) {
+    buildingSel.addEventListener('change', () => {
+      const isOther = buildingSel.value === 'Otro';
+      if (buildingOther) buildingOther.classList.toggle('hidden', !isOther);
+      if (!isOther && buildingOther) buildingOther.value = '';
+      if (!isOther && buildingOtherHidden) buildingOtherHidden.value = '';
+    });
+  }
+  if (buildingOther) {
+    buildingOther.addEventListener('input', () => {
+      if (buildingOtherHidden) buildingOtherHidden.value = buildingOther.value;
+    });
+  }
+
+  // Career "Otro" (only for correctivo)
+  const careerSel = document.getElementById('act-career');
+  const careerOther = document.getElementById('act-career-other-input');
+  const careerOtherHidden = document.getElementById('act-career-other');
+  if (careerSel && careerOther) {
+    careerSel.addEventListener('change', () => {
+      const isOther = careerSel.value === 'Otro';
+      if (careerOther) careerOther.classList.toggle('hidden', !isOther);
+      if (!isOther && careerOther) careerOther.value = '';
+      if (!isOther && careerOtherHidden) careerOtherHidden.value = '';
+    });
+  }
+  if (careerOther) {
+    careerOther.addEventListener('input', () => {
+      if (careerOtherHidden) careerOtherHidden.value = careerOther.value;
+    });
+  }
+
+  // Room "Otro" (only for correctivo)
+  const roomSel = document.getElementById('act-room');
+  const roomOther = document.getElementById('act-room-other-input');
+  const roomOtherHidden = document.getElementById('act-room-other');
+  if (roomSel && roomOther) {
+    roomSel.addEventListener('change', () => {
+      const isOther = roomSel.value === 'Otro';
+      if (roomOther) roomOther.classList.toggle('hidden', !isOther);
+      if (!isOther && roomOther) roomOther.value = '';
+      if (!isOther && roomOtherHidden) roomOtherHidden.value = '';
+    });
+  }
+  if (roomOther) {
+    roomOther.addEventListener('input', () => {
+      if (roomOtherHidden) roomOtherHidden.value = roomOther.value;
+    });
+  }
+
+  // Shift buttons
+  const shiftInput = document.getElementById('act-shift');
+  document.querySelectorAll('.act-shift-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-value') || '';
+      if (shiftInput) shiftInput.value = v;
+      setSelectedByDataAttr('.act-shift-btn', v);
+    });
+  });
 }
 
 function ensureIncidenciaUXWired() {
   const form = document.getElementById('form-activity');
   if (!form || form.dataset.uxWired === 'true') return;
   form.dataset.uxWired = 'true';
+
+  // Función auxiliar para validar campos en tiempo real
+  const validateField = (fieldId, fieldName) => {
+    const input = document.getElementById(fieldId);
+    if (!input) return;
+
+    const validate = () => {
+      const isEmpty = !input.value || input.value.trim() === '';
+      const parent = input.closest('.grid > div') || input.closest('[class*="flex"]');
+      
+      if (parent && isEmpty) {
+        input.classList.add('border-red-500', 'focus:border-red-500');
+        input.classList.remove('border-green-500', 'focus:border-green-500');
+      } else if (parent && !isEmpty) {
+        input.classList.remove('border-red-500', 'focus:border-red-500');
+        input.classList.add('border-green-500', 'focus:border-green-500');
+      }
+    };
+
+    input.addEventListener('blur', validate);
+    input.addEventListener('input', validate);
+  };
+
+  // Validar campos clave
+  validateField('act-career', 'Nombre');
+  validateField('act-room', 'Ubicación');
+  validateField('act-observations', 'Observaciones');
 
   // Tipo de mantenimiento (preventivo/correctivo) - se guarda en meta (observaciones)
   const maintInput = document.getElementById('act-maint-type');
@@ -83,6 +573,12 @@ function ensureIncidenciaUXWired() {
       const v = btn.getAttribute('data-value') || 'correctivo';
       if (maintInput) maintInput.value = v;
       setSelectedByDataAttr('.act-maint-btn', v);
+      renderLocationFieldsByMaintenanceType(v);
+      // Scroll automático para ver los nuevos campos
+      setTimeout(() => {
+        const locationSection = document.querySelector('[class*="Ubicación"]');
+        if (locationSection) locationSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     });
   });
 
@@ -105,7 +601,12 @@ function ensureIncidenciaUXWired() {
       if (quickInput) quickInput.value = v;
       setSelectedByDataAttr('.act-quick-chip', v);
       const showOther = v === 'Otro';
-      if (otherArea) otherArea.classList.toggle('hidden', !showOther);
+      if (otherArea) {
+        otherArea.classList.toggle('hidden', !showOther);
+        if (showOther) {
+          setTimeout(() => otherArea.focus(), 200);
+        }
+      }
       if (!showOther && otherArea) otherArea.value = '';
     });
   });
@@ -129,6 +630,42 @@ function ensureIncidenciaUXWired() {
       setSelectedByDataAttr('.act-status-chip', v);
     });
   });
+
+  // Edificio "Otro"
+  const buildingSel = document.getElementById('act-building');
+  const buildingOther = document.getElementById('act-building-other-input');
+  const buildingOtherHidden = document.getElementById('act-building-other');
+  if (buildingSel) {
+    buildingSel.addEventListener('change', () => {
+      const isOther = buildingSel.value === 'Otro';
+      if (buildingOther) buildingOther.classList.toggle('hidden', !isOther);
+      if (!isOther && buildingOther) buildingOther.value = '';
+      if (!isOther && buildingOtherHidden) buildingOtherHidden.value = '';
+    });
+  }
+  if (buildingOther) {
+    buildingOther.addEventListener('input', () => {
+      if (buildingOtherHidden) buildingOtherHidden.value = buildingOther.value;
+    });
+  }
+
+  // Carrera "Otro"
+  const careerSel = document.getElementById('act-career');
+  const careerOther = document.getElementById('act-career-other-input');
+  const careerOtherHidden = document.getElementById('act-career-other');
+  if (careerSel) {
+    careerSel.addEventListener('change', () => {
+      const isOther = careerSel.value === 'Otro';
+      if (careerOther) careerOther.classList.toggle('hidden', !isOther);
+      if (!isOther && careerOther) careerOther.value = '';
+      if (!isOther && careerOtherHidden) careerOtherHidden.value = '';
+    });
+  }
+  if (careerOther) {
+    careerOther.addEventListener('input', () => {
+      if (careerOtherHidden) careerOtherHidden.value = careerOther.value;
+    });
+  }
 
   // Turno (opcional)
   const shiftInput = document.getElementById('act-shift');
@@ -320,16 +857,17 @@ export function renderActivitiesTable() {
   if (currentPageEl) currentPageEl.textContent = `Página ${state.currentPage}`;
 
   if (paginated.length === 0) {
+    renderActivitiesCards([]);
     tbody.innerHTML = `
       <tr>
-        <td colspan="12" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+        <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
           <div class="flex flex-col items-center gap-2">
             <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
               <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300"></i>
             </div>
             <div class="font-semibold">No se encontraron incidencias</div>
             <div class="text-sm">Prueba cambiando filtros o crea una nueva incidencia.</div>
-            <button onclick="showActivityModal('correctivo')" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+            <button onclick="openMaintenanceFormSection('correctivo')" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
               <i class="fas fa-plus mr-2"></i>
               Nueva correctiva
             </button>
@@ -340,63 +878,30 @@ export function renderActivitiesTable() {
     return;
   }
 
+  renderActivitiesCards(paginated);
   tbody.innerHTML = paginated
     .map((activity) => {
       const canEdit = canEditOwnedOrRole(state.currentUser, activity.user_id);
       const canDel = canDelete(state.currentUser);
       const canDeliver = canEdit && !['completado', 'cancelado'].includes(String(activity.task_status || '').toLowerCase());
+      const ui = getActivityUiMeta(activity);
 
       return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
           <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">${formatDate(activity.date)}</td>
           <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.reporter_name}</td>
-          <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.department}</td>
+          <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${ui.area}</td>
+          <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${ui.location}</td>
           <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 max-w-xs truncate">${activity.description}</td>
-          <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.brand || '-'} ${activity.model || ''}</td>
-          <td class="hidden xl:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.operating_system || '-'}</td>
-          <td class="hidden lg:table-cell px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.service_type}</td>
           <td class="hidden lg:table-cell px-6 py-4">
-            ${(() => {
-              const { meta } = parseMetaBlock(activity.observations || '');
-              const t = String(meta.mantenimiento || '').toLowerCase().trim() || 'correctivo';
-              const isPrev = t === 'preventivo';
-              const label = isPrev ? 'Preventivo' : 'Correctivo';
-              const cls = isPrev
-                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800'
-                : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-200 border border-orange-200 dark:border-orange-800';
-              return `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${label}</span>`;
-            })()}
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${ui.maintenanceBadgeClass}">${ui.maintenanceLabel}</span>
           </td>
           <td class="hidden lg:table-cell px-6 py-4">
-            <span class="badge badge-priority-${String(activity.priority || 'media')}">${getPriorityText(activity.priority)}</span>
-          </td>
-          <td class="px-6 py-4">
             <span class="badge badge-${getBadgeClass(activity.task_status)}">${getStatusText(activity.task_status)}</span>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">${activity.assigned_to || '-'}</td>
           <td class="px-6 py-4">
-            <div class="flex justify-center space-x-2">
-              <button onclick="viewActivity('${activity.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" title="Ver detalle">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button onclick="exportActivityPDF('${activity.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-red-600" title="PDF individual">
-                <i class="fas fa-file-pdf"></i>
-              </button>
-              ${canDeliver ? `
-                <button onclick="markDelivered('${activity.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-green-600" title="Marcar entregado (hoy)">
-                  <i class="fas fa-check-double"></i>
-                </button>
-              ` : ''}
-              ${canEdit ? `
-                <button onclick="editActivity('${activity.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-blue-500" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-              ` : ''}
-              ${canDel ? `
-                <button onclick="deleteActivity('${activity.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-red-500" title="Eliminar">
-                  <i class="fas fa-trash"></i>
-                </button>
-              ` : ''}
+            <div class="flex justify-center flex-wrap gap-2">
+              ${buildActivityActionButtons(activity, { canEdit, canDel, canDeliver, compact: true })}
             </div>
           </td>
         </tr>
@@ -421,34 +926,44 @@ function renderActivitiesSummary(list = []) {
   const canceled = list.filter((a) => a.task_status === 'cancelado').length;
   const overdueCount = list.filter(overdue).length;
   const dueTodayCount = list.filter(dueSoon).length;
+  const preventive = list.filter((a) => getActivityUiMeta(a).maintenanceType === 'preventivo').length;
+  const corrective = list.filter((a) => getActivityUiMeta(a).maintenanceType === 'correctivo').length;
 
   el.innerHTML = `
-    <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-white/70 dark:bg-gray-900/40">
-        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Resultados</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+      <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/50 shadow-sm">
+        <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Registros</p>
         <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">${total}</p>
       </div>
-      <div class="rounded-xl border border-orange-200 dark:border-orange-900/40 p-4 bg-orange-50/60 dark:bg-orange-900/10">
+      <div class="rounded-2xl border border-emerald-200 dark:border-emerald-900/40 p-4 bg-emerald-50/60 dark:bg-emerald-900/10">
+        <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Preventivo</p>
+        <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-2">${preventive}</p>
+      </div>
+      <div class="rounded-2xl border border-orange-200 dark:border-orange-900/40 p-4 bg-orange-50/60 dark:bg-orange-900/10">
+        <p class="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wider">Correctivo</p>
+        <p class="text-2xl font-bold text-orange-700 dark:text-orange-300 mt-2">${corrective}</p>
+      </div>
+      <div class="rounded-2xl border border-orange-200 dark:border-orange-900/40 p-4 bg-orange-50/60 dark:bg-orange-900/10">
         <p class="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wider">Pendientes</p>
         <p class="text-2xl font-bold text-orange-700 dark:text-orange-300 mt-2">${pending}</p>
       </div>
-      <div class="rounded-xl border border-blue-200 dark:border-blue-900/40 p-4 bg-blue-50/60 dark:bg-blue-900/10">
+      <div class="rounded-2xl border border-blue-200 dark:border-blue-900/40 p-4 bg-blue-50/60 dark:bg-blue-900/10">
         <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">En proceso</p>
         <p class="text-2xl font-bold text-blue-700 dark:text-blue-300 mt-2">${inProgress}</p>
       </div>
-      <div class="rounded-xl border border-green-200 dark:border-green-900/40 p-4 bg-green-50/60 dark:bg-green-900/10">
+      <div class="rounded-2xl border border-green-200 dark:border-green-900/40 p-4 bg-green-50/60 dark:bg-green-900/10">
         <p class="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wider">Completadas</p>
         <p class="text-2xl font-bold text-green-700 dark:text-green-300 mt-2">${completed}</p>
       </div>
-      <div class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/40">
+      <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/60 dark:bg-gray-800/40">
         <p class="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Canceladas</p>
         <p class="text-2xl font-bold text-gray-700 dark:text-gray-200 mt-2">${canceled}</p>
       </div>
-      <div class="rounded-xl border border-red-200 dark:border-red-900/40 p-4 bg-red-50/60 dark:bg-red-900/10">
+      <div class="rounded-2xl border border-red-200 dark:border-red-900/40 p-4 bg-red-50/60 dark:bg-red-900/10">
         <p class="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wider">Atrasadas</p>
         <p class="text-2xl font-bold text-red-700 dark:text-red-300 mt-2">${overdueCount}</p>
       </div>
-      <div class="rounded-xl border border-yellow-200 dark:border-yellow-900/40 p-4 bg-yellow-50/60 dark:bg-yellow-900/10">
+      <div class="rounded-2xl border border-yellow-200 dark:border-yellow-900/40 p-4 bg-yellow-50/60 dark:bg-yellow-900/10">
         <p class="text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">Entrega hoy</p>
         <p class="text-2xl font-bold text-yellow-800 dark:text-yellow-200 mt-2">${dueTodayCount}</p>
       </div>
@@ -590,6 +1105,19 @@ export function showActivityModal(defaultMaintType = 'correctivo') {
   setSelectedByDataAttr('.act-service-card', '');
   setSelectedByDataAttr('.act-quick-chip', '');
 
+  // Render dynamic location fields based on maintenance type
+  renderLocationFieldsByMaintenanceType(maintNormalized);
+
+  const buildingOtherHidden = document.getElementById('act-building-other');
+  const careerOtherHidden = document.getElementById('act-career-other');
+  if (buildingOtherHidden) buildingOtherHidden.value = '';
+  if (careerOtherHidden) careerOtherHidden.value = '';
+  const shiftInput = document.getElementById('act-shift');
+  if (shiftInput) {
+    shiftInput.value = '';
+    setSelectedByDataAttr('.act-shift-btn', '');
+  }
+
   const otherArea = document.getElementById('act-problem-other');
   if (otherArea) {
     otherArea.value = '';
@@ -629,6 +1157,20 @@ export async function editActivity({ supabase } = {}, id) {
 
     ensureIncidenciaUXWired();
 
+    const form = document.getElementById('form-activity');
+    if (form) form.reset();
+    document.getElementById('act-building-other-input')?.classList.add('hidden');
+    document.getElementById('act-career-other-input')?.classList.add('hidden');
+    document.getElementById('act-room-other-input')?.classList.add('hidden');
+    const initialBuildingOtherHidden = document.getElementById('act-building-other');
+    if (initialBuildingOtherHidden) initialBuildingOtherHidden.value = '';
+    const initialCareerOtherHidden = document.getElementById('act-career-other');
+    if (initialCareerOtherHidden) initialCareerOtherHidden.value = '';
+    const initialRoomOtherHidden = document.getElementById('act-room-other');
+    if (initialRoomOtherHidden) initialRoomOtherHidden.value = '';
+    const initialShiftEl = document.getElementById('act-shift');
+    if (initialShiftEl) initialShiftEl.value = '';
+
     const modal = document.getElementById('modal-activity');
     modal.classList.remove('hidden');
     modal.classList.add('show');
@@ -646,6 +1188,9 @@ export async function editActivity({ supabase } = {}, id) {
     if (maintHidden) maintHidden.value = inferredMaint;
     setSelectedByDataAttr('.act-maint-btn', inferredMaint);
 
+    // Render dynamic location fields based on maintenance type
+    renderLocationFieldsByMaintenanceType(inferredMaint);
+
     // Ubicación (mapeo actual: coordination=edificio, department=carrera)
     const building = meta.edificio || data.coordination || '';
     const career = meta.carrera || data.department || '';
@@ -653,24 +1198,66 @@ export async function editActivity({ supabase } = {}, id) {
     const shift = meta.turno || '';
 
     const buildingEl = document.getElementById('act-building');
-    if (buildingEl) buildingEl.value = building;
+    const buildingOtherInput = document.getElementById('act-building-other-input');
+    const buildingOtherHidden = document.getElementById('act-building-other');
+    if (buildingEl) {
+      const options = Array.from(buildingEl.options || []).map((o) => o.value);
+      if (building && options.includes(building)) {
+        buildingEl.value = building;
+        if (buildingOtherInput) buildingOtherInput.classList.add('hidden');
+      } else if (building) {
+        buildingEl.value = 'Otro';
+        if (buildingOtherInput) {
+          buildingOtherInput.classList.remove('hidden');
+          buildingOtherInput.value = building;
+        }
+        if (buildingOtherHidden) buildingOtherHidden.value = building;
+      }
+    }
     const careerEl = document.getElementById('act-career');
-    if (careerEl) careerEl.value = career;
+    const careerOtherInput = document.getElementById('act-career-other-input');
+    const careerOtherHidden = document.getElementById('act-career-other');
+    if (careerEl) {
+      // Si es un input (preventivo), establecer directo el valor
+      if (careerEl.tagName === 'INPUT') {
+        careerEl.value = career;
+      } else {
+        // Si es un select (correctivo), buscar opciones
+        const options = Array.from(careerEl.options || []).map((o) => o.value);
+        if (career && options.includes(career)) {
+          careerEl.value = career;
+          if (careerOtherInput) careerOtherInput.classList.add('hidden');
+        } else if (career) {
+          careerEl.value = 'Otro';
+          if (careerOtherInput) {
+            careerOtherInput.classList.remove('hidden');
+            careerOtherInput.value = career;
+          }
+          if (careerOtherHidden) careerOtherHidden.value = career;
+        }
+      }
+    }
     const roomEl = document.getElementById('act-room');
     const roomOtherInput = document.getElementById('act-room-other-input');
     const roomOtherHidden = document.getElementById('act-room-other');
     if (roomEl) {
-      const options = Array.from(roomEl.options || []).map((o) => o.value);
-      if (room && options.includes(room)) {
+      // Si es un input (preventivo), establecer directo el valor
+      if (roomEl.tagName === 'INPUT') {
         roomEl.value = room;
-        if (roomOtherInput) roomOtherInput.classList.add('hidden');
-      } else if (room) {
-        roomEl.value = 'Otro';
-        if (roomOtherInput) {
-          roomOtherInput.classList.remove('hidden');
-          roomOtherInput.value = room;
+      } else {
+        // Si es un select (correctivo), buscar opciones
+        const options = Array.from(roomEl.options || []).map((o) => o.value);
+        if (room && options.includes(room)) {
+          roomEl.value = room;
+          if (roomOtherInput) roomOtherInput.classList.add('hidden');
+        } else if (room) {
+          roomEl.value = 'Otro';
+          if (roomOtherInput) {
+            roomOtherInput.classList.remove('hidden');
+            roomOtherInput.value = room;
+          }
+          if (roomOtherHidden) roomOtherHidden.value = room;
         }
-        if (roomOtherHidden) roomOtherHidden.value = room;
       }
     }
     const shiftEl = document.getElementById('act-shift');
@@ -1267,11 +1854,22 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
 
     const id = document.getElementById('activity-id').value;
 
-    const building = document.getElementById('act-building')?.value || '';
-    const career = document.getElementById('act-career')?.value || '';
-    const roomSel = document.getElementById('act-room')?.value || '';
+    const buildingSel = document.getElementById('act-building')?.value || '';
+    const buildingOther = document.getElementById('act-building-other')?.value?.trim() || '';
+    const building = buildingSel === 'Otro' ? (buildingOther || 'Otro') : buildingSel;
+    
+    // act-career puede ser un input (preventivo) o un select (correctivo)
+    const careerEl = document.getElementById('act-career');
+    const careerValue = careerEl?.tagName === 'INPUT' ? (careerEl.value || '') : (careerEl?.value || '');
+    const careerOther = document.getElementById('act-career-other')?.value?.trim() || '';
+    const career = careerEl?.tagName === 'SELECT' && careerValue === 'Otro' ? (careerOther || 'Otro') : careerValue;
+    
+    // act-room puede ser un input (preventivo) o un select (correctivo)
+    const roomEl = document.getElementById('act-room');
+    const roomValue = roomEl?.tagName === 'INPUT' ? (roomEl.value || '') : (roomEl?.value || '');
     const roomOther = document.getElementById('act-room-other')?.value || '';
-    const room = roomSel === 'Otro' ? (roomOther || 'Otro') : roomSel;
+    const room = roomEl?.tagName === 'SELECT' && roomValue === 'Otro' ? (roomOther || 'Otro') : roomValue;
+    
     const shift = document.getElementById('act-shift')?.value || '';
 
     const maintTypeRaw = document.getElementById('act-maint-type')?.value || 'correctivo';
@@ -1284,20 +1882,24 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
     const taskStatus = document.getElementById('act-task-status')?.value || 'pendiente';
     const observationsUser = document.getElementById('act-observations')?.value?.trim() || '';
 
-    if (!building || !career || !room) {
-      Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Completa Edificio, Carrera y Salón.' });
-      return;
-    }
-    if (!service) {
-      Swal.fire({ icon: 'warning', title: 'Falta el tipo', text: 'Selecciona un tipo de servicio.' });
-      return;
-    }
-    if (!quick) {
-      Swal.fire({ icon: 'warning', title: 'Falta la descripción', text: 'Selecciona una descripción rápida.' });
-      return;
-    }
-    if (quick === 'Otro' && !otherText) {
-      Swal.fire({ icon: 'warning', title: 'Especifica el problema', text: 'Escribe una breve descripción.' });
+    // Validaciones mejoradas
+    const validationErrors = [];
+    
+    if (!building) validationErrors.push('📍 Selecciona una Acción Académica/Área');
+    if (!career) validationErrors.push('👤 Completa el Nombre del Reportante');
+    if (!room) validationErrors.push('📌 Especifica la Ubicación');
+    if (!service) validationErrors.push('🔧 Selecciona un Tipo de Servicio');
+    if (!quick) validationErrors.push('📝 Selecciona una Descripción Rápida');
+    if (quick === 'Otro' && !otherText) validationErrors.push('✏️ Escribe una descripción cuando eliges "Otro"');
+    
+    if (validationErrors.length > 0) {
+      hideLoader();
+      Swal.fire({
+        icon: 'warning',
+        title: `Faltan ${validationErrors.length} campo(s)`,
+        html: `<div style="text-align:left">${validationErrors.map(e => `<div style="margin:6px 0">• ${e}</div>`).join('')}</div>`,
+        confirmButtonText: 'Entendido'
+      });
       return;
     }
 
@@ -1378,34 +1980,79 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
     };
 
     let error;
-    if (id) {
-      // Update
-      const result = await supabase.from('activities').update(activityData).eq('id', id);
-      error = result.error;
-    } else {
-      // Insert
-      const result = await supabase.from('activities').insert(activityData);
-      error = result.error;
+    let wasInsert = !id;
+    
+    try {
+      if (id) {
+        // Update
+        const result = await supabase.from('activities').update(activityData).eq('id', id);
+        error = result.error;
+        if (!error) console.log('✅ Actividad actualizada:', id);
+      } else {
+        // Insert
+        const result = await supabase.from('activities').insert(activityData);
+        error = result.error;
+        if (!error) console.log('✅ Actividad creada:',  result.data?.[0]?.id || 'success');
+      }
+    } catch (e) {
+      error = e;
     }
 
-    if (error) throw error;
+    if (error) {
+      hideLoader();
+      console.error('❌ Error saving activity:', error);
+      
+      // Determinar el tipo de error y mostrar mensaje específico
+      const errorMsg = String(error?.message || error || '').toLowerCase();
+      let displayMsg = 'No se pudo guardar la actividad';
+      
+      if (errorMsg.includes('auth') || errorMsg.includes('permission') || errorMsg.includes('policy')) {
+        displayMsg = 'No tienes permisos para realizar esta acción. Verifica tu rol de usuario.';
+      } else if (errorMsg.includes('network') || errorMsg.includes('connection')) {
+        displayMsg = 'Error de conexión. Verifica tu conexión a internet y que Supabase esté disponible.';
+      } else if (errorMsg.includes('unique') || errorMsg.includes('constraint')) {
+        displayMsg = 'Este registro ya existe o hay un conflicto de datos.';
+      }
+      
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        html: `<div style="text-align:left"><p>${displayMsg}</p><p style="margin-top:8px;font-size:11px;color:#6b7280">${error?.message || ''}</p></div>`,
+        confirmButtonText: 'Entendido'
+      });
+      throw error;
+    }
 
     closeActivityModal();
+    
+    // Recargar datos con mejor feedback
+    showLoader();
     await loadActivities({ supabase });
     await loadDashboardData({ supabase });
+    hideLoader();
 
+    const title = id ? '✅ Actualizada' : '✅ Registrada';
+    const message = id
+      ? `La actividad <b>${folio}</b> ha sido actualizada exitosamente`
+      : `La actividad <b>${folio}</b> ha sido registrada exitosamente`;
+    
     Swal.fire({
       icon: 'success',
-      title: id ? 'Actualizada' : 'Registrada',
-      text: id
-        ? `La actividad ha sido actualizada por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`
-        : `La actividad ha sido registrada por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`,
-      timer: 2000,
+      title,
+      html: `<div style="text-align:center">${message}<br/><small style="color:#6b7280">Por: ${state.currentUser?.full_name || state.currentUser?.email || 'Usuario'}</small></div>`,
+      timer: 2500,
       showConfirmButton: false,
+      didClose: () => {
+        showToast({ type: 'success', title: title.replace('✅ ', ''), message: `Folio: ${folio}` });
+      }
     });
   } catch (error) {
     console.error('Error saving activity:', error);
-    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar la actividad' });
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error?.message || 'No se pudo guardar la actividad',
+    });
   } finally {
     hideLoader();
   }

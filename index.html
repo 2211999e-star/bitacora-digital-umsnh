@@ -11,9 +11,21 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="apple-touch-icon" href="./assets/logo-umich.png">
     <meta name="application-name" content="Bitácora Digital">
+    <!-- Fuerza modo offline ANTES de cargar módulos -->
+    <script>
+        // Verificar si hay credenciales de Supabase válidas
+        const hasSupabaseUrl = localStorage.getItem('bitacora_umich_supabaseUrl');
+        const hasSupabaseKey = localStorage.getItem('bitacora_umich_supabaseAnonKey');
+        
+        // Si no hay credenciales, forzar modo offline
+        if (!hasSupabaseUrl || !hasSupabaseKey) {
+            localStorage.setItem('bitacora_umich_forceOffline', 'true');
+        }
+    </script>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="./css/tailwind.css">
+    <link rel="stylesheet" href="./css/enhanced-ui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,6 +35,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./css/style.css">
+    <!-- Supabase JS Client (global) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Wrapper para funciones de window que se llaman desde onclick -->
+    <script>
+        window.showActivityModal = function(type) {
+            if (typeof window._showActivityModal === 'function') {
+                return window._showActivityModal(type);
+            }
+            console.warn('showActivityModal: función aún no cargada');
+        };
+        window.showSection = function(section) {
+            if (typeof window._showSection === 'function') {
+                return window._showSection(section);
+            }
+            console.warn('showSection: función aún no cargada');
+        };
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-950 dark:to-black text-gray-900 dark:text-gray-100 font-sans antialiased transition-colors duration-300">
 
@@ -30,6 +59,26 @@
         class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-black focus:text-white">
         Saltar al contenido
     </a>
+
+    <!-- FALLBACK: Si app.js no carga en 3 segundos, mostrar login -->
+    <script>
+        // Fallback: mostrar login después de 3 segundos
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            const login = document.getElementById('login-screen');
+            if (loader) {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }
+            if (login) {
+                login.classList.remove('hidden');
+                login.style.display = 'flex';
+                login.style.minHeight = '100vh';
+                login.style.backgroundColor = 'white';
+            }
+            console.log('Fallback: showing login');
+        }, 3000);
+    </script>
 
     <!-- Loader -->
     <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-950 transition-opacity duration-300">
@@ -58,6 +107,9 @@
                 </div>
 
                 <form id="login-form" class="space-y-6">
+                    <div id="login-network-status" class="hidden rounded-xl p-3 text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-100 border border-yellow-200 dark:border-yellow-800">
+                        Sin conexión a internet. El modo local o de revisión puede usarse sin red.
+                    </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Correo (o usuario local)
@@ -94,7 +146,7 @@
                         <button type="button" onclick="openRegisterModal()" class="text-gray-800 dark:text-gray-100 font-semibold hover:underline">
                             Solicitar acceso
                         </button>
-                        <a class="text-gray-600 dark:text-gray-400 hover:underline" href="mailto:2211999e@umich.mx">
+                        <a class="text-gray-600 dark:text-gray-400 hover:underline" href="mailto:22119993@umich.mx">
                             Contactar administrador
                         </a>
                     </div>
@@ -359,13 +411,13 @@
                                     <i class="fas fa-screwdriver-wrench text-gray-700 dark:text-gray-200"></i>
                                     <span>Ver mantenimientos</span>
                                 </button>
-                                <button onclick="showActivityModal('correctivo')" class="dashboard-hero-action text-left">
+                                <button onclick="openMaintenanceFormSection('correctivo')" class="dashboard-hero-action text-left">
                                     <i class="fas fa-plus text-gray-700 dark:text-gray-200"></i>
-                                    <span>Nueva correctiva</span>
+                                    <span>Mantenimiento correctivo</span>
                                 </button>
-                                <button onclick="showActivityModal('preventivo')" class="dashboard-hero-action text-left">
+                                <button onclick="openMaintenanceFormSection('preventivo')" class="dashboard-hero-action text-left">
                                     <i class="fas fa-shield-heart text-gray-700 dark:text-gray-200"></i>
-                                    <span>Nueva preventiva</span>
+                                    <span>Mantenimiento preventivo</span>
                                 </button>
                                 <button onclick="showSection('reports')" class="dashboard-hero-action text-left">
                                     <i class="fas fa-chart-line text-gray-700 dark:text-gray-200"></i>
@@ -386,6 +438,29 @@
                                 <p class="text-gray-500 dark:text-gray-400 text-center py-8">Cargando alertas...</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('pendiente','','','','delivery_asc')" class="dashboard-summary-card dashboard-stat-btn text-left">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Abiertas</p>
+                            <p id="stat-open" class="count text-3xl font-bold text-gray-900 dark:text-white mt-4">0</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tickets sin resolución</p>
+                        </button>
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('en_proceso','','','','delivery_asc')" class="dashboard-summary-card dashboard-stat-btn text-left">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">En progreso</p>
+                            <p id="stat-waiting" class="count text-3xl font-bold text-blue-600 dark:text-blue-300 mt-4">0</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tickets en atención</p>
+                        </button>
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('completado')" class="dashboard-summary-card dashboard-stat-btn text-left">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Resueltos</p>
+                            <p id="stat-resolved" class="count text-3xl font-bold text-green-600 dark:text-green-300 mt-4">0</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tickets cerrados</p>
+                        </button>
+                        <button type="button" onclick="showSection('activities'); openActivitiesPreset('','','','overdue','delivery_asc')" class="dashboard-summary-card dashboard-stat-btn text-left">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Críticas</p>
+                            <p id="stat-critical" class="count text-3xl font-bold text-red-600 dark:text-red-300 mt-4">0</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Tickets urgentes / vencidos</p>
+                        </button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -692,9 +767,9 @@
                         <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Acciones rápidas</h3>
                             <div class="quick-action-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <button onclick="showActivityModal('correctivo')" class="px-4 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-left">
+                                <button onclick="openMaintenanceFormSection('correctivo')" class="px-4 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-left">
                                     <i class="fas fa-plus mr-2"></i>
-                                    Nueva correctiva
+                                    Mantenimiento correctivo
                                 </button>
                                 <button onclick="showEventModal()" class="px-4 py-3 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-left">
                                     <i class="fas fa-calendar-plus mr-2"></i>
@@ -834,13 +909,13 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <button onclick="showActivityModal('correctivo')" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
-                                <i class="fas fa-plus mr-2"></i>
-                                Nueva correctiva
+                            <button onclick="openMaintenanceFormSection('correctivo')" class="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
+                                <i class="fas fa-bolt mr-2"></i>
+                                Ir a correctivo
                             </button>
-                            <button onclick="showActivityModal('preventivo')" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <button onclick="openMaintenanceFormSection('preventivo')" class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                                 <i class="fas fa-shield-heart mr-2"></i>
-                                Nueva preventiva
+                                Ir a preventivo
                             </button>
 
                             <!-- Menú de acciones secundarias -->
@@ -878,6 +953,120 @@
                                 </div>
                             </details>
                         </div>
+                    </div>
+
+                    <div id="maintenance-forms" class="grid grid-cols-1 2xl:grid-cols-2 gap-6 mb-6 scroll-mt-24">
+                        <form id="preventive-maintenance-form" class="rounded-3xl border border-blue-200/80 dark:border-blue-900/40 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                            <input type="hidden" name="maintenance_kind" value="preventivo">
+                            <div class="px-6 py-5 border-b border-blue-100 dark:border-blue-900/40 bg-gradient-to-br from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                                            <i class="fas fa-shield-heart"></i>
+                                            Mantenimiento Preventivo
+                                        </span>
+                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">Bitácora preventiva</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Registra actividades programadas, revisiones periódicas y acciones de prevención en un formulario simple.</p>
+                                    </div>
+                                    <button type="button" onclick="document.getElementById('preventive-maintenance-form')?.reset()" class="shrink-0 px-3 py-2 rounded-xl bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium">
+                                        Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 gap-5">
+                                    <div>
+                                        <label for="preventive-commission" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Comisión Académica o Área</label>
+                                        <input id="preventive-commission" name="commission" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all">
+                                    </div>
+                                    <div>
+                                        <label for="preventive-reporter" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Nombre Completo de Quien Reporta</label>
+                                        <input id="preventive-reporter" name="reporter_name" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all" placeholder="Escribe el nombre completo">
+                                    </div>
+                                    <div>
+                                        <label for="preventive-location" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Ubicación Específica</label>
+                                        <input id="preventive-location" name="location" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all" placeholder="Indica el lugar exacto">
+                                    </div>
+                                    <div>
+                                        <label for="preventive-description" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Descripción de la actividad</label>
+                                        <textarea id="preventive-description" name="description" rows="5" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all resize-y" placeholder="Describe la actividad preventiva realizada o programada"></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="preventive-status" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Estado</label>
+                                        <select id="preventive-status" name="status" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all">
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="en_proceso">En proceso</option>
+                                            <option value="completado">Finalizado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-3 pt-2">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Formulario independiente y desplazable para registros preventivos.</p>
+                                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm" data-default-text="Guardar preventivo">
+                                        <i class="fas fa-save"></i>
+                                        <span>Guardar preventivo</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <form id="corrective-maintenance-form" class="rounded-3xl border border-blue-200/80 dark:border-blue-900/40 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                            <input type="hidden" name="maintenance_kind" value="correctivo">
+                            <div class="px-6 py-5 border-b border-blue-100 dark:border-blue-900/40 bg-gradient-to-br from-blue-50 via-white to-white dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div>
+                                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                                            <i class="fas fa-screwdriver-wrench"></i>
+                                            Mantenimiento Correctivo
+                                        </span>
+                                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-3">Bitácora correctiva</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Captura reportes de falla, atención correctiva y seguimiento con un formulario autónomo y rápido.</p>
+                                    </div>
+                                    <button type="button" onclick="document.getElementById('corrective-maintenance-form')?.reset()" class="shrink-0 px-3 py-2 rounded-xl bg-white/80 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium">
+                                        Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-5">
+                                <div class="grid grid-cols-1 gap-5">
+                                    <div>
+                                        <label for="corrective-commission" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Comisión Académica o Área</label>
+                                        <input id="corrective-commission" name="commission" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all">
+                                    </div>
+                                    <div>
+                                        <label for="corrective-reporter" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Nombre Completo de Quien Reporta</label>
+                                        <input id="corrective-reporter" name="reporter_name" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all" placeholder="Escribe el nombre completo">
+                                    </div>
+                                    <div>
+                                        <label for="corrective-location" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Ubicación Específica</label>
+                                        <input id="corrective-location" name="location" type="text" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all" placeholder="Indica el lugar exacto">
+                                    </div>
+                                    <div>
+                                        <label for="corrective-description" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Descripción de la actividad</label>
+                                        <textarea id="corrective-description" name="description" rows="5" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all resize-y" placeholder="Describe la falla o la acción correctiva realizada"></textarea>
+                                    </div>
+                                    <div>
+                                        <label for="corrective-status" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">Estado</label>
+                                        <select id="corrective-status" name="status" class="w-full px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-300 dark:focus:border-blue-700 transition-all">
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="en_proceso">En proceso</option>
+                                            <option value="completado">Finalizado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-3 pt-2">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Formulario independiente y desplazable para registros correctivos.</p>
+                                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-sm" data-default-text="Guardar correctivo">
+                                        <i class="fas fa-save"></i>
+                                        <span>Guardar correctivo</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
                     <!-- Búsqueda + filtros (en panel, no amontonados) -->
@@ -988,50 +1177,76 @@
 
                     <div id="activities-summary" class="mb-4"></div>
 
-                    <!-- Table -->
-                    <div class="table-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                    <div class="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mb-6">
+                        <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-br from-gray-50 via-white to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Registros</p>
+                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mt-2">Incidencias registradas</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Los botones de cada tarjeta permiten ver, editar, exportar, marcar como entregado o eliminar según permisos.</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" onclick="openMaintenanceFormSection('preventivo')" class="px-4 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-900/40 font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors">
+                                        <i class="fas fa-shield-heart mr-2"></i>
+                                        Nuevo preventivo
+                                    </button>
+                                    <button type="button" onclick="openMaintenanceFormSection('correctivo')" class="px-4 py-2.5 rounded-2xl bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-200 border border-orange-200 dark:border-orange-900/40 font-semibold hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
+                                        <i class="fas fa-screwdriver-wrench mr-2"></i>
+                                        Nuevo correctivo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div id="activities-records-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+                                <div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">No hay registros todavía.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <details class="table-panel bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                        <summary class="cursor-pointer select-none px-6 py-4 bg-gray-50/80 dark:bg-gray-800/80 text-gray-900 dark:text-white font-semibold flex items-center justify-between">
+                            <span><i class="fas fa-table mr-2 text-gray-500"></i>Vista tabular de incidencias</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Expandir</span>
+                        </summary>
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="sticky top-0 z-10">
                                     <tr class="bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur border-b border-gray-200 dark:border-gray-700">
                                         <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Fecha</th>
-                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Reportante</th>
-                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Departamento</th>
-                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Problema</th>
-                                        <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Equipo</th>
-                                        <th class="hidden xl:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">SO</th>
-                                        <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Servicio</th>
+                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Reporta</th>
+                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Área</th>
+                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Ubicación</th>
+                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Descripción</th>
                                         <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Mantenimiento</th>
-                                        <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Prioridad</th>
-                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                                        <th class="text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Responsable</th>
+                                        <th class="hidden lg:table-cell text-left px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Estado</th>
                                         <th class="text-center px-6 py-4 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="table-activities" class="divide-y divide-gray-200 dark:divide-gray-800">
                                     <tr>
-                                        <td colspan="12" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                             No hay actividades registradas
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </details>
 
-                        <!-- Pagination -->
-                        <div class="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center justify-between">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Mostrando <span id="showing-start">0</span> - <span id="showing-end">0</span> de <span id="total-records">0</span> registros
-                            </p>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="prevPage()" class="table-pager-btn px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <span id="current-page" class="text-sm text-gray-700 dark:text-gray-300">Página 1</span>
-                                <button onclick="nextPage()" class="table-pager-btn px-3 py-1 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
+                    <div class="mt-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 px-6 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            Mostrando <span id="showing-start">0</span> - <span id="showing-end">0</span> de <span id="total-records">0</span> registros
+                        </p>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="prevPage()" class="table-pager-btn px-3 py-2 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="current-page" class="text-sm text-gray-700 dark:text-gray-300 font-medium">Página 1</span>
+                            <button onclick="nextPage()" class="table-pager-btn px-3 py-2 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded-xl border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -1543,24 +1758,24 @@
             onclick="closeActivityModal()"
             onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityModal()"
         ></div>
-        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
-            <div class="modal-header-soft sticky top-0 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl">
+        <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+            <div class="modal-header-soft sticky top-0 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 id="modal-activity-title" class="text-xl font-bold text-gray-900 dark:text-white">Nueva incidencia</h2>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                            Folio: <span id="act-folio-label" class="font-semibold text-gray-900 dark:text-gray-100">—</span>
-                            <span class="mx-2 text-gray-300 dark:text-gray-700">·</span>
-                            Se guardan fecha, hora y usuario automáticamente
+                        <h2 id="modal-activity-title" class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">Registro de Mantenimiento</h2>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                            <span><i class="fas fa-file-invoice mr-1"></i>Folio: <span id="act-folio-label" class="font-semibold text-gray-900 dark:text-gray-100">—</span></span>
+                            <span class="mx-2">·</span>
+                            <span><i class="fas fa-clock mr-1"></i>Fecha, hora y usuario guardados automáticamente</span>
                         </p>
                     </div>
-                    <button onclick="closeActivityModal()" class="icon-button" title="Cerrar">
+                    <button onclick="closeActivityModal()" class="icon-button hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors" title="Cerrar">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
 
-            <form id="form-activity" class="modal-form-layout p-7 space-y-6">
+            <form id="form-activity" class="modal-form-layout p-8 space-y-6">
                 <input type="hidden" id="activity-id">
                 <input type="hidden" id="act-folio">
                 <input type="hidden" id="act-service-type" value="">
@@ -1568,72 +1783,41 @@
                 <input type="hidden" id="act-maint-type" value="correctivo">
                 <input type="hidden" id="act-priority" value="media">
                 <input type="hidden" id="act-task-status" value="pendiente">
+                <input type="hidden" id="act-building-other" value="">
+                <input type="hidden" id="act-career-other" value="">
                 <input type="hidden" id="act-room-other" value="">
+                <input type="hidden" id="act-commission" value="">
+                <input type="hidden" id="act-responsible" value="">
+                <input type="hidden" id="act-time" value="">
+
+                <!-- SECCIÓN: SELECTOR DE TIPO (Mejorado) -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                    <p class="text-xs font-semibold text-blue-900 dark:text-blue-200 uppercase mb-3 tracking-wide">Tipo de Mantenimiento</p>
+                    <div class="inline-flex rounded-full p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 w-full gap-1">
+                        <button type="button" class="act-maint-btn flex-1 py-3 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 text-sm" data-value="correctivo">
+                            <i class="fas fa-wrench text-lg"></i>
+                            <span>Correctivo</span>
+                        </button>
+                        <button type="button" class="act-maint-btn flex-1 py-3 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 text-sm" data-value="preventivo">
+                            <i class="fas fa-shield-alt text-lg"></i>
+                            <span>Preventivo</span>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- SECCIÓN 1: UBICACIÓN -->
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-5 bg-white/70 dark:bg-gray-900/40">
-                    <div class="flex items-center justify-between gap-3 mb-4">
+                <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/60 dark:to-gray-800/40 backdrop-blur-sm" id="maint-location-section">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wide">Ubicación</h3>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Selecciona rápido. Sin escritura innecesaria.</p>
+                            <h3 id="maint-location-title" class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Ubicación</h3>
+                            <p class="text-xs text-gray-600 dark:text-gray-400" id="maint-location-subtitle">Selecciona la ubicación del problema</p>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Edificio *</label>
-                            <select id="act-building" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all">
-                                <option value="">Selecciona…</option>
-                                <option value="A">A</option>
-                                <option value="A4">A4</option>
-                                <option value="A5">A5</option>
-                                <option value="Y">Y</option>
-                                <option value="Z">Z</option>
-                                <option value="Posgrado">Posgrado</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Carrera *</label>
-                            <select id="act-career" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all">
-                                <option value="">Selecciona…</option>
-                                <option value="Contabilidad">Contabilidad</option>
-                                <option value="Mercadotecnia">Mercadotecnia</option>
-                                <option value="Administración">Administración</option>
-                                <option value="Informática Administrativa">Informática Administrativa</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Salón *</label>
-                            <select id="act-room" required class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all">
-                                <option value="">Selecciona…</option>
-                                <option value="Aula 1">Aula 1</option>
-                                <option value="Aula 2">Aula 2</option>
-                                <option value="Aula 3">Aula 3</option>
-                                <option value="Aula 4">Aula 4</option>
-                                <option value="Aula 5">Aula 5</option>
-                                <option value="Laboratorio 1">Laboratorio 1</option>
-                                <option value="Laboratorio 2">Laboratorio 2</option>
-                                <option value="Laboratorio 3">Laboratorio 3</option>
-                                <option value="Auditorio">Auditorio</option>
-                                <option value="Otro">Otro…</option>
-                            </select>
-                            <input type="text" id="act-room-other-input" class="hidden mt-2 w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-gray-300 dark:focus:border-gray-600 text-gray-900 dark:text-white transition-all" placeholder="Especifica el salón">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Turno (opcional)</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" class="act-shift-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="Matutino">
-                                    Matutino
-                                </button>
-                                <button type="button" class="act-shift-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="Vespertino">
-                                    Vespertino
-                                </button>
-                            </div>
-                            <input type="hidden" id="act-shift" value="">
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="maint-location-fields">
+                        <!-- Los campos se cargan dinámicamente según el tipo de mantenimiento -->
                     </div>
                 </div>
 
@@ -1642,18 +1826,6 @@
                     <div class="mb-4">
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-white tracking-wide">Problema</h3>
                         <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">Elige tipo y una descripción rápida. Si es “Otro”, escribe una línea.</p>
-                    </div>
-
-                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Tipo de mantenimiento *</label>
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <button type="button" class="act-maint-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="correctivo">
-                            <i class="fas fa-screwdriver-wrench mr-2"></i>
-                            Correctivo
-                        </button>
-                        <button type="button" class="act-maint-btn px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" data-value="preventivo">
-                            <i class="fas fa-shield-heart mr-2"></i>
-                            Preventivo
-                        </button>
                     </div>
 
                     <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Tipo de servicio *</label>
@@ -2124,11 +2296,45 @@
     <script>
         // Configuración para despliegue en la nube (Supabase)
         // Nota: esta es una clave PUBLICABLE (anon/publishable). No usar service_role ni secretos en frontend.
-        window.SUPABASE_URL = window.SUPABASE_URL || 'https://xmbrnfkoocnmwtkpzeuj.supabase.co';
-        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_ybDZLxt7YpcbMNu8PEsoUw_AGdym5XF';
+        // 
+        // PASOS PARA USAR SUPABASE EN LÍNEA:
+        // 1. Crea un proyecto en https://app.supabase.com/
+        // 2. Ejecuta el script SQL de SUPABASE_SETUP.sql en el SQL Editor de Supabase
+        // 3. Copia tu URL de proyecto y clave anon desde Settings > API
+        // 4. Actualiza los valores abajo O configúralos en Configuración > Supabase dentro de la app
+        
+        // Obtener de localStorage si están configurados, de lo contrario usar defaults vacíos
+        const storedURL = localStorage.getItem('bitacora_umich_supabaseUrl');
+        const storedKey = localStorage.getItem('bitacora_umich_supabaseAnonKey');
+        
+        window.SUPABASE_URL = window.SUPABASE_URL || storedURL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || storedKey || '';
+        
+        // DEBUG: Mostrar estado de configuración en consola
+        console.log('🚀 Bitácora Digital UMSNH');
+        console.log('Supabase URL:', window.SUPABASE_URL ? '✅ Configurado' : '❌ No configurado');
+        console.log('Supabase Key:', window.SUPABASE_ANON_KEY ? '✅ Configurado' : '❌ No configurado');
+    </script>
+    <!-- Fallback: si la app no se carga en 5 segundos, mostrar el login -->
+    <script>
+        // Desactivar modo offline forzado para permitir conexión en línea
+        // Si necesitas modo offline, hazlo desde la interfaz de Configuración
+        // localStorage.setItem('bitacora_umich_forceOffline', 'true');
+        
+        setTimeout(() => {
+            const loader = document.getElementById('loader');
+            const loginScreen = document.getElementById('login-screen');
+            if (loader && loader.offsetParent !== null) {
+                loader.style.display = 'none';
+                if (loginScreen) {
+                    loginScreen.classList.remove('hidden');
+                    loginScreen.style.display = 'flex';
+                }
+            }
+        }, 5000);
     </script>
     <!-- Cache-busting para GitHub Pages / navegadores -->
-    <script type="module" src="./js/app.js?v=1.5.2"></script>
+    <script type="module" src="./js/app.js?v=1.5.5"></script>
     <script>
         // Service Worker (PWA / cache offline)
         (function () {
@@ -2136,7 +2342,48 @@
                 if (!('serviceWorker' in navigator)) return;
                 // Evitar problemas en file:// (debe correr en http/https)
                 if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-                navigator.serviceWorker.register('./sw.js?v=4').catch(() => { });
+
+                // Modo debug: agrega ?nosw=1 para deshabilitar cache y evitar assets viejos.
+                // Nota: para soltar el "controller" actual hay que recargar después de desregistrar.
+                const qs = new URLSearchParams(location.search);
+                if (qs.has('nosw') && !qs.has('nosw_done')) {
+                    navigator.serviceWorker.getRegistrations().then((regs) => {
+                        return Promise.all(regs.map((r) => r.unregister()));
+                    }).finally(() => {
+                        qs.set('nosw_done', '1');
+                        // Mantenernos en la misma página pero ya sin SW controlando.
+                        window.location.replace(location.pathname + '?' + qs.toString());
+                    });
+                    return;
+                }
+                // Si nosw está presente (aunque ya se haya hecho el unregister), no registramos SW.
+                if (qs.has('nosw')) return;
+
+                let reloaded = false;
+                navigator.serviceWorker.register('./sw.js?v=7').then((reg) => {
+                    try { reg.update?.(); } catch { }
+
+                    // Si hay una versión en espera, pedir activación inmediata
+                    if (reg.waiting) {
+                        try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch { }
+                    }
+
+                    reg.addEventListener('updatefound', () => {
+                        const worker = reg.installing;
+                        if (!worker) return;
+                        worker.addEventListener('statechange', () => {
+                            if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                                try { worker.postMessage({ type: 'SKIP_WAITING' }); } catch { }
+                            }
+                        });
+                    });
+
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (reloaded) return;
+                        reloaded = true;
+                        window.location.reload();
+                    });
+                }).catch(() => { });
             } catch { }
         })();
     </script>

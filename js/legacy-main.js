@@ -13,7 +13,7 @@ const SUPABASE_ANON_KEY =
     localStorage.getItem('bitacora_umich_supabaseAnonKey') ||
     '';
 
-const LOCAL_ADMIN_USERNAME = '2211999e';
+const LOCAL_ADMIN_USERNAME = '22119993';
 const LOCAL_ADMIN_PASSWORD = '123456789';
 const LOCAL_STORAGE_PREFIX = 'bitacora_umich_';
 

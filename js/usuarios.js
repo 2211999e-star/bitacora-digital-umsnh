@@ -3,10 +3,10 @@
  * Gestión de usuarios (profiles) - solo admin.
  */
 
-import { state, showLoader, hideLoader } from './utils.js';
-import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL } from './config.js';
-import { createClient } from './database.js';
-import { isPrimaryAdmin } from './permissions.js';
+import { state, showLoader, hideLoader } from './utils.js?v=1.5.4';
+import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL } from './config.js?v=1.5.4';
+import { createClient } from './database.js?v=1.5.4';
+import { isPrimaryAdmin } from './permissions.js?v=1.5.4';
 
 export function getRoleName(role) {
   const roles = {

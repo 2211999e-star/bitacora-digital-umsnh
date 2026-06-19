@@ -1,0 +1,258 @@
+<!-- MODAL DE ACTIVIDAD MEJORADO - Copiar y pegar en index.html reemplazando el modal-activity -->
+<!-- Activity Modal -->
+<div id="modal-activity" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-label="Incidencia">
+    <div
+        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        role="button"
+        tabindex="0"
+        aria-label="Cerrar incidencia"
+        onclick="closeActivityModal()"
+        onkeydown="if(event.key==='Escape'||event.key==='Enter'||event.key===' ') closeActivityModal()"
+    ></div>
+    <div class="modal-shell relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+        <div class="modal-header-soft sticky top-0 border-b border-gray-200 dark:border-gray-800 px-6 py-4 rounded-t-2xl bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 id="modal-activity-title" class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">Registro de Mantenimiento</h2>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                        <span><i class="fas fa-file-invoice mr-1"></i>Folio: <span id="act-folio-label" class="font-semibold text-gray-900 dark:text-gray-100">—</span></span>
+                        <span class="mx-2">·</span>
+                        <span><i class="fas fa-clock mr-1"></i>Fecha, hora y usuario guardados automáticamente</span>
+                    </p>
+                </div>
+                <button onclick="closeActivityModal()" class="icon-button hover:bg-gray-200 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors" title="Cerrar">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <form id="form-activity" class="modal-form-layout p-8 space-y-6">
+            <input type="hidden" id="activity-id">
+            <input type="hidden" id="act-folio">
+            <input type="hidden" id="act-service-type" value="">
+            <input type="hidden" id="act-quick-desc" value="">
+            <input type="hidden" id="act-maint-type" value="correctivo">
+            <input type="hidden" id="act-priority" value="media">
+            <input type="hidden" id="act-task-status" value="pendiente">
+            <input type="hidden" id="act-building-other" value="">
+            <input type="hidden" id="act-career-other" value="">
+            <input type="hidden" id="act-room-other" value="">
+            <input type="hidden" id="act-commission" value="">
+            <input type="hidden" id="act-responsible" value="">
+            <input type="hidden" id="act-time" value="">
+
+            <!-- SECCIÓN: SELECTOR DE TIPO (Mejorado) -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                <p class="text-xs font-semibold text-blue-900 dark:text-blue-200 uppercase mb-3 tracking-wide">Tipo de Mantenimiento</p>
+                <div class="inline-flex rounded-full p-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 w-full gap-1">
+                    <button type="button" class="act-maint-btn flex-1 py-3 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 text-sm" data-value="correctivo">
+                        <i class="fas fa-wrench text-lg"></i>
+                        <span>Correctivo</span>
+                    </button>
+                    <button type="button" class="act-maint-btn flex-1 py-3 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 text-sm" data-value="preventivo">
+                        <i class="fas fa-shield-alt text-lg"></i>
+                        <span>Preventivo</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 1: UBICACIÓN -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/60 dark:to-gray-800/40 backdrop-blur-sm" id="maint-location-section">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h3 id="maint-location-title" class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Ubicación</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400" id="maint-location-subtitle">Selecciona la ubicación del problema</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="maint-location-fields">
+                    <!-- Los campos se cargan dinámicamente según el tipo de mantenimiento -->
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: TIPO DE SERVICIO Y DESCRIPCIÓN -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/60 dark:to-gray-800/40 backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Tipo de Servicio</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Selecciona el equipo/servicio afectado</p>
+                    </div>
+                </div>
+
+                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Categoría *</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Computadora">
+                        <div class="text-2xl mb-1">🖥</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Computadora</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Proyector">
+                        <div class="text-2xl mb-1">📽</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Proyector</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Impresora">
+                        <div class="text-2xl mb-1">🖨</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Impresora</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Internet">
+                        <div class="text-2xl mb-1">🌐</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Internet</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Red">
+                        <div class="text-2xl mb-1">🔌</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Red</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Software">
+                        <div class="text-2xl mb-1">💾</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Software</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Hardware">
+                        <div class="text-2xl mb-1">⚙</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Hardware</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Laboratorio">
+                        <div class="text-2xl mb-1">🧪</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Laboratorio</p>
+                    </button>
+                    <button type="button" class="act-service-card p-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/70 hover:border-purple-400 dark:hover:border-purple-600 transition-all text-left" data-value="Otro">
+                        <div class="text-2xl mb-1">📌</div>
+                        <p class="font-semibold text-xs text-gray-900 dark:text-white">Otro</p>
+                    </button>
+                </div>
+
+                <div class="mt-5">
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Descripción del problema *</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="No enciende">No enciende</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="No proyecta imagen">No proyecta imagen</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Sin internet">Sin internet</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Error de software">Error de software</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Impresora sin funcionar">Impresora sin funcionar</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Equipo lento">Equipo lento</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Sin conexión de red">Sin conexión de red</button>
+                        <button type="button" class="act-quick-chip px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-medium text-sm hover:bg-purple-200 dark:hover:bg-purple-900 hover:text-purple-900 dark:hover:text-purple-100 transition-all" data-value="Otro">Otro…</button>
+                    </div>
+                    <textarea id="act-problem-other" rows="2" class="hidden mt-3 w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-purple-400 dark:focus:border-purple-600 text-gray-900 dark:text-white transition-all resize-none" placeholder="Describe brevemente el problema"></textarea>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: RESPONSABLE Y COMISIÓN -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/60 dark:to-gray-800/40 backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Responsable y Comisión</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Asigna quién realizará el mantenimiento</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Comisión Académica / Unidad *</label>
+                        <select id="act-commission-select" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white font-medium transition-all">
+                            <option value="">Selecciona una comisión...</option>
+                            <option value="Comisión de Servicios Informáticos">Comisión de Servicios Informáticos</option>
+                            <option value="Comisión de Infraestructura">Comisión de Infraestructura</option>
+                            <option value="Comisión de Telecomunicaciones">Comisión de Telecomunicaciones</option>
+                            <option value="Mantenimiento General">Mantenimiento General</option>
+                            <option value="Otro">Otro (especificar)</option>
+                        </select>
+                        <input type="text" id="act-commission-other" class="hidden w-full px-4 py-2.5 mt-2 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white transition-all" placeholder="Especifica la comisión">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Responsable / Comisionista *</label>
+                        <select id="act-responsible-select" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white font-medium transition-all">
+                            <option value="">Selecciona responsable...</option>
+                            <option value="Practicante">Practicante</option>
+                            <option value="Coordinador">Coordinador</option>
+                            <option value="Técnico">Técnico</option>
+                            <option value="Personal Externo">Personal Externo</option>
+                            <option value="Otro">Otro (especificar)</option>
+                        </select>
+                        <input type="text" id="act-responsible-other" class="hidden w-full px-4 py-2.5 mt-2 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white transition-all" placeholder="Especifica el responsable">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Nombre del Responsable</label>
+                        <input type="text" id="act-responsible-name" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white transition-all" placeholder="Nombre completo">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Hora de Atención</label>
+                        <input type="time" id="act-time-input" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-green-400 dark:focus:border-green-600 text-gray-900 dark:text-white transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: DETALLES - PRIORIDAD Y ESTADO -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-900/60 dark:to-gray-800/40 backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white tracking-wide">Detalles de Gestión</h3>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Prioridad, estado y observaciones</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Prioridad *</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" class="act-priority-card px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="baja">🔵 Baja</button>
+                            <button type="button" class="act-priority-card px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="media">🟡 Media</button>
+                            <button type="button" class="act-priority-card px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="alta">🟠 Alta</button>
+                            <button type="button" class="act-priority-card px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="urgente">🔴 Crítica</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-3">Estado *</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" class="act-status-chip px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="pendiente">⚪ Pendiente</button>
+                            <button type="button" class="act-status-chip px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="en_proceso">🟡 En proceso</button>
+                            <button type="button" class="act-status-chip px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="completado">🟢 Completado</button>
+                            <button type="button" class="act-status-chip px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all text-sm" data-value="cancelado">🔴 Cancelado</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Observaciones y Notas</label>
+                    <textarea id="act-observations" rows="3"
+                        class="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-blue-400 dark:focus:border-blue-600 text-gray-900 dark:text-white transition-all resize-none"
+                        placeholder="Agrega observaciones, diagnósticos o notas importantes..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                <button type="button" onclick="openActivityAdvancedModal()" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-semibold">
+                    <i class="fas fa-microchip mr-2"></i>
+                    Información Técnica Avanzada
+                </button>
+
+                <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeActivityModal()"
+                    class="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="px-6 py-2.5 bg-gradient-to-r from-black to-gray-800 dark:from-white dark:to-gray-100 text-white dark:text-black rounded-lg font-semibold hover:shadow-lg transition-all transform hover:scale-[1.02]">
+                    <i class="fas fa-save mr-2"></i>
+                    Guardar Registro
+                </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

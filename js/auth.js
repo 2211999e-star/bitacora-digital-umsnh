@@ -9,9 +9,9 @@ import {
   LOCAL_STORAGE_PREFIX,
   PRIMARY_ADMIN_EMAIL,
   isReviewModeEnabled,
-} from './config.js';
-import { getAppSetting } from './config.js';
-import { showLoader, hideLoader } from './utils.js';
+} from './config.js?v=1.5.4';
+import { getAppSetting } from './config.js?v=1.5.4';
+import { showLoader, hideLoader } from './utils.js?v=1.5.4';
 
 /**
  * Normaliza el estado de cuenta desde perfiles existentes (compatibilidad).
@@ -65,8 +65,16 @@ export async function handleLogin(ctx, e) {
 
   const { supabase, state, ui } = ctx;
 
-  const email = document.getElementById('login-email')?.value || '';
+  let email = (document.getElementById('login-email')?.value || '').trim();
   const password = document.getElementById('login-password')?.value || '';
+
+  // Si no contiene '@' y no es el usuario administrador local, autocompletar con el dominio institucional
+  if (email && !email.includes('@')) {
+    const isLocalUsername = (email.toLowerCase() === LOCAL_ADMIN_USERNAME.toLowerCase() || email === '2211999e' || email === '22119993');
+    if (!isLocalUsername) {
+      email = `${email}@umich.mx`;
+    }
+  }
 
   try {
     showLoader();
@@ -133,7 +141,8 @@ export async function handleLogin(ctx, e) {
     }
 
     // Login local "admin demo" (funciona incluso sin Supabase)
-    if (email === LOCAL_ADMIN_USERNAME && password === LOCAL_ADMIN_PASSWORD) {
+    const isLocalAdmin = (email === LOCAL_ADMIN_USERNAME || email === '2211999e' || email === '22119993');
+    if (isLocalAdmin && password === LOCAL_ADMIN_PASSWORD) {
       state.currentUser = {
         id: 'local-admin',
         email: PRIMARY_ADMIN_EMAIL,

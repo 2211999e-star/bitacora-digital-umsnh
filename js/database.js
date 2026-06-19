@@ -7,10 +7,22 @@
  * - El objeto `supabase` expone `__local` para identificar el fallback.
  */
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isForceOfflineEnabled, isReviewModeEnabled } from './config.js';
+// Supabase JS se carga globalmente desde index.html
+// Accesible como: window.supabase.createClient()
 
-export { createClient };
+import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isForceOfflineEnabled, isReviewModeEnabled } from './config.js?v=1.5.4';
+
+// Helper para obtener createClient en tiempo de ejecución
+function getCreateClient() {
+  return window?.supabase?.createClient;
+}
+
+// Exportar createClient para uso en otros módulos
+export function createClient(url, anonKey) {
+  const fn = getCreateClient();
+  if (!fn) throw new Error('Supabase client library not loaded');
+  return fn(url, anonKey);
+}
 
 export function isValidUrl(url) {
   try {
@@ -203,6 +215,11 @@ export function createSupabase() {
   if (isForceOfflineEnabled()) return createSupabaseFallback();
   const { url, anonKey } = getSupabaseConfig();
   if (isValidUrl(url) && anonKey) {
+    const createClient = getCreateClient();
+    if (!createClient) {
+      console.warn('Supabase client library not loaded, falling back to localStorage');
+      return createSupabaseFallback();
+    }
     const client = createClient(url, anonKey);
     // Bandera para mantener la misma interfaz que el fallback
     client.__local = false;

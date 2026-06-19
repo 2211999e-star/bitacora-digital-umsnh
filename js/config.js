@@ -3,14 +3,14 @@
  * Configuración: Supabase, preferencias de tema, utilidades de backup y controles de settings.
  */
 
-import { isValidUrl } from './database.js';
+import { isValidUrl } from './database.js?v=1.5.5';
 
-export const LOCAL_ADMIN_USERNAME = '2211999e';
+export const LOCAL_ADMIN_USERNAME = '22119993';
 export const LOCAL_ADMIN_PASSWORD = '123456789';
 export const LOCAL_STORAGE_PREFIX = 'bitacora_umich_';
 
 // Administrador principal (único con permisos críticos)
-export const PRIMARY_ADMIN_EMAIL = '2211999e@umich.mx';
+export const PRIMARY_ADMIN_EMAIL = '22119993@umich.mx';
 
 // Modo revisión (para superiores): opera en modo local y con datos de prueba
 export const REVIEW_MODE_KEY = `${LOCAL_STORAGE_PREFIX}reviewMode`; // 'true' | 'false'

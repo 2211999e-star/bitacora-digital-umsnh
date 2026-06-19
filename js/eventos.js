@@ -3,9 +3,9 @@
  * CRUD de eventos (events) + filtros y modales.
  */
 
-import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast } from './utils.js';
-import { canEditOwnedOrRole, canDelete } from './permissions.js';
-import { updateNotificationBadge } from './dashboard.js';
+import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast } from './utils.js?v=1.5.4';
+import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
+import { updateNotificationBadge } from './dashboard.js?v=1.5.4';
 
 function buildEventMeta(meta = {}) {
   try {

@@ -3,8 +3,8 @@
  * Controles de reportes (firma/logos/rango fechas) + exportación PDF.
  */
 
-import { state, showLoader, hideLoader, formatDate, getStatusText, getPriorityText } from './utils.js';
-import { LOCAL_STORAGE_PREFIX } from './config.js';
+import { state, showLoader, hideLoader, formatDate, getStatusText, getPriorityText } from './utils.js?v=1.5.4';
+import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
 
 export function initializeReportControls() {
   const urlToDataUrl = (url) =>
@@ -241,6 +241,18 @@ export function clearReportLogo(which) {
   if (preview) preview.classList.add('hidden');
   if (clearBtn) clearBtn.classList.add('hidden');
   if (fileInput) fileInput.value = '';
+}
+
+function savePendingReportLog(entry) {
+  try {
+    const key = `${LOCAL_STORAGE_PREFIX}pendingReportsLog`;
+    const raw = localStorage.getItem(key) || '[]';
+    const arr = JSON.parse(raw);
+    arr.push(Object.assign({created_at: new Date().toISOString()}, entry));
+    localStorage.setItem(key, JSON.stringify(arr));
+  } catch {
+    // noop
+  }
 }
 
 export async function exportPDF(_ctx, type, options = {}) {
@@ -609,26 +621,47 @@ export async function exportPDF(_ctx, type, options = {}) {
 
     const prefix = (options.filenamePrefix || '').trim() || (type === 'events' ? 'reporte_eventos' : `reporte_${type}`);
 
-    // Registrar generación en DB (si hay Supabase real)
+    // Registrar generación en DB (si hay Supabase real). Si falla, guardar localmente
     try {
       const supabase = _ctx?.supabase;
+      const filters = {
+        type,
+        date_start: document.getElementById('report-date-start')?.value || null,
+        date_end: document.getElementById('report-date-end')?.value || null,
+        serviceType: options.serviceType || null,
+        title: options.title || null,
+      };
+
       if (supabase && !supabase.__local && state.currentUser?.id) {
-        const filters = {
-          type,
-          date_start: document.getElementById('report-date-start')?.value || null,
-          date_end: document.getElementById('report-date-end')?.value || null,
-          serviceType: options.serviceType || null,
-          title: options.title || null,
-        };
-        await supabase.from('reports_log').insert({
-          user_id: state.currentUser.id,
-          folio: folioUsed,
-          report_type: String(type),
-          filters,
-        });
+        try {
+          const res = await supabase.from('reports_log').insert({
+            user_id: state.currentUser.id,
+            folio: folioUsed,
+            report_type: String(type),
+            filters,
+          });
+          // supabase-js returns error in res.error for some versions
+          if (res?.error) throw res.error;
+        } catch (err) {
+          // guardar en local como fallback
+          savePendingReportLog({ user_id: state.currentUser?.id || null, folio: folioUsed, report_type: String(type), filters });
+          try {
+            Swal.fire({ icon: 'info', title: 'Registro pendiente', text: 'No se pudo guardar el registro en el servidor; se almacenó localmente y se sincronizará después.' });
+          } catch {
+            // noop
+          }
+        }
+      } else {
+        // No hay Supabase disponible en este entorno -> guardar localmente
+        savePendingReportLog({ user_id: state.currentUser?.id || null, folio: folioUsed, report_type: String(type), filters });
       }
-    } catch {
-      // noop (no bloquear exportación)
+    } catch (e) {
+      // no bloquear la exportación por errores de logging
+      try {
+        savePendingReportLog({ user_id: state.currentUser?.id || null, folio: folioUsed, report_type: String(type), filters: { type } });
+      } catch {
+        // noop
+      }
     }
 
     doc.save(`${prefix}_${folioUsed}_${new Date().toISOString().split('T')[0]}.pdf`);
@@ -647,14 +680,14 @@ export function exportMaintenanceReport(ctx, kind) {
   if (normalized === 'preventivo') {
     return exportPDF(ctx, 'activities', {
       maintenanceType: 'preventivo',
-      title: 'Reporte de Mantenimiento preventivo',
+      title: 'Reporte de Mantenimiento Preventivo',
       filenamePrefix: 'reporte_mantenimiento_preventivo',
     });
   }
   if (normalized === 'correctivo') {
     return exportPDF(ctx, 'activities', {
       maintenanceType: 'correctivo',
-      title: 'Reporte de Mantenimiento correctivo',
+      title: 'Reporte de Mantenimiento Correctivo',
       filenamePrefix: 'reporte_mantenimiento_correctivo',
     });
   }

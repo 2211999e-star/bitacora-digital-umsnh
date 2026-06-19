@@ -7,7 +7,8 @@
  * - Network-first para navegación (HTML) con fallback a caché
  */
 
-const CACHE_VERSION = 'bitacora-cache-v4';
+// Incrementa este valor cuando cambien CSS/JS para evitar servir assets viejos.
+const CACHE_VERSION = 'bitacora-cache-v7';
 
 // Nota: se cachean SOLO recursos locales del repo (evitamos CDNs por CORS y variaciones).
 const PRECACHE_URLS = [
@@ -24,6 +25,7 @@ const PRECACHE_URLS = [
   './css/tables.css',
   './css/dashboard.css',
   './css/responsive.css',
+  './css/enhanced-ui.css',
 
   './js/app.js',
   './js/auth.js',
@@ -50,6 +52,14 @@ self.addEventListener('install', (event) => {
       self.skipWaiting();
     })(),
   );
+});
+
+self.addEventListener('message', (event) => {
+  try {
+    if (event?.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  } catch {
+    // noop
+  }
 });
 
 self.addEventListener('activate', (event) => {
