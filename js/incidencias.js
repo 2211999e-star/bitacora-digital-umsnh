@@ -115,8 +115,8 @@ function getActivityUiMeta(activity = {}) {
     maintenanceType,
     maintenanceLabel: isPreventive ? 'Preventivo' : 'Correctivo',
     maintenanceBadgeClass: isPreventive
-      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800'
-      : 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-200 border border-orange-200 dark:border-orange-800',
+      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
+      : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-800',
     location: meta.edificio || activity.coordination || 'Sin ubicación',
     area: meta.carrera || activity.department || 'Sin área',
     folio: meta.folio || activity.folio || '—',
@@ -183,8 +183,8 @@ function renderActivitiesCards(list = []) {
     const extraText = ui.cleanText || 'Sin observaciones adicionales';
 
     return `
-      <article class="rounded-3xl border ${ui.maintenanceType === 'preventivo' ? 'border-emerald-200/80 dark:border-emerald-900/30' : 'border-orange-200/80 dark:border-orange-900/30'} bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-        <div class="px-5 py-4 border-b ${ui.maintenanceType === 'preventivo' ? 'border-emerald-100 dark:border-emerald-900/30 bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-950/20 dark:to-gray-900' : 'border-orange-100 dark:border-orange-900/30 bg-gradient-to-r from-orange-50 to-white dark:from-orange-950/20 dark:to-gray-900'}">
+      <article class="rounded-3xl border border-blue-200/80 dark:border-blue-900/30 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+        <div class="px-5 py-4 border-b border-blue-100 dark:border-blue-900/30 bg-gradient-to-r from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div class="flex flex-wrap items-center gap-2">
