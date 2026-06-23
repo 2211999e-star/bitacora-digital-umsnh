@@ -6,3 +6,24 @@
 @import url("./tables.css");
 @import url("./dashboard.css");
 @import url("./responsive.css");
+
+/* SweetAlert2 Dark Mode overrides */
+.dark .swal2-popup {
+    background: #1f2937 !important;
+    color: #f9fafb !important;
+}
+.dark .swal2-title, .dark .swal2-html-container {
+    color: #f9fafb !important;
+}
+.dark .swal2-confirm {
+    background-color: #2563eb !important;
+}
+.dark .swal2-cancel {
+    background-color: #4b5563 !important;
+}
+
+/* Fix select dropdowns in dark mode */
+.dark select option {
+    background-color: #1f2937 !important;
+    color: #f9fafb !important;
+}
