@@ -620,6 +620,15 @@ function ensureIncidenciaUXWired() {
     });
   });
 
+  // Software a instalar (chips múltiples)
+  document.querySelectorAll('.act-software-chip').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('ring-2');
+      btn.classList.toggle('ring-black');
+      btn.classList.toggle('dark:ring-white');
+    });
+  });
+
   // Prioridad (cards)
   const priInput = document.getElementById('act-priority');
   document.querySelectorAll('.act-priority-card').forEach((btn) => {
@@ -1113,6 +1122,9 @@ export function showActivityModal(defaultMaintType = 'correctivo') {
   setSelectedByDataAttr('.act-maint-btn', maintNormalized);
   setSelectedByDataAttr('.act-service-card', '');
   setSelectedByDataAttr('.act-quick-chip', '');
+  document.querySelectorAll('.act-software-chip').forEach(btn => {
+    btn.classList.remove('ring-2', 'ring-black', 'dark:ring-white');
+  });
 
   // Render dynamic location fields based on maintenance type
   renderLocationFieldsByMaintenanceType(maintNormalized);
@@ -1959,7 +1971,14 @@ export async function handleActivitySubmit({ supabase } = {}, e) {
       ...creatorMeta,
     };
 
-    const description = quick === 'Otro' ? otherText : quick;
+    const selectedSoftware = Array.from(document.querySelectorAll('.act-software-chip.ring-2'))
+      .map(btn => btn.getAttribute('data-value'))
+      .join(', ');
+
+    let description = quick === 'Otro' ? otherText : quick;
+    if (selectedSoftware) {
+      description += ` (Software instalado: ${selectedSoftware})`;
+    }
     const observations = [buildMetaBlock(meta), observationsUser].filter(Boolean).join('\n').trim() || null;
 
     const activityData = {
