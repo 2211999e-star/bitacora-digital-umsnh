@@ -382,7 +382,7 @@
                 <section id="section-dashboard" class="section">
                     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Resumen operativo, recordatorios y accesos rápidos.</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -623,6 +623,38 @@
                             </div>
                         </div>
                     </div>
+
+                    
+                            <!-- Quick Actions -->
+                            <div class="mb-8">
+                                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Acciones Rápidas</h2>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <button onclick="showSection('activities'); setTimeout(() => openActivityModal(), 100)" class="flex flex-col items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 rounded-xl transition-all group">
+                                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-plus text-xl"></i>
+                                        </div>
+                                        <span class="font-medium text-blue-900 dark:text-blue-100">Nueva Incidencia</span>
+                                    </button>
+                                    <button onclick="showSection('events'); setTimeout(() => openEventModal(), 100)" class="flex flex-col items-center justify-center p-4 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-800 rounded-xl transition-all group">
+                                        <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-800 text-purple-600 dark:text-purple-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-calendar-plus text-xl"></i>
+                                        </div>
+                                        <span class="font-medium text-purple-900 dark:text-purple-100">Nuevo Evento</span>
+                                    </button>
+                                    <button onclick="showSection('reports')" class="flex flex-col items-center justify-center p-4 bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 border border-green-200 dark:border-green-800 rounded-xl transition-all group">
+                                        <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-file-pdf text-xl"></i>
+                                        </div>
+                                        <span class="font-medium text-green-900 dark:text-green-100">Imprimir Reporte</span>
+                                    </button>
+                                    <button onclick="openGlobalSearch()" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all group">
+                                        <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-search text-xl"></i>
+                                        </div>
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">Buscar (Ctrl+K)</span>
+                                    </button>
+                                </div>
+                            </div>
 
                     <!-- Indicadores clave (más información sin saturar) -->
                     <div class="dashboard-panel bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 mb-8">
@@ -893,7 +925,7 @@
                     <!-- Encabezado + acciones (limpio, sin saturar) -->
                     <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Incidencias</h2>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Incidencias</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Registro y seguimiento de mantenimientos y soporte.</p>
                             <div class="mt-3 inline-flex items-center gap-2 rounded-xl border border-gray-200 dark:border-gray-800 p-1 bg-white/70 dark:bg-gray-900/40">
                                 <button type="button" onclick="setActivitiesMaintenanceFilter('')" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
@@ -1255,7 +1287,7 @@
                 <section id="section-events" class="section hidden">
                     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Eventos</h2>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Eventos</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Actividades programadas, seguimiento y control por estado.</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -1314,7 +1346,7 @@
                 <!-- Reports Section -->
                 <section id="section-reports" class="section hidden">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Reportes</h2>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Reportes</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Generación de reportes oficiales en PDF (con logos y firma).</p>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1455,7 +1487,7 @@
                 <!-- Settings Section -->
                 <section id="section-settings" class="section hidden">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Configuración</h2>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Configuración</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Preferencias del sistema, conexión a la nube y formatos de impresión.</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -1699,7 +1731,7 @@
                 <section id="section-users" class="section hidden">
                     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Usuarios</h2>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Usuarios</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Administración de cuentas y roles (solo administrador).</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
@@ -2387,5 +2419,41 @@
             } catch { }
         })();
     </script>
+
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3" id="fab-container">
+        <div id="fab-menu" class="hidden flex flex-col gap-3 items-end transition-all opacity-0 translate-y-4">
+            <button onclick="showSection('reports')" class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-700 transition-colors">
+                <span>Reporte</span> <i class="fas fa-file-pdf"></i>
+            </button>
+            <button onclick="showSection('events'); setTimeout(() => openEventModal(), 100)" class="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-purple-700 transition-colors">
+                <span>Evento</span> <i class="fas fa-calendar-plus"></i>
+            </button>
+            <button onclick="showSection('activities'); setTimeout(() => openActivityModal(), 100)" class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors">
+                <span>Incidencia</span> <i class="fas fa-clipboard-list"></i>
+            </button>
+        </div>
+        <button onclick="toggleFAB()" id="fab-main-btn" class="w-14 h-14 bg-gray-900 dark:bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all focus:outline-none">
+            <i class="fas fa-plus text-2xl transition-transform" id="fab-icon"></i>
+        </button>
+    </div>
+
+    <!-- Global Search Modal -->
+    <div id="global-search-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onclick="closeGlobalSearch()"></div>
+        <div class="absolute top-1/4 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
+                <div class="p-4 flex items-center border-b border-gray-100 dark:border-gray-800">
+                    <i class="fas fa-search text-gray-400 text-xl ml-2 mr-4"></i>
+                    <input type="text" id="global-search-input" class="w-full bg-transparent border-none focus:ring-0 text-lg text-gray-900 dark:text-white placeholder-gray-400" placeholder="Buscar actividades, equipos, personas... (Esc para salir)">
+                    <span class="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md ml-4">ESC</span>
+                </div>
+                <div id="global-search-results" class="max-h-96 overflow-y-auto p-2">
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">Escribe para buscar...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
