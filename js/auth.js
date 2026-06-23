@@ -143,53 +143,91 @@ export async function handleLogin(ctx, e) {
     // Login local "admin demo" (funciona incluso sin Supabase)
     const isLocalAdmin = (email === LOCAL_ADMIN_USERNAME || email === '2211999e' || email === '22119993');
     if (isLocalAdmin && password === LOCAL_ADMIN_PASSWORD) {
-      state.currentUser = {
-        id: 'local-admin',
-        email: PRIMARY_ADMIN_EMAIL,
-        full_name: 'Administrador',
-        role: 'admin',
-        account_status: 'approved',
-      };
+      if (supabase.__local) {
+        state.currentUser = {
+          id: 'local-admin',
+          email: PRIMARY_ADMIN_EMAIL,
+          full_name: 'Administrador',
+          role: 'admin',
+          account_status: 'approved',
+        };
 
-      // Persistir sesión local para que "se guarde todo" incluso al recargar la página
-      try {
-        localStorage.setItem(
-          `${LOCAL_STORAGE_PREFIX}session`,
-          JSON.stringify({
-            user: {
-              id: state.currentUser.id,
-              email: state.currentUser.email,
-              user_metadata: {
-                full_name: state.currentUser.full_name,
+        try {
+          localStorage.setItem(
+            `${LOCAL_STORAGE_PREFIX}session`,
+            JSON.stringify({
+              user: {
+                id: state.currentUser.id,
                 email: state.currentUser.email,
-                role: state.currentUser.role,
+                user_metadata: {
+                  full_name: state.currentUser.full_name,
+                  email: state.currentUser.email,
+                  role: state.currentUser.role,
+                },
               },
-            },
-          }),
-        );
-      } catch {
-        // noop
+            }),
+          );
+        } catch {
+          // noop
+        }
+
+        ui.updateUserDisplay();
+        ui.updateAdminMenu();
+        ui.showApp();
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡Bienvenido!',
+          text: `Hola, ${state.currentUser.full_name} (Modo Offline)`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        return;
+      } else {
+        // En línea: usar el correo real del administrador
+        email = PRIMARY_ADMIN_EMAIL;
       }
-
-      ui.updateUserDisplay();
-      ui.updateAdminMenu();
-      ui.showApp();
-
-      Swal.fire({
-        icon: 'success',
-        title: '¡Bienvenido!',
-        text: `Hola, ${state.currentUser.full_name}`,
-        timer: 2000,
-        showConfirmButton: false,
-      });
-
-      return;
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    if (error) {
+      // Si el administrador local no existe en Supabase, lo creamos automáticamente
+      if (isLocalAdmin && password === LOCAL_ADMIN_PASSWORD && error.message.includes('Invalid login')) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: PRIMARY_ADMIN_EMAIL,
+          password: LOCAL_ADMIN_PASSWORD,
+          options: {
+            data: { full_name: 'Administrador', role: 'admin' },
+          },
+        });
+        if (signUpError) throw signUpError;
+        
+        // Crear perfil inicial
+        await supabase.from('profiles').upsert({
+          id: signUpData.user.id,
+          email: PRIMARY_ADMIN_EMAIL,
+          full_name: 'Administrador',
+          role: 'admin',
+          is_active: true,
+          account_status: 'approved'
+        });
+        
+        // Iniciar sesión ahora
+        const { data: retryData, error: retryError } = await supabase.auth.signInWithPassword({
+          email: PRIMARY_ADMIN_EMAIL,
+          password: LOCAL_ADMIN_PASSWORD,
+        });
+        if (retryError) throw retryError;
+        data.user = retryData.user;
+      } else {
+        throw error;
+      }
+    }
 
     if (error) throw error;
 

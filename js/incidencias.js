@@ -183,7 +183,7 @@ function renderActivitiesCards(list = []) {
     const extraText = ui.cleanText || 'Sin observaciones adicionales';
 
     return `
-      <article class="relative flex flex-col rounded-[2rem] border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] shadow-lg shadow-gray-200/50 dark:shadow-none hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
+      <article class="relative flex flex-col rounded-[2rem] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg shadow-gray-200/50 dark:shadow-none hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
         <!-- Decorator line on top -->
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity"></div>
         

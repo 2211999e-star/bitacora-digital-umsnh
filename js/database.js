@@ -18,10 +18,10 @@ function getCreateClient() {
 }
 
 // Exportar createClient para uso en otros módulos
-export function createClient(url, anonKey) {
+export function createClient(url, anonKey, options) {
   const fn = getCreateClient();
   if (!fn) throw new Error('Supabase client library not loaded');
-  return fn(url, anonKey);
+  return fn(url, anonKey, options);
 }
 
 export function isValidUrl(url) {
