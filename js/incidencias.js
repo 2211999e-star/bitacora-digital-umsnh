@@ -159,7 +159,7 @@ function renderActivitiesCards(list = []) {
 
   if (!list.length) {
     grid.innerHTML = `
-      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/50 p-12 text-center">
+      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-transparent border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
         <div class="w-16 h-16 mx-auto rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center">
           <i class="fas fa-clipboard-list text-gray-400 dark:text-gray-500 text-2xl"></i>
         </div>

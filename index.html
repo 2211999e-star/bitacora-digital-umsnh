@@ -385,6 +385,41 @@
                             <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Resumen operativo, recordatorios y accesos rápidos.</p>
                         </div>
+                    </div>
+
+                    <!-- Modern Events/Images Slider -->
+                    <div class="w-full relative rounded-2xl overflow-hidden mb-8 shadow-xl border border-gray-200 dark:border-gray-800" style="min-h: 220px;">
+                        <div class="slider-container flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar w-full h-full absolute inset-0" id="dashboard-slider">
+                            <!-- Slide 1 -->
+                            <div class="snap-center shrink-0 w-full flex flex-col justify-end p-6 lg:p-8 bg-gradient-to-r from-blue-600 to-indigo-700 text-white h-full relative">
+                                <div class="absolute inset-0 bg-black/10"></div>
+                                <div class="relative z-10 max-w-2xl">
+                                    <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 rounded backdrop-blur-md mb-3 inline-block">Aviso Importante</span>
+                                    <h3 class="text-2xl lg:text-3xl font-black mb-2 drop-shadow-md">Bienvenido al Nuevo Sistema</h3>
+                                    <p class="text-blue-50 text-sm lg:text-base opacity-90 drop-shadow">Ahora es más fácil, rápido y oscuro registrar tus incidencias y mantenimientos.</p>
+                                </div>
+                            </div>
+                            <!-- Slide 2 -->
+                            <div class="snap-center shrink-0 w-full flex flex-col justify-end p-6 lg:p-8 bg-gradient-to-r from-emerald-600 to-teal-800 text-white h-full relative">
+                                <div class="absolute inset-0 bg-black/10"></div>
+                                <div class="relative z-10 max-w-2xl">
+                                    <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-white/20 rounded backdrop-blur-md mb-3 inline-block">Tip de uso</span>
+                                    <h3 class="text-2xl lg:text-3xl font-black mb-2 drop-shadow-md">Nuevos Atajos</h3>
+                                    <p class="text-teal-50 text-sm lg:text-base opacity-90 drop-shadow">Usa Ctrl+K o da clic en la lupa superior para buscar eventos rápidamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('dashboard-slider').scrollBy({left: -window.innerWidth, behavior: 'smooth'})" class="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-md transition-colors border border-white/10 z-20">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button onclick="document.getElementById('dashboard-slider').scrollBy({left: window.innerWidth, behavior: 'smooth'})" class="absolute right-3 lg:right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-md transition-colors border border-white/10 z-20">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <style>
+                        .hide-scrollbar::-webkit-scrollbar { display: none; }
+                        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+                    </style>
                         <div class="flex flex-wrap gap-2">
                             <button onclick="showNotifications()" class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
                                 <i class="fas fa-bell mr-2"></i>
@@ -1209,8 +1244,8 @@
 
                     <div id="activities-summary" class="mb-4"></div>
 
-                    <div class="rounded-[2.5rem] border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0B1120] shadow-xl overflow-hidden mb-8">
-                        <div class="px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-[#111827]">
+                    <div class="rounded-[2.5rem] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-xl overflow-hidden mb-8">
+                        <div class="px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
                             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                 <div>
                                     <div class="flex items-center gap-3">
@@ -1237,7 +1272,7 @@
                             </div>
                         </div>
 
-                        <div class="p-6 lg:p-8 bg-gray-50 dark:bg-gray-900/50">
+                        <div class="p-6 lg:p-8 bg-transparent">
                             <div id="activities-records-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-5">
                                 <div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">No hay registros todavía.</div>
                             </div>
