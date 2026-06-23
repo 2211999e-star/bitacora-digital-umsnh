@@ -159,12 +159,12 @@ function renderActivitiesCards(list = []) {
 
   if (!list.length) {
     grid.innerHTML = `
-      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/30 p-10 text-center">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-          <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300 text-xl"></i>
+      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/50 p-12 text-center">
+        <div class="w-16 h-16 mx-auto rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center">
+          <i class="fas fa-clipboard-list text-gray-400 dark:text-gray-500 text-2xl"></i>
         </div>
-        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mt-4">No hay incidencias registradas</h4>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Puedes crear una nueva incidencia preventiva o correctiva desde los formularios superiores.</p>
+        <h4 class="text-xl font-bold text-gray-900 dark:text-white mt-5">No hay incidencias registradas</h4>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto">Crea una nueva incidencia preventiva o correctiva para empezar a llevar el control.</p>
       </div>
     `;
     return;
@@ -183,57 +183,66 @@ function renderActivitiesCards(list = []) {
     const extraText = ui.cleanText || 'Sin observaciones adicionales';
 
     return `
-      <article class="rounded-3xl border border-blue-200/80 dark:border-blue-900/30 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-        <div class="px-5 py-4 border-b border-blue-100 dark:border-blue-900/30 bg-gradient-to-r from-blue-50 to-white dark:from-blue-950/20 dark:to-gray-900">
-          <div class="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${ui.maintenanceBadgeClass}">${ui.maintenanceLabel}</span>
-                <span class="${statusClass}">${statusLabel}</span>
-                <span class="${priorityClass}">${priorityLabel}</span>
-              </div>
-              <h4 class="text-lg font-semibold text-gray-900 dark:text-white mt-3">${activity.reporter_name || 'Sin reportante'}</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${ui.area}</p>
+      <article class="relative flex flex-col rounded-[2rem] border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111827] shadow-lg shadow-gray-200/50 dark:shadow-none hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
+        <!-- Decorator line on top -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+        
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${ui.maintenanceBadgeClass}">${ui.maintenanceLabel}</span>
+              <span class="${statusClass} px-3 py-1 text-xs font-bold uppercase">${statusLabel}</span>
+              <span class="${priorityClass} px-3 py-1 text-xs font-bold uppercase">${priorityLabel}</span>
             </div>
-            <div class="text-right">
-              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Folio</p>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-1">${ui.folio}</p>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">${formatDate(activity.date)}</p>
+            <h4 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">${activity.reporter_name || 'Sin reportante'}</h4>
+            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">
+              <i class="fas fa-building mr-2 text-gray-400"></i> ${ui.area}
+            </div>
+          </div>
+          <div class="sm:text-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 shadow-sm min-w-[140px]">
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-1">Folio</p>
+            <p class="text-sm font-black text-blue-600 dark:text-blue-400 font-mono">${ui.folio}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium"><i class="far fa-calendar-alt mr-1"></i>${formatDate(activity.date)}</p>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 flex-1 flex flex-col gap-5">
+          <!-- Info Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Ubicación</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center"><i class="fas fa-map-marker-alt text-gray-400 mr-2"></i> ${ui.location}</p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Tipo de Servicio</p>
+              <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center"><i class="fas fa-tools text-gray-400 mr-2"></i> ${activity.service_type || ui.maintenanceLabel}</p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-4 border border-gray-100 dark:border-gray-800">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">Descripción del problema</p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">${activity.description || 'Sin descripción registrada'}</p>
+          </div>
+          
+          <!-- Extra Data -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Datos Técnicos</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">${technicalInfo}</p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Observaciones</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">${extraText}</p>
             </div>
           </div>
         </div>
 
-        <div class="p-5 space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
-              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Ubicación</p>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-2">${ui.location}</p>
-            </div>
-            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
-              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Servicio</p>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white mt-2">${activity.service_type || ui.maintenanceLabel}</p>
-            </div>
-          </div>
-
-          <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
-            <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Descripción</p>
-            <p class="text-sm text-gray-700 dark:text-gray-200 mt-2 leading-6">${activity.description || 'Sin descripción registrada'}</p>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
-              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Datos técnicos</p>
-              <p class="text-sm text-gray-700 dark:text-gray-200 mt-2">${technicalInfo}</p>
-            </div>
-            <div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-800 p-4">
-              <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Observaciones</p>
-              <p class="text-sm text-gray-700 dark:text-gray-200 mt-2">${extraText}</p>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-1">
-            ${buildActivityActionButtons(activity, { canEdit, canDel, canDeliver, compact: false })}
-          </div>
+        <!-- Footer Actions -->
+        <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-100 dark:border-gray-800 flex flex-wrap sm:flex-nowrap justify-end gap-2 mt-auto">
+          ${buildActivityActionButtons(activity, { canEdit, canDel, canDeliver, compact: false })}
         </div>
       </article>
     `;
