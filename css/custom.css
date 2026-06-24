@@ -1,0 +1,22 @@
+:root {
+  --bs-primary: #0b4ea2;
+}
+
+.navbar.bg-primary {
+  background: linear-gradient(90deg, #0b4ea2 0%, #153e75 100%) !important;
+}
+
+.kpi-card {
+  border-radius: 14px;
+}
+
+.card {
+  border-radius: 14px;
+}
+
+table.table thead th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+}
