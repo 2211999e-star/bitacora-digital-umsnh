@@ -389,11 +389,11 @@
                         </div>
                     </div>
 
-                    <!-- Modern Slider -->
-                    <div class="w-full relative rounded-2xl overflow-hidden mb-8 shadow-xl border border-gray-200 dark:border-gray-800" style="min-height:220px; height:220px;">
-                        <div id="dashboard-slider" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar w-full h-full">
+                    <!-- Modern Slider (Fixed) -->
+                    <div class="w-full relative rounded-2xl overflow-hidden mb-8 shadow-xl border border-gray-200 dark:border-gray-800 group" style="height:220px;" id="hero-slider-container">
+                        <div id="dashboard-slider" class="flex w-full h-full transition-transform duration-500 ease-out" style="transform: translateX(0%);">
                             <!-- Slide 1 -->
-                            <div class="snap-center shrink-0 w-full h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white relative">
+                            <div class="w-full shrink-0 h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white relative">
                                 <div class="absolute inset-0" style="background:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'><circle cx=\'20\' cy=\'20\' r=\'1.5\' fill=\'rgba(255,255,255,0.1)\'/></svg>') repeat;"></div>
                                 <div class="relative z-10">
                                     <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-white/20 rounded-full backdrop-blur-sm mb-3 inline-block border border-white/20">📋 Sistema Activo</span>
@@ -402,7 +402,7 @@
                                 </div>
                             </div>
                             <!-- Slide 2 -->
-                            <div class="snap-center shrink-0 w-full h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800 text-white relative">
+                            <div class="w-full shrink-0 h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-emerald-600 via-teal-700 to-cyan-800 text-white relative">
                                 <div class="absolute inset-0" style="background:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><rect x=\'0\' y=\'0\' width=\'60\' height=\'60\' fill=\'none\' stroke=\'rgba(255,255,255,0.05)\' stroke-width=\'1\'/></svg>') repeat;"></div>
                                 <div class="relative z-10">
                                     <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-white/20 rounded-full backdrop-blur-sm mb-3 inline-block border border-white/20">⚡ Atajo Rápido</span>
@@ -411,7 +411,7 @@
                                 </div>
                             </div>
                             <!-- Slide 3 -->
-                            <div class="snap-center shrink-0 w-full h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-purple-600 via-violet-700 to-indigo-900 text-white relative">
+                            <div class="w-full shrink-0 h-full flex flex-col justify-end p-6 lg:p-10 bg-gradient-to-br from-purple-600 via-violet-700 to-indigo-900 text-white relative">
                                 <div class="absolute inset-0" style="background:url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'80\' height=\'80\'><polygon points=\'40,0 80,80 0,80\' fill=\'rgba(255,255,255,0.03)\'/></svg>') repeat;"></div>
                                 <div class="relative z-10">
                                     <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-white/20 rounded-full backdrop-blur-sm mb-3 inline-block border border-white/20">📊 Reportes</span>
@@ -420,21 +420,86 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <!-- Nav arrows -->
-                        <button onclick="document.getElementById('dashboard-slider').scrollBy({left:-document.getElementById('dashboard-slider').offsetWidth, behavior:'smooth'})" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full transition-all border border-white/20 z-20 shadow-lg">
+                        <button id="slider-prev" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full transition-all border border-white/20 z-20 shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 outline-none">
                             <i class="fas fa-chevron-left text-sm"></i>
                         </button>
-                        <button onclick="document.getElementById('dashboard-slider').scrollBy({left:document.getElementById('dashboard-slider').offsetWidth, behavior:'smooth'})" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full transition-all border border-white/20 z-20 shadow-lg">
+                        <button id="slider-next" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full transition-all border border-white/20 z-20 shadow-lg opacity-0 group-hover:opacity-100 focus:opacity-100 outline-none">
                             <i class="fas fa-chevron-right text-sm"></i>
                         </button>
+
                         <!-- Dots -->
-                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-                            <button onclick="document.getElementById('dashboard-slider').scrollTo({left:0,behavior:'smooth'})" class="w-2 h-2 rounded-full bg-white/60 hover:bg-white transition-all"></button>
-                            <button onclick="document.getElementById('dashboard-slider').scrollTo({left:document.getElementById('dashboard-slider').offsetWidth,behavior:'smooth'})" class="w-2 h-2 rounded-full bg-white/60 hover:bg-white transition-all"></button>
-                            <button onclick="document.getElementById('dashboard-slider').scrollTo({left:document.getElementById('dashboard-slider').offsetWidth*2,behavior:'smooth'})" class="w-2 h-2 rounded-full bg-white/60 hover:bg-white transition-all"></button>
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20" id="slider-dots">
+                            <button class="slider-dot w-6 h-1.5 rounded-full bg-white transition-all outline-none" data-index="0"></button>
+                            <button class="slider-dot w-2 h-1.5 rounded-full bg-white/40 hover:bg-white/80 transition-all outline-none" data-index="1"></button>
+                            <button class="slider-dot w-2 h-1.5 rounded-full bg-white/40 hover:bg-white/80 transition-all outline-none" data-index="2"></button>
                         </div>
                     </div>
-                    <style>.hide-scrollbar::-webkit-scrollbar{display:none}.hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}</style>
+
+                    <script>
+                        (function() {
+                            let currentSlide = 0;
+                            const totalSlides = 3;
+                            const slider = document.getElementById('dashboard-slider');
+                            const dots = document.querySelectorAll('.slider-dot');
+                            let autoPlayInterval;
+
+                            function updateSlider(index) {
+                                currentSlide = index;
+                                slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+                                dots.forEach((dot, i) => {
+                                    if(i === currentSlide) {
+                                        dot.classList.remove('w-2', 'bg-white/40');
+                                        dot.classList.add('w-6', 'bg-white');
+                                    } else {
+                                        dot.classList.remove('w-6', 'bg-white');
+                                        dot.classList.add('w-2', 'bg-white/40');
+                                    }
+                                });
+                            }
+
+                            function nextSlide() {
+                                updateSlider((currentSlide + 1) % totalSlides);
+                            }
+
+                            function prevSlide() {
+                                updateSlider((currentSlide - 1 + totalSlides) % totalSlides);
+                            }
+
+                            document.getElementById('slider-next').addEventListener('click', () => {
+                                nextSlide();
+                                resetAutoPlay();
+                            });
+
+                            document.getElementById('slider-prev').addEventListener('click', () => {
+                                prevSlide();
+                                resetAutoPlay();
+                            });
+
+                            dots.forEach(dot => {
+                                dot.addEventListener('click', (e) => {
+                                    updateSlider(parseInt(e.target.dataset.index));
+                                    resetAutoPlay();
+                                });
+                            });
+
+                            function startAutoPlay() {
+                                autoPlayInterval = setInterval(nextSlide, 5000);
+                            }
+
+                            function resetAutoPlay() {
+                                clearInterval(autoPlayInterval);
+                                startAutoPlay();
+                            }
+
+                            const container = document.getElementById('hero-slider-container');
+                            container.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+                            container.addEventListener('mouseleave', startAutoPlay);
+
+                            startAutoPlay();
+                        })();
+                    </script>
 
                     <div class="grid grid-cols-1 xl:grid-cols-[1.5fr_.9fr] gap-6 mb-8">
                         <div class="dashboard-hero-panel bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6">
