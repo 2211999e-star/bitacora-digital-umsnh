@@ -6,7 +6,7 @@
 import { state, showLoader, hideLoader } from './utils.js?v=1.5.4';
 import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL } from './config.js?v=1.5.4';
 import { createClient } from './database.js?v=1.5.4';
-import { isPrimaryAdmin } from './permissions.js?v=1.5.4';
+import { isAdmin, isPrimaryAdmin } from './permissions.js?v=1.5.4';
 
 export function getRoleName(role) {
   const roles = {
@@ -18,7 +18,7 @@ export function getRoleName(role) {
 }
 
 export async function loadUsers({ supabase } = {}) {
-  if (!isPrimaryAdmin(state.currentUser, PRIMARY_ADMIN_EMAIL)) return;
+  if (!isAdmin(state.currentUser)) return;
 
   try {
     const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
@@ -68,6 +68,42 @@ function renderUsersTable() {
         const status = getAccountStatus(user);
         const pill = getStatusPill(status);
         const canManage = isPrimaryAdmin(state.currentUser, PRIMARY_ADMIN_EMAIL);
+        const actionButtons = [];
+        if (canManage && status === 'pending') {
+          actionButtons.push(`
+              <button onclick="approveUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-green-600" title="Aprobar">
+                <i class="fas fa-check"></i>
+              </button>
+              <button onclick="rejectUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-red-600" title="Rechazar">
+                <i class="fas fa-xmark"></i>
+              </button>
+          `);
+        }
+        if (canManage && status === 'approved') {
+          actionButtons.push(`
+              <button onclick="suspendUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" title="Suspender">
+                <i class="fas fa-ban"></i>
+              </button>
+          `);
+        }
+        if (canManage && status === 'suspended') {
+          actionButtons.push(`
+              <button onclick="activateUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-green-600" title="Reactivar">
+                <i class="fas fa-circle-play"></i>
+              </button>
+          `);
+        }
+        if (canManage) {
+          actionButtons.push(`
+              <button onclick="editUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-blue-500" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+          `);
+        } else {
+          actionButtons.push(`
+              <span class="text-xs text-gray-500 dark:text-gray-400">Solo lectura</span>
+          `);
+        }
         return `
       <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
         <td class="px-6 py-4">
@@ -89,27 +125,7 @@ function renderUsersTable() {
         </td>
         <td class="px-6 py-4">
           <div class="flex justify-center space-x-2">
-            ${canManage && status === 'pending' ? `
-              <button onclick="approveUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-green-600" title="Aprobar">
-                <i class="fas fa-check"></i>
-              </button>
-              <button onclick="rejectUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-red-600" title="Rechazar">
-                <i class="fas fa-xmark"></i>
-              </button>
-            ` : ''}
-            ${canManage && status === 'approved' ? `
-              <button onclick="suspendUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" title="Suspender">
-                <i class="fas fa-ban"></i>
-              </button>
-            ` : ''}
-            ${canManage && status === 'suspended' ? `
-              <button onclick="activateUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-green-600" title="Reactivar">
-                <i class="fas fa-circle-play"></i>
-              </button>
-            ` : ''}
-            <button onclick="editUser('${user.id}')" class="action-btn text-gray-600 dark:text-gray-400 hover:text-blue-500">
-              <i class="fas fa-edit"></i>
-            </button>
+            ${actionButtons.join('')}
           </div>
         </td>
       </tr>
@@ -150,6 +166,10 @@ export function closeUserModal() {
 }
 
 export async function editUser({ supabase } = {}, id) {
+  if (!isPrimaryAdmin(state.currentUser, PRIMARY_ADMIN_EMAIL)) {
+    Swal.fire({ icon: 'info', title: 'Solo lectura', text: 'Solo el administrador principal puede editar usuarios.' });
+    return;
+  }
   try {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', id).single();
     if (error) throw error;

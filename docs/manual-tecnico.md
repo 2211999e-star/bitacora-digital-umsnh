@@ -35,7 +35,7 @@ pagina-main/
 │  ├─ tables.css
 │  ├─ dashboard.css
 │  └─ responsive.css
-├─ supabase_schema.sql
+├─ supabase-schema.sql
 └─ .env.example
 ```
 
@@ -74,7 +74,7 @@ Prioridad:
 2. `localStorage` (`bitacora_umich_supabaseUrl` / `bitacora_umich_supabaseAnonKey`) guardado desde la UI.
 
 ### 5.2 Esquema
-Se incluye `supabase_schema.sql` como punto de partida.
+Se incluye `supabase-schema.sql` como punto de partida.
 
 Recomendación:
 - Activar RLS y usar las políticas incluidas.
@@ -85,7 +85,7 @@ Recomendación:
 - El trigger `handle_new_user()` crea perfiles nuevos como:
   - `account_status = 'pending'`
   - `is_active = false`
-- Solo el administrador principal (`2211999e@umich.mx`) cumple `is_primary_admin()` y puede:
+- Solo el administrador principal (`22119993@umich.mx`) cumple `is_primary_admin()` y puede:
   - aprobar/rechazar/suspender usuarios
   - cambiar roles
   - actualizar configuración crítica (tabla `settings`)

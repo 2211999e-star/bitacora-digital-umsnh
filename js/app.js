@@ -23,6 +23,7 @@ import {
   isReviewModeEnabled,
   setReviewModeEnabled,
   setForceOfflineEnabled,
+  PRIMARY_ADMIN_EMAIL,
 } from './config.js?v=1.5.4';
 import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.5.4';
 import { handleRegister } from './auth.js?v=1.5.4';
@@ -423,7 +424,7 @@ async function ensureDbReady() {
           title: 'Supabase aún no está inicializado',
           html:
             'Detecté credenciales de Supabase configuradas, pero faltan tablas (por ejemplo <b>profiles</b>, <b>activities</b>, <b>events</b>).<br><br>' +
-            'Para que el modo nube funcione, ejecuta el archivo <b>supabase_schema.sql</b> en tu proyecto de Supabase (SQL Editor) y revisa RLS/policies.<br><br>' +
+            'Para que el modo nube funcione, ejecuta el archivo <b>supabase-schema.sql</b> en tu proyecto de Supabase (SQL Editor) y revisa RLS/policies.<br><br>' +
             'Por ahora activé automáticamente el <b>modo offline</b> para que el sistema no falle.',
           confirmButtonText: 'Entendido',
         });
@@ -565,9 +566,10 @@ function updateUserDisplay() {
 
 function updateAdminMenu() {
   const adminMenu = document.getElementById('admin-menu');
-  // Solo el admin principal ve el menú de administración
-  const isPrimary = Boolean(state.currentUser) && state.currentUser.role === 'admin' && String(state.currentUser.email || '').toLowerCase() === '22119993@umich.mx';
-  if (adminMenu) adminMenu.classList.toggle('hidden', !isPrimary);
+  // La sección de usuarios es visible para cualquier administrador;
+  // las acciones críticas siguen limitadas al admin principal.
+  const isAdmin = Boolean(state.currentUser) && state.currentUser.role === 'admin';
+  if (adminMenu) adminMenu.classList.toggle('hidden', !isAdmin);
 
   // Controles especiales en incidencias (muestra)
   const seedBtn = document.getElementById('btn-seed-activities');
@@ -931,7 +933,7 @@ async function seedReviewModeData() {
   if (localStorage.getItem(key) === 'true') return;
 
   const demoProfiles = [
-    { id: 'review-admin', email: 'demo.admin@umich.mx', full_name: 'Admin Demo', role: 'admin', account_status: 'approved', is_active: true },
+    { id: 'review-admin', email: PRIMARY_ADMIN_EMAIL, full_name: 'Admin Demo', role: 'admin', account_status: 'approved', is_active: true },
     { id: 'review-coordinator', email: 'demo.coordinador@umich.mx', full_name: 'Coordinador Demo', role: 'coordinator', account_status: 'approved', is_active: true },
     { id: 'review-practitioner', email: 'demo.practicante@umich.mx', full_name: 'Practicante Demo', role: 'practitioner', account_status: 'approved', is_active: true },
   ];

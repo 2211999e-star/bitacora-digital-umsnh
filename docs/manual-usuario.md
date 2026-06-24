@@ -25,7 +25,7 @@ En el menú lateral puedes acceder a:
 - **Eventos**: registro de eventos y seguimiento.
 - **Reportes**: exportación de PDFs (incidencias y eventos).
 - **Configuración**: modo offline / Supabase / respaldo / preferencias.
-- **Usuarios** (solo Admin): gestión de usuarios.
+- **Usuarios** (solo Admin): consulta de cuentas; la gestión completa queda para el administrador principal.
 
 ## 3. Dashboard
 El dashboard muestra:

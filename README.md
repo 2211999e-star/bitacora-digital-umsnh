@@ -95,14 +95,30 @@ pagina-main/
 │  ├─ config.js
 │  ├─ database.js
 │  ├─ permissions.js
-│  ├─ utils.js
-│  └─ legacy-main.js
+│  └─ utils.js
 ├─ assets/
-│  └─ logo-umich.png
+│  └─ logos/
+│     ├─ logo-umich.png
+│     └─ logo-faculty.png
+├─ docs/
+│  ├─ manual-tecnico.md
+│  └─ manual-usuario.md
+├─ legacy/
+│  ├─ main-legacy.js
+│  ├─ root-style-legacy.css
+│  ├─ root-tailwind-legacy.css
+│  ├─ modal-activity-improved.html
+│  └─ js/
+│     ├─ legacy-main.js
+│     ├─ enhanced-ui.js
+│     ├─ enhancements.js
+│     └─ examples.js
 ├─ index.html
-├─ main.js                    # legacy (ya no se usa)
 ├─ .env.example
-└─ vite.svg
+├─ supabase-schema.sql
+├─ manifest.webmanifest
+├─ sw.js
+└─ favicon.svg
 ```
 
 ### ¿Qué hace cada archivo?
@@ -115,17 +131,17 @@ pagina-main/
 - **js/** (módulos)  
   Separación por dominio (auth/dashboard/incidencias/eventos/reportes/usuarios/config/database/permissions/utils) sin perder funcionalidad.
 
-- **main.js** (legacy)  
-  Versión anterior del código. Se conserva por compatibilidad/histórico, pero **ya no se carga** desde `index.html`.
+- **legacy/**  
+  Archivos históricos y experimentales que ya no se cargan en `index.html`, separados para que la base activa sea más fácil de mantener.
 
 - **css/style.css**  
   Agregador de estilos. Importa los parciales para mantener un único `<link>` en `index.html`.
 
-- **assets/logo-umich.png**  
-  Logo institucional utilizado en interfaz y reportes.
+- **assets/logos/**  
+  Logos institucionales utilizados en interfaz, PWA y reportes PDF.
 
-- **vite.svg**  
-  Favicon/asset base del proyecto (puede reemplazarse por uno institucional).
+- **favicon.svg**  
+  Ícono base del proyecto para navegador.
 
 ---
 
@@ -166,10 +182,10 @@ Si no hay Supabase configurado, el sistema funciona en **modo offline**.
 
 ### Opción recomendada: usar el esquema listo (SQL)
 En este repositorio se incluye:
-- `supabase_schema.sql`
+- `supabase-schema.sql`
 
 Pasos:
-1. En Supabase → **SQL Editor** pega y ejecuta `supabase_schema.sql`.
+1. En Supabase → **SQL Editor** pega y ejecuta `supabase-schema.sql`.
 2. En Supabase → **Authentication → Providers** habilita **Email**.
 3. (Opcional) Desactiva “Confirm email” para pruebas internas.
 4. En el sistema web → **Configuración** pega tu **Supabase URL** y **ANON KEY** (pública).
@@ -178,7 +194,7 @@ Pasos:
 
 ### Solución de problemas (Supabase)
 - Si en consola aparece el error **PGRST205** (por ejemplo: “Could not find the table 'public.activities' in the schema cache”), significa que Supabase está configurado pero **aún no tiene creadas las tablas**.
-  - Ejecuta `supabase_schema.sql` en Supabase → **SQL Editor**.
+  - Ejecuta `supabase-schema.sql` en Supabase → **SQL Editor**.
   - Verifica que estén creadas al menos: `profiles`, `activities`, `events`, `settings`.
   - Revisa RLS/policies según tu entorno.
 - La app puede activar automáticamente **modo offline** para evitar que la interfaz “se rompa”. Al guardar Supabase de nuevo en **Configuración**, se reintentará el modo nube.
@@ -233,7 +249,7 @@ Ver:
 
 Regla: **NO** expongas claves privadas (Service Role Key). Solo se usa el **ANON KEY**.
 1. Supabase → **SQL Editor** → New query
-2. Pega el contenido de `supabase_schema.sql` y ejecútalo.
+2. Pega el contenido de `supabase-schema.sql` y ejecútalo.
 3. Supabase → **Authentication**:
    - Habilita **Email/Password**
    - Para un entorno interno, puedes desactivar temporalmente la confirmación por correo (opcional).
@@ -254,7 +270,7 @@ Este proyecto es una SPA estática (sin build obligatorio). Se incluye `.env.exa
 ### Hosting (Hostinger)
 Como la app es una SPA estática, en Hostinger normalmente basta con:
 1. Subir estos archivos a `public_html/`:
-   - `index.html`, `main.js`, `style.css`, `vite.svg`, `assets/`
+   - `index.html`, `css/`, `js/`, `assets/`, `manifest.webmanifest`, `sw.js`
 2. Verificar que **assets/** también se subió.
 3. Abrir tu dominio y probar login.
 

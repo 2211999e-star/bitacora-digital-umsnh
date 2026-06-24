@@ -677,8 +677,8 @@ function initializeReportControls() {
         logoUmichClearBtn.classList.remove('hidden');
     }
     if (!savedUmichLogo && logoUmichPreview && logoUmichClearBtn) {
-        // Logo incluido en el proyecto (assets/logo-umich.png)
-        urlToDataUrl('./assets/logo-umich.png')
+        // Logo incluido en el proyecto (assets/logos/logo-umich.png)
+        urlToDataUrl('./assets/logos/logo-umich.png')
             .then((dataUrl) => {
                 localStorage.setItem(logoUmichKey, String(dataUrl));
                 logoUmichPreview.src = String(dataUrl);
@@ -695,8 +695,8 @@ function initializeReportControls() {
         logoFacultyClearBtn.classList.remove('hidden');
     }
     if (!savedFacultyLogo && logoFacultyPreview && logoFacultyClearBtn) {
-        // Logo incluido en el proyecto (assets/logo-faculty.png)
-        urlToDataUrl('./assets/logo-faculty.png')
+        // Logo incluido en el proyecto (assets/logos/logo-faculty.png)
+        urlToDataUrl('./assets/logos/logo-faculty.png')
             .then((dataUrl) => {
                 localStorage.setItem(logoFacultyKey, String(dataUrl));
                 logoFacultyPreview.src = String(dataUrl);
@@ -1637,6 +1637,7 @@ async function loadDashboardData() {
         updateNotificationBadge();
         renderDashboardReminders();
         renderDashboardInsights();
+        renderDashboardCalendar();
 
         // Estadísticas para sección de reportes
         updateReportStats();
@@ -1972,6 +1973,7 @@ function loadRecentActivities() {
             </div>
         </div>
     `).join('');
+    } catch (e) { console.error('Error en renderEventsGrid:', e); }
 }
 
 // Activities Functions
@@ -1994,8 +1996,11 @@ async function loadActivities() {
 }
 
 function renderActivitiesTable() {
-    const tbody = document.getElementById('table-activities');
-    const searchText = document.getElementById('search-activities').value.toLowerCase();
+    try {
+        const tbody = document.getElementById('table-activities');
+        if (!tbody) return;
+        const searchInput = document.getElementById('search-activities');
+        const searchText = searchInput ? searchInput.value.toLowerCase() : '';
     const filterStatus = document.getElementById('filter-status').value;
     const filterService = (document.getElementById('filter-service-type')?.value || '').trim();
     const filterPriority = (document.getElementById('filter-priority')?.value || '').trim();
@@ -2745,8 +2750,11 @@ async function loadEvents() {
 }
 
 function renderEventsGrid(list = eventsData) {
-    const grid = document.getElementById('events-grid');
-
+    try {
+        const grid = document.getElementById('events-grid');
+        if (!grid) return;
+        
+        if (!Array.isArray(list)) list = [];
     if (!list || list.length === 0) {
         grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">No hay eventos registrados</div>';
         return;
@@ -3209,7 +3217,15 @@ window.exportPDF = async function(type, options = {}) {
     try {
         showLoader();
 
+        if (!window.jspdf) {
+            throw new Error("Librería generadora de PDF no disponible. Verifique su conexión o recargue la página.");
+        }
+
         const { jsPDF } = window.jspdf;
+        if (!jsPDF) {
+            throw new Error("jsPDF no está inicializado correctamente.");
+        }
+        
         const doc = new jsPDF();
 
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -3619,3 +3635,303 @@ window.showSection = showSection;
 window.toggleSidebar = toggleSidebar;
 window.toggleDarkMode = toggleDarkMode;
 window.showNotifications = showNotifications;
+
+
+function renderDashboardCalendar() {
+    try {
+        const container = document.getElementById('dashboard-calendar');
+        if (!container) return;
+
+        const summary = document.getElementById('dashboard-calendar-summary');
+        const monthTitle = document.getElementById('dashboard-calendar-month');
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        if (monthTitle) monthTitle.textContent = `${monthNames[month]} ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        let html = '<div class="grid grid-cols-7 gap-1 text-center mb-2">';
+        const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        days.forEach(d => html += `<div class="text-xs font-bold text-gray-500">${d}</div>`);
+        html += '</div><div class="grid grid-cols-7 gap-1">';
+        
+        let upcomingCount = 0;
+
+        for (let i = 0; i < firstDay; i++) {
+            html += `<div class="p-2 text-gray-300 dark:text-gray-700"></div>`;
+        }
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            
+            // Check for events
+            const dayEvents = (eventsData || []).filter(e => e.event_date === dateStr);
+            const dayDeliveries = (activitiesData || []).filter(a => a.delivery_date === dateStr);
+            
+            let indicators = '';
+            if (dayEvents.length > 0) {
+                indicators += `<div class="w-1.5 h-1.5 rounded-full bg-blue-500 mx-0.5" title="Evento(s)"></div>`;
+                if (dateStr >= now.toISOString().split('T')[0]) upcomingCount += dayEvents.length;
+            }
+            if (dayDeliveries.length > 0) {
+                indicators += `<div class="w-1.5 h-1.5 rounded-full bg-red-500 mx-0.5" title="Entrega(s)"></div>`;
+                if (dateStr >= now.toISOString().split('T')[0]) upcomingCount += dayDeliveries.length;
+            }
+
+            const isToday = day === now.getDate() ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500' : 'bg-gray-50 dark:bg-gray-800 border-transparent';
+            
+            html += `
+                <div class="p-1 md:p-2 border rounded-lg ${isToday} flex flex-col items-center justify-start min-h-[40px]">
+                    <span class="text-xs ${day === now.getDate() ? 'font-bold text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}">${day}</span>
+                    <div class="flex mt-1">${indicators}</div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+
+        if (summary) {
+            summary.textContent = upcomingCount > 0 
+                ? `Tienes ${upcomingCount} actividad(es) programada(s) próximamente.`
+                : 'Sin actividades próximas en el mes actual.';
+        }
+    } catch (e) {
+        console.error("Error rendering calendar:", e);
+    }
+}
+
+// Ensure function is exposed
+window.renderDashboardCalendar = renderDashboardCalendar;
+
+
+// --- UX Improvements Logic ---
+window.toggleFAB = function() {
+    const menu = document.getElementById('fab-menu');
+    const icon = document.getElementById('fab-icon');
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        setTimeout(() => {
+            menu.classList.remove('opacity-0', 'translate-y-4');
+            icon.style.transform = 'rotate(45deg)';
+        }, 10);
+    } else {
+        menu.classList.add('opacity-0', 'translate-y-4');
+        icon.style.transform = 'rotate(0deg)';
+        setTimeout(() => menu.classList.add('hidden'), 200);
+    }
+};
+
+window.openGlobalSearch = function() {
+    const modal = document.getElementById('global-search-modal');
+    const input = document.getElementById('global-search-input');
+    if (modal) {
+        modal.classList.remove('hidden');
+        setTimeout(() => input.focus(), 50);
+    }
+};
+
+window.closeGlobalSearch = function() {
+    const modal = document.getElementById('global-search-modal');
+    if (modal) modal.classList.add('hidden');
+};
+
+document.addEventListener('keydown', (e) => {
+    // Ctrl+K to open global search
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openGlobalSearch();
+    }
+    // Esc to close global search
+    if (e.key === 'Escape') {
+        closeGlobalSearch();
+        const menu = document.getElementById('fab-menu');
+        if (menu && !menu.classList.contains('hidden')) toggleFAB();
+    }
+});
+
+const setupGlobalSearch = () => {
+    const input = document.getElementById('global-search-input');
+    const results = document.getElementById('global-search-results');
+    if (!input || !results) return;
+
+    input.addEventListener('input', (e) => {
+        const val = e.target.value.toLowerCase().trim();
+        if (!val) {
+            results.innerHTML = '<div class="p-8 text-center text-gray-500">Escribe para buscar...</div>';
+            return;
+        }
+
+        const actMatches = activitiesData.filter(a => 
+            (a.reporter_name||'').toLowerCase().includes(val) ||
+            (a.department||'').toLowerCase().includes(val) ||
+            (a.brand||'').toLowerCase().includes(val) ||
+            (a.model||'').toLowerCase().includes(val)
+        ).slice(0, 5);
+
+        const evMatches = eventsData.filter(e => 
+            (e.title||'').toLowerCase().includes(val) ||
+            (e.location||'').toLowerCase().includes(val)
+        ).slice(0, 3);
+
+        if (actMatches.length === 0 && evMatches.length === 0) {
+            results.innerHTML = '<div class="p-8 text-center text-gray-500">No se encontraron resultados.</div>';
+            return;
+        }
+
+        let html = '';
+        if (actMatches.length > 0) {
+            html += '<h3 class="text-xs font-bold text-gray-400 uppercase px-3 py-2">Incidencias</h3>';
+            html += actMatches.map(a => `
+                <div onclick="closeGlobalSearch(); showSection('activities'); openActivityModal('${a.id}')" class="p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer rounded-lg flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fas fa-clipboard-list"></i></div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600">${a.reporter_name || 'Sin nombre'} • ${a.department || '-'}</p>
+                            <p class="text-xs text-gray-500">${a.brand || ''} ${a.model || ''} - ${a.service_type || ''}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400"><i class="fas fa-chevron-right"></i></span>
+                </div>
+            `).join('');
+        }
+        if (evMatches.length > 0) {
+            html += '<h3 class="text-xs font-bold text-gray-400 uppercase px-3 py-2 mt-2">Eventos</h3>';
+            html += evMatches.map(e => `
+                <div onclick="closeGlobalSearch(); showSection('events'); openEventModal('${e.id}')" class="p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer rounded-lg flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-calendar"></i></div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-purple-600">${e.title || 'Evento'}</p>
+                            <p class="text-xs text-gray-500">${e.event_date} ${e.event_time ? e.event_time : ''}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-gray-400"><i class="fas fa-chevron-right"></i></span>
+                </div>
+            `).join('');
+        }
+        results.innerHTML = html;
+    });
+};
+setTimeout(setupGlobalSearch, 1000);
+
+window.updateQuickStatus = async function(id, status) {
+    try {
+        const { error } = await supabase.from('activities').update({ task_status: status }).eq('id', id);
+        if (error) throw error;
+        const idx = activitiesData.findIndex(a => a.id === id);
+        if (idx !== -1) activitiesData[idx].task_status = status;
+        renderActivitiesTable();
+        loadDashboardData();
+        Swal.fire({ icon: 'success', title: 'Estado actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+    } catch(e) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado' });
+        renderActivitiesTable(); // Revert visual change
+    }
+};
+
+window.updateEventQuickStatus = async function(id, status) {
+    try {
+        const { error } = await supabase.from('events').update({ status: status }).eq('id', id);
+        if (error) throw error;
+        const idx = eventsData.findIndex(e => e.id === id);
+        if (idx !== -1) eventsData[idx].status = status;
+        renderEventsGrid();
+        loadDashboardData();
+        Swal.fire({ icon: 'success', title: 'Estado actualizado', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+    } catch(e) {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado' });
+        renderEventsGrid(); // Revert visual change
+    }
+};
+
+// Form Memory logic injection
+const originalOpenActivityModal = window.openActivityModal;
+window.openActivityModal = function(id = null) {
+    if (originalOpenActivityModal) originalOpenActivityModal(id);
+    if (!id) {
+        // Only autofill if creating new
+        const lastDept = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}lastDept`);
+        const lastReporter = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}lastReporter`);
+        if (lastDept && document.getElementById('act-department')) document.getElementById('act-department').value = lastDept;
+        if (lastReporter && document.getElementById('act-reporter-name')) document.getElementById('act-reporter-name').value = lastReporter;
+    }
+};
+
+const originalSaveActivity = window.saveActivity;
+window.saveActivity = async function() {
+    // Save memory before calling original
+    const dept = document.getElementById('act-department')?.value;
+    const rep = document.getElementById('act-reporter-name')?.value;
+    if (dept) localStorage.setItem(`${LOCAL_STORAGE_PREFIX}lastDept`, dept);
+    if (rep) localStorage.setItem(`${LOCAL_STORAGE_PREFIX}lastReporter`, rep);
+    
+    if (originalSaveActivity) return originalSaveActivity();
+};
+
+
+// --- Dashboard Buttons Missing Logic ---
+window.openCommandPalette = window.openGlobalSearch;
+
+window.openMaintenanceFormSection = function(type) {
+    showSection('activities');
+    setTimeout(() => {
+        openActivityModal();
+        const serviceTypeInput = document.getElementById('act-service-type');
+        if (serviceTypeInput) {
+            serviceTypeInput.value = type === 'preventivo' ? 'Mantenimiento preventivo' : 'Mantenimiento correctivo';
+        }
+    }, 150); // slight delay to ensure modal is rendered
+};
+
+window.openActivitiesPreset = function(status = '', service = '', priority = '', delivery = '', sort = '') {
+    showSection('activities');
+    
+    // Clear search and apply filters
+    const searchInput = document.getElementById('search-activities');
+    if (searchInput) searchInput.value = '';
+    
+    const filterStatus = document.getElementById('filter-status');
+    if (filterStatus) filterStatus.value = status;
+    
+    const filterService = document.getElementById('filter-service-type');
+    if (filterService) {
+        if (service === 'preventivo') filterService.value = 'Mantenimiento preventivo';
+        else if (service === 'correctivo') filterService.value = 'Mantenimiento correctivo';
+        else filterService.value = service;
+    }
+    
+    const filterPriority = document.getElementById('filter-priority');
+    if (filterPriority) filterPriority.value = priority;
+    
+    const filterDelivery = document.getElementById('filter-delivery');
+    if (filterDelivery) filterDelivery.value = delivery;
+    
+    // Assuming there's a sort input, though it wasn't standard
+    const sortInput = document.getElementById('sort-activities');
+    if (sortInput && sort) sortInput.value = sort;
+    
+    // Trigger render to apply filters
+    setTimeout(() => renderActivitiesTable(), 50);
+};
+
+window.setActivitiesStatusFilter = function(status) {
+    showSection('activities');
+    const filterStatus = document.getElementById('filter-status');
+    if (filterStatus) {
+        filterStatus.value = status === 'activos' ? '' : status; // 'activos' logic might just be clear filter
+    }
+    setTimeout(() => renderActivitiesTable(), 50);
+};
+
+window.setActivitiesDeliveryFilter = function(filter) {
+    showSection('activities');
+    const filterDelivery = document.getElementById('filter-delivery');
+    if (filterDelivery) filterDelivery.value = filter;
+    setTimeout(() => renderActivitiesTable(), 50);
+};
