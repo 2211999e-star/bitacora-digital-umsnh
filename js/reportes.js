@@ -106,8 +106,8 @@ export function initializeReportControls() {
     logoUmichClearBtn.classList.remove('hidden');
   }
   if (!savedUmichLogo && logoUmichPreview && logoUmichClearBtn) {
-    // Logo incluido en el proyecto (assets/logos/logo-umich.png)
-    urlToDataUrl('./assets/logos/logo-umich.png')
+    // Logo incluido en el proyecto (img/logos/logo-umich.png)
+    urlToDataUrl('./img/logos/logo-umich.png')
       .then((dataUrl) => {
         localStorage.setItem(logoUmichKey, String(dataUrl));
         logoUmichPreview.src = String(dataUrl);
@@ -124,8 +124,8 @@ export function initializeReportControls() {
     logoFacultyClearBtn.classList.remove('hidden');
   }
   if (!savedFacultyLogo && logoFacultyPreview && logoFacultyClearBtn) {
-    // Logo incluido en el proyecto (assets/logos/logo-faculty.png)
-    urlToDataUrl('./assets/logos/logo-faculty.png')
+    // Logo incluido en el proyecto (img/logos/logo-faculty.png)
+    urlToDataUrl('./img/logos/logo-faculty.png')
       .then((dataUrl) => {
         localStorage.setItem(logoFacultyKey, String(dataUrl));
         logoFacultyPreview.src = String(dataUrl);

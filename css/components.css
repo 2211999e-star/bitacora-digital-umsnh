@@ -260,6 +260,39 @@ pre {
   color: #f9fafb;
 }
 
+/* Secciones semánticas principales */
+.app-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.app-section-header {
+  margin-bottom: 0.25rem;
+}
+
+.app-section .dashboard-panel,
+.app-section .stat-card,
+.app-section .table-panel,
+.app-section .settings-card {
+  border-radius: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .app-section {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-section {
+    gap: 1rem;
+  }
+
+  .app-section-header h2 {
+    line-height: 1.2;
+  }
+}
+
 /* Tarjetas de settings */
 .settings-card {
   border-radius: 1rem;

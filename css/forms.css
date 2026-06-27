@@ -70,6 +70,18 @@ a {
   text-underline-offset: 3px;
 }
 
+/* Base unificada para controles principales dentro de la app */
+#app-container button,
+#app-container input,
+#app-container select,
+#app-container textarea {
+  border-radius: 0.75rem;
+}
+
+#app-container button {
+  font-weight: 600;
+}
+
 /* Custom Select Arrow */
 select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -108,13 +120,4 @@ input[type="file"]::file-selector-button {
 input[type="file"]:hover::file-selector-button {
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
-}
-
-/* Focus States for Accessibility (mantener comportamiento legacy) */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
 }

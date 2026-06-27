@@ -96,23 +96,15 @@ pagina-main/
 │  ├─ database.js
 │  ├─ permissions.js
 │  └─ utils.js
-├─ assets/
+├─ img/
 │  └─ logos/
 │     ├─ logo-umich.png
 │     └─ logo-faculty.png
+├─ components/
+│  └─ README.md
 ├─ docs/
 │  ├─ manual-tecnico.md
 │  └─ manual-usuario.md
-├─ legacy/
-│  ├─ main-legacy.js
-│  ├─ root-style-legacy.css
-│  ├─ root-tailwind-legacy.css
-│  ├─ modal-activity-improved.html
-│  └─ js/
-│     ├─ legacy-main.js
-│     ├─ enhanced-ui.js
-│     ├─ enhancements.js
-│     └─ examples.js
 ├─ index.html
 ├─ .env.example
 ├─ supabase-schema.sql
@@ -131,13 +123,10 @@ pagina-main/
 - **js/** (módulos)  
   Separación por dominio (auth/dashboard/incidencias/eventos/reportes/usuarios/config/database/permissions/utils) sin perder funcionalidad.
 
-- **legacy/**  
-  Archivos históricos y experimentales que ya no se cargan en `index.html`, separados para que la base activa sea más fácil de mantener.
-
 - **css/style.css**  
   Agregador de estilos. Importa los parciales para mantener un único `<link>` en `index.html`.
 
-- **assets/logos/**  
+- **img/logos/**  
   Logos institucionales utilizados en interfaz, PWA y reportes PDF.
 
 - **favicon.svg**  
@@ -270,8 +259,8 @@ Este proyecto es una SPA estática (sin build obligatorio). Se incluye `.env.exa
 ### Hosting (Hostinger)
 Como la app es una SPA estática, en Hostinger normalmente basta con:
 1. Subir estos archivos a `public_html/`:
-   - `index.html`, `css/`, `js/`, `assets/`, `manifest.webmanifest`, `sw.js`
-2. Verificar que **assets/** también se subió.
+  - `index.html`, `css/`, `js/`, `img/`, `manifest.webmanifest`, `sw.js`
+2. Verificar que **img/** también se subió.
 3. Abrir tu dominio y probar login.
 
 > Nota: si usas Supabase, asegúrate de agregar tu dominio en Supabase → Authentication → URL Configuration (Allowed Redirect URLs).

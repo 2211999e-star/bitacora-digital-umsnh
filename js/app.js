@@ -90,6 +90,14 @@ const cmdk = {
   recents: [],
 };
 
+const globalSearchState = {
+  open: false,
+};
+
+const fabState = {
+  open: false,
+};
+
 const CMDK_RECENTS_KEY = `${LOCAL_STORAGE_PREFIX}cmdkRecents`;
 
 function loadCmdkRecents() {
@@ -154,6 +162,153 @@ function closeCommandPalette() {
   } catch {
     // noop
   }
+}
+
+function closeFAB() {
+  const menu = document.getElementById('fab-menu');
+  const icon = document.getElementById('fab-icon');
+  if (!menu || !icon) return;
+
+  fabState.open = false;
+  menu.classList.add('opacity-0', 'translate-y-4');
+  icon.classList.remove('rotate-45');
+  setTimeout(() => {
+    if (!fabState.open) menu.classList.add('hidden');
+  }, 160);
+}
+
+function toggleFAB() {
+  const menu = document.getElementById('fab-menu');
+  const icon = document.getElementById('fab-icon');
+  if (!menu || !icon) return;
+
+  if (fabState.open) {
+    closeFAB();
+    return;
+  }
+
+  fabState.open = true;
+  menu.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    menu.classList.remove('opacity-0', 'translate-y-4');
+    icon.classList.add('rotate-45');
+  });
+}
+
+function renderGlobalSearchResults(queryRaw = '') {
+  const input = document.getElementById('global-search-input');
+  const results = document.getElementById('global-search-results');
+  if (!results) return;
+
+  const q = String(queryRaw || input?.value || '').trim().toLowerCase();
+  if (!q) {
+    results.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Escribe para buscar...</div>';
+    return;
+  }
+
+  const activityMatches = (state.activitiesData || [])
+    .filter((a) => {
+      const haystack = [
+        a?.folio,
+        a?.reporter_name,
+        a?.department,
+        a?.coordination,
+        a?.service_type,
+        a?.description,
+        a?.task_status,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    })
+    .slice(0, 8)
+    .map((a) => ({ type: 'activity', id: a.id, title: a.description || 'Incidencia', meta: a.task_status || 'Sin estado' }));
+
+  const eventMatches = (state.eventsData || [])
+    .filter((ev) => {
+      const haystack = [ev?.title, ev?.location, ev?.status, ev?.description, ev?.event_date].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    })
+    .slice(0, 8)
+    .map((ev) => ({ type: 'event', id: ev.id, title: ev.title || 'Evento', meta: ev.status || 'Sin estado' }));
+
+  const items = [...activityMatches, ...eventMatches].slice(0, 12);
+  if (!items.length) {
+    results.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Sin resultados.</div>';
+    return;
+  }
+
+  results.innerHTML = '';
+  items.forEach((item) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'w-full text-left px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors';
+    btn.innerHTML = `
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <p class="font-semibold text-gray-900 dark:text-white truncate">${item.title}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">${item.meta}</p>
+        </div>
+        <span class="text-[11px] px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300">${item.type === 'activity' ? 'Incidencia' : 'Evento'}</span>
+      </div>
+    `;
+    btn.addEventListener('click', () => {
+      closeGlobalSearch();
+      if (item.type === 'activity') {
+        showSection('activities');
+        setTimeout(() => viewActivity(dbCtx, item.id), 60);
+      } else {
+        showSection('events');
+        setTimeout(() => editEvent(dbCtx, item.id), 60);
+      }
+    });
+    results.appendChild(btn);
+  });
+}
+
+function openGlobalSearch() {
+  const modal = document.getElementById('global-search-modal');
+  const input = document.getElementById('global-search-input');
+  if (!modal) return;
+
+  globalSearchState.open = true;
+  modal.classList.remove('hidden');
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  renderGlobalSearchResults('');
+  setTimeout(() => input?.focus?.(), 0);
+}
+
+function closeGlobalSearch() {
+  const modal = document.getElementById('global-search-modal');
+  if (!modal) return;
+
+  globalSearchState.open = false;
+  modal.classList.add('hidden');
+  document.documentElement.style.overflow = '';
+  document.body.style.overflow = '';
+}
+
+function closeAllPanels() {
+  closeCommandPalette();
+  closeFAB();
+  closeGlobalSearch();
+  closeSidebar();
+
+  document.querySelectorAll('details[open]').forEach((d) => d.removeAttribute('open'));
+
+  const closeIfVisible = (id, fn) => {
+    const el = document.getElementById(id);
+    if (!el || el.classList.contains('hidden')) return;
+    if (typeof fn === 'function') fn();
+  };
+
+  closeIfVisible('modal-activity', closeActivityModal);
+  closeIfVisible('modal-activity-advanced', closeActivityAdvancedModal);
+  closeIfVisible('modal-event', closeEventModal);
+  closeIfVisible('modal-user', closeUserModal);
+  closeIfVisible('modal-register', closeRegisterModal);
 }
 
 function buildCmdkItems() {
@@ -631,6 +786,12 @@ function showSection(sectionName) {
   // Close sidebar on mobile
   if (window.innerWidth < 1024) closeSidebar();
 
+  // Reset scroll principal al cambiar de sección para una navegación más fluida
+  const mainContent = document.getElementById('main-content');
+  if (mainContent) {
+    mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   // Refresh data based on section
   if (sectionName === 'dashboard') {
     loadDashboardData(dbCtx);
@@ -761,40 +922,19 @@ function initializeEventListeners() {
     });
   }
 
+  const globalInput = document.getElementById('global-search-input');
+  if (globalInput && !globalInput.dataset.initialized) {
+    globalInput.dataset.initialized = 'true';
+    globalInput.addEventListener('input', () => renderGlobalSearchResults(globalInput.value));
+  }
+
   // Escape global: cerrar modales/overlays si están abiertos
   if (!document.body.dataset.escapeWired) {
     document.body.dataset.escapeWired = 'true';
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
-
-      // 1) Command Palette
-      if (cmdk.open) {
-        e.preventDefault();
-        closeCommandPalette();
-        return;
-      }
-
-      // 2) Dropdowns <details>
-      const openDetails = document.querySelectorAll('details[open]');
-      if (openDetails.length) {
-        openDetails.forEach((d) => d.removeAttribute('open'));
-        return;
-      }
-
-      // 3) Modales principales (si existen)
-      const tryClose = (id, fn) => {
-        const modal = document.getElementById(id);
-        if (modal && modal.classList.contains('show') && typeof fn === 'function') {
-          fn();
-          return true;
-        }
-        return false;
-      };
-
-      if (tryClose('modal-activity', window.closeActivityModal)) return;
-      if (tryClose('modal-event', window.closeEventModal)) return;
-      if (tryClose('modal-user', window.closeUserModal)) return;
-      if (tryClose('modal-register', window.closeRegisterModal)) return;
+      e.preventDefault();
+      closeAllPanels();
     });
   }
 
@@ -900,9 +1040,6 @@ async function initializeApp() {
       // noop
     }
 
-    // Initialize event listeners
-    initializeEventListeners();
-
     // Hide loader
     hideLoader();
   } catch (error) {
@@ -1007,6 +1144,7 @@ window.prevPage = prevPage;
 window.nextPage = nextPage;
 window.openMaintenanceFormSection = openMaintenanceFormSection;
 window.showActivityModal = showActivityModal;
+window.openActivityModal = showActivityModal;
 window.showPreventiveModal = () => openMaintenanceFormSection('preventivo');
 window.showCorrectiveModal = () => openMaintenanceFormSection('correctivo');
 window.closeActivityModal = closeActivityModal;
@@ -1029,6 +1167,7 @@ window.downloadMsinfoScript = downloadMsinfoScript;
 window.filterEvents = filterEvents;
 window.clearEventsFilters = clearEventsFilters;
 window.showEventModal = showEventModal;
+window.openEventModal = showEventModal;
 window.closeEventModal = closeEventModal;
 window.editEvent = (id) => editEvent(dbCtx, id);
 window.exportEventsCSV = () => exportEventsCSV();
@@ -1052,6 +1191,10 @@ window.exportMaintenanceReport = (kind) => exportMaintenanceReport(dbCtx, kind);
 // Command Palette
 window.openCommandPalette = openCommandPalette;
 window.closeCommandPalette = closeCommandPalette;
+window.toggleFAB = toggleFAB;
+window.openGlobalSearch = openGlobalSearch;
+window.closeGlobalSearch = closeGlobalSearch;
+window.closeAllPanels = closeAllPanels;
 
 // Clipboard helper (para botones/acciones rápidas)
 window.copyToClipboard = async (text) => {

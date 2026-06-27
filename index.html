@@ -9,7 +9,7 @@
     <title>Bitácora Digital - Comisión de Servicios Informáticos UMICH</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="apple-touch-icon" href="./assets/logos/logo-umich.png">
+    <link rel="apple-touch-icon" href="./img/logos/logo-umich.png">
     <meta name="application-name" content="Bitácora Digital">
     <!-- Fuerza modo offline ANTES de cargar módulos -->
     <script>
@@ -57,26 +57,6 @@
         class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-black focus:text-white">
         Saltar al contenido
     </a>
-
-    <!-- FALLBACK: Si app.js no carga en 3 segundos, mostrar login -->
-    <script>
-        // Fallback: mostrar login después de 3 segundos
-        setTimeout(() => {
-            const loader = document.getElementById('loader');
-            const login = document.getElementById('login-screen');
-            if (loader) {
-                loader.classList.add('hidden');
-                loader.style.display = 'none';
-            }
-            if (login) {
-                login.classList.remove('hidden');
-                login.style.display = 'flex';
-                login.style.minHeight = '100vh';
-                login.style.backgroundColor = 'white';
-            }
-            console.log('Fallback: showing login');
-        }, 3000);
-    </script>
 
     <!-- Loader -->
     <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-950 transition-opacity duration-300">
@@ -221,7 +201,7 @@
     </div>
 
     <!-- Main App Container -->
-    <div id="app-container" class="h-screen flex overflow-hidden hidden">
+    <div id="app-container" class="min-h-screen lg:h-screen flex overflow-hidden hidden">
         <!-- Banner: Modo revisión -->
         <div id="review-banner" class="hidden fixed top-0 left-0 right-0 z-[60]">
             <div class="mx-auto max-w-7xl px-4 py-2">
@@ -359,6 +339,9 @@
                             <button type="button" onclick="openCommandPalette()" aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)" class="icon-button">
                                 <i class="fas fa-magnifying-glass text-xl"></i>
                             </button>
+                            <button type="button" onclick="closeAllPanels()" aria-label="Cerrar paneles" title="Cerrar paneles y pestañas" class="icon-button">
+                                <i class="fas fa-xmark text-xl"></i>
+                            </button>
                             <button type="button" onclick="toggleDarkMode()" aria-label="Cambiar modo oscuro" title="Cambiar tema" class="icon-button">
                             <i class="fas fa-moon dark:hidden text-xl"></i>
                             <i class="fas fa-sun hidden dark:inline text-xl"></i>
@@ -375,8 +358,8 @@
 
             <!-- Page Content -->
             <div class="p-4 lg:p-8 max-w-7xl mx-auto">
-                <section id="section-dashboard" class="section">
-                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
+                <section id="section-dashboard" class="section app-section app-section--dashboard">
+                    <div class="app-section-header flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                         <div>
                             <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Dashboard</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Resumen operativo, recordatorios y accesos rápidos.</p>
@@ -1029,9 +1012,9 @@
                 </section>
 
                 <!-- Activities Section -->
-                <section id="section-activities" class="section hidden">
+                <section id="section-activities" class="section app-section app-section--activities hidden">
                     <!-- Encabezado + acciones (limpio, sin saturar) -->
-                    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-4">
+                    <div class="app-section-header flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 mb-4">
                         <div>
                             <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Incidencias</h2>
                             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Registro y seguimiento de mantenimientos y soporte.</p>
@@ -1399,7 +1382,7 @@
                 </section>
 
                 <!-- Events Section -->
-                <section id="section-events" class="section hidden">
+                <section id="section-events" class="section app-section app-section--events hidden">
                     <!-- Events Header Banner -->
                     <div class="relative rounded-2xl overflow-hidden mb-6 p-6 bg-gradient-to-r from-purple-700 via-violet-700 to-indigo-800 text-white shadow-xl">
                         <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0);background-size:24px 24px"></div>
@@ -1460,7 +1443,7 @@
                 </section>
 
                 <!-- Reports Section -->
-                <section id="section-reports" class="section hidden">
+                <section id="section-reports" class="section app-section app-section--reports hidden">
                     <!-- Reports Header Banner -->
                     <div class="relative rounded-2xl overflow-hidden mb-6 p-6 bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white shadow-xl">
                         <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0);background-size:24px 24px"></div>
@@ -1607,7 +1590,7 @@
                 </section>
 
                 <!-- Settings Section -->
-                <section id="section-settings" class="section hidden">
+                <section id="section-settings" class="section app-section app-section--settings hidden">
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Configuración</h2>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Preferencias del sistema, conexión a la nube y formatos de impresión.</p>
@@ -1805,11 +1788,11 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-800 p-3">
                                         <p class="font-semibold text-gray-900 dark:text-gray-100">Universidad</p>
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">assets/logos/logo-umich.png</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">img/logos/logo-umich.png</p>
                                     </div>
                                     <div class="rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-800 p-3">
                                         <p class="font-semibold text-gray-900 dark:text-gray-100">Facultad</p>
-                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">assets/logos/logo-faculty.png</p>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">img/logos/logo-faculty.png</p>
                                     </div>
                                 </div>
                                 <p class="text-xs text-gray-600 dark:text-gray-400 mt-3">Para cambiarlos dentro del PDF: <b>Reportes → Configuración del PDF</b>.</p>
@@ -1850,7 +1833,7 @@
                 </section>
 
                 <!-- Users Section (Admin Only) -->
-                <section id="section-users" class="section hidden">
+                <section id="section-users" class="section app-section app-section--users hidden">
                     <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
                         <div>
                             <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Usuarios</h2>

@@ -59,6 +59,15 @@
     font-size: 0.625rem;
     padding: 0.125rem 0.5rem;
   }
+
+  .modal-shell {
+    max-height: 88svh !important;
+    border-radius: 1rem !important;
+  }
+
+  #global-search-modal .max-w-2xl {
+    max-width: 100%;
+  }
 }
 
 /* Más aire en formularios largos (evita sensación “amontonada”) */
@@ -71,11 +80,24 @@
 }
 
 @media (max-width: 768px) {
+  #app-container {
+    min-height: 100svh;
+    height: auto;
+  }
+
+  #main-content {
+    min-height: 0;
+  }
+
   /* Tablas: menos “apretado” y mejor lectura en pantallas pequeñas */
   table th,
   table td {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+  }
+
+  .quick-action-grid {
+    grid-template-columns: 1fr;
   }
 }
 

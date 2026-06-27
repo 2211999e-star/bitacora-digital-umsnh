@@ -8,7 +8,7 @@
  */
 
 // Incrementa este valor cuando cambien CSS/JS para evitar servir assets viejos.
-const CACHE_VERSION = 'bitacora-cache-v8';
+const CACHE_VERSION = 'bitacora-cache-v9';
 
 // Nota: se cachean SOLO recursos locales del repo (evitamos CDNs por CORS y variaciones).
 const PRECACHE_URLS = [
@@ -16,7 +16,7 @@ const PRECACHE_URLS = [
   './index.html',
   './manifest.webmanifest',
   './favicon.svg',
-  './assets/logos/logo-umich.png',
+  './img/logos/logo-umich.png',
 
   './css/tailwind.css',
   './css/style.css',

@@ -9,12 +9,12 @@
   "theme_color": "#0b0f19",
   "icons": [
     {
-      "src": "./assets/logos/logo-umich.png",
+      "src": "./img/logos/logo-umich.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "./assets/logos/logo-umich.png",
+      "src": "./img/logos/logo-umich.png",
       "sizes": "512x512",
       "type": "image/png"
     }
