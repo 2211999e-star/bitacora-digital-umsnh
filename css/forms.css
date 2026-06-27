@@ -78,6 +78,41 @@ a {
   border-radius: 0.75rem;
 }
 
+#app-container label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.dark #app-container label {
+  color: #cbd5e1;
+}
+
+#app-container input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+#app-container select {
+  min-height: 2.75rem;
+}
+
+#app-container textarea {
+  line-height: 1.45;
+}
+
+#app-container input:not([type="checkbox"]):not([type="radio"]),
+#app-container select,
+#app-container textarea {
+  border-color: rgba(148, 163, 184, 0.35);
+  background-color: rgba(255, 255, 255, 0.88);
+}
+
+.dark #app-container input:not([type="checkbox"]):not([type="radio"]),
+.dark #app-container select,
+.dark #app-container textarea {
+  border-color: rgba(100, 116, 139, 0.6);
+  background-color: rgba(15, 23, 42, 0.7);
+}
+
 #app-container button {
   font-weight: 600;
 }
@@ -120,4 +155,14 @@ input[type="file"]::file-selector-button {
 input[type="file"]:hover::file-selector-button {
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+#app-container input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #0f172a 0%, #0d9488 100%);
+  color: #f8fafc;
+  font-weight: 700;
+  padding: 0.55rem 0.85rem;
+  margin-right: 0.75rem;
 }

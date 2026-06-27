@@ -17,7 +17,27 @@ html {
 
 body {
   overflow-x: hidden;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  letter-spacing: 0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+.section-title,
+.panel-title {
+  font-family: 'Sora', 'Nunito Sans', system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+:root {
+  --ui-surface-light: rgba(255, 255, 255, 0.9);
+  --ui-surface-dark: rgba(17, 24, 39, 0.86);
+  --ui-border-light: rgba(203, 213, 225, 0.7);
+  --ui-border-dark: rgba(71, 85, 105, 0.65);
+  --ui-shadow-light: 0 14px 30px rgba(15, 23, 42, 0.08);
+  --ui-shadow-dark: 0 18px 34px rgba(2, 6, 23, 0.34);
 }
 
 /* details/summary: usado para menús de acciones y filtros */
@@ -82,16 +102,16 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(0, 0, 0, 0.06), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(0, 0, 0, 0.04), transparent 55%),
-    radial-gradient(900px 700px at 40% 100%, rgba(0, 0, 0, 0.035), transparent 60%);
+    radial-gradient(1200px 620px at 12% 8%, rgba(15, 23, 42, 0.07), transparent 62%),
+    radial-gradient(920px 520px at 94% 2%, rgba(8, 145, 178, 0.08), transparent 58%),
+    radial-gradient(880px 720px at 42% 100%, rgba(34, 197, 94, 0.06), transparent 62%);
 }
 
 .dark body::before {
   background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(255, 255, 255, 0.06), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(255, 255, 255, 0.04), transparent 55%),
-    radial-gradient(900px 700px at 40% 100%, rgba(255, 255, 255, 0.03), transparent 60%);
+    radial-gradient(1200px 620px at 12% 8%, rgba(148, 163, 184, 0.12), transparent 62%),
+    radial-gradient(920px 520px at 94% 2%, rgba(34, 211, 238, 0.08), transparent 58%),
+    radial-gradient(880px 720px at 42% 100%, rgba(74, 222, 128, 0.07), transparent 62%);
 }
 
 ::selection {
@@ -109,6 +129,39 @@ div[class*="rounded-xl"][class*="border"][class*="bg-white"] {
 
 .dark div[class*="rounded-xl"][class*="border"][class*="bg-white"] {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Superficies consistentes para módulos internos */
+#app-container .section div.rounded-xl.border,
+#app-container .section div.rounded-2xl.border,
+#app-container .section section.rounded-xl.border,
+#app-container .section section.rounded-2xl.border,
+#app-container .section article.rounded-xl.border,
+#app-container .section article.rounded-2xl.border {
+  border-color: var(--ui-border-light);
+  background: linear-gradient(180deg, var(--ui-surface-light), rgba(248, 250, 252, 0.92));
+  box-shadow: var(--ui-shadow-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.dark #app-container .section div.rounded-xl.border,
+.dark #app-container .section div.rounded-2xl.border,
+.dark #app-container .section section.rounded-xl.border,
+.dark #app-container .section section.rounded-2xl.border,
+.dark #app-container .section article.rounded-xl.border,
+.dark #app-container .section article.rounded-2xl.border {
+  border-color: var(--ui-border-dark);
+  background: linear-gradient(180deg, var(--ui-surface-dark), rgba(15, 23, 42, 0.94));
+  box-shadow: var(--ui-shadow-dark);
+}
+
+#app-container .section div.rounded-xl.border:hover,
+#app-container .section div.rounded-2xl.border:hover,
+#app-container .section section.rounded-xl.border:hover,
+#app-container .section section.rounded-2xl.border:hover,
+#app-container .section article.rounded-xl.border:hover,
+#app-container .section article.rounded-2xl.border:hover {
+  transform: translateY(-1px);
 }
 
 /* Botón primario (bg-black) */
@@ -139,6 +192,28 @@ summary:hover,
 
 .dark button[class*="dark:bg-white"] {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+}
+
+/* Acciones con jerarquía consistente */
+#app-container button[class*="bg-black"],
+#app-container button[class*="bg-white"],
+#app-container button[class*="bg-gray-100"],
+#app-container .action-btn {
+  border-radius: 0.8rem;
+  font-weight: 700;
+}
+
+#app-container button[class*="bg-black"] {
+  background-image: linear-gradient(135deg, #0f172a 0%, #0d9488 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.dark #app-container button[class*="bg-black"] {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+#app-container button[class*="bg-black"]:hover {
+  box-shadow: 0 16px 30px rgba(13, 148, 136, 0.28);
 }
 
 /* Botones secundarios (bg-gray-100) */

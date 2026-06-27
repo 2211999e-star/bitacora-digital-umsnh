@@ -13,6 +13,30 @@ thead th {
   box-shadow: inset 0 -1px 0 rgba(229, 231, 235, 0.65);
 }
 
+table {
+  width: 100%;
+}
+
+thead th,
+tbody td {
+  vertical-align: middle;
+}
+
+thead th {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.dark thead th {
+  color: #cbd5e1;
+}
+
+tbody td {
+  line-height: 1.45;
+}
+
 .dark thead th {
   box-shadow: inset 0 -1px 0 rgba(55, 65, 81, 0.8);
 }
@@ -36,6 +60,8 @@ tbody tr:nth-child(even) {
 
 .table-panel {
   box-shadow: 0 12px 28px rgba(17, 24, 39, 0.06);
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
 .dark .table-panel {

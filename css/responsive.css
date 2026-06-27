@@ -68,6 +68,23 @@
   #global-search-modal .max-w-2xl {
     max-width: 100%;
   }
+
+  #login-screen {
+    padding: 1rem;
+  }
+
+  .login-stage {
+    border-radius: 20px;
+  }
+
+  .login-brand-pane,
+  .login-form-pane {
+    padding: 1.25rem;
+  }
+
+  .login-feature-item {
+    padding: 0.65rem 0.75rem;
+  }
 }
 
 /* Más aire en formularios largos (evita sensación “amontonada”) */
@@ -98,6 +115,14 @@
 
   .quick-action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .login-brand-pane {
+    border-bottom: 1px solid rgba(203, 213, 225, 0.25);
+  }
+
+  .dark .login-brand-pane {
+    border-bottom-color: rgba(71, 85, 105, 0.45);
   }
 }
 
