@@ -387,14 +387,45 @@ export async function handleEventSubmit({ supabase } = {}, e) {
         // noop
       }
     }
+    const title = (document.getElementById('evt-title').value || '').trim();
+    const description = (document.getElementById('evt-description').value || '').trim();
+    const eventDate = (document.getElementById('evt-date').value || '').trim();
+    const eventTime = (document.getElementById('evt-time').value || '').trim();
+    const location = (document.getElementById('evt-location').value || '').trim();
+    const status = (document.getElementById('evt-status').value || 'pendiente').trim();
+    const assignedTo = (document.getElementById('evt-assigned').value || '').trim();
+
+    if (!title || title.length < 4) {
+      Swal.fire({ icon: 'warning', title: 'Título inválido', text: 'Escribe un título más descriptivo (mínimo 4 caracteres).' });
+      return;
+    }
+
+    if (!eventDate) {
+      Swal.fire({ icon: 'warning', title: 'Fecha requerida', text: 'Selecciona la fecha del evento.' });
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    if (eventDate < today && ['pendiente', 'en_proceso'].includes(status)) {
+      const confirmPast = await Swal.fire({
+        icon: 'question',
+        title: 'Evento en fecha pasada',
+        text: 'La fecha seleccionada ya pasó. ¿Deseas guardarlo de todos modos?',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar',
+      });
+      if (!confirmPast.isConfirmed) return;
+    }
+
     const eventData = {
-      title: document.getElementById('evt-title').value,
-      description: document.getElementById('evt-description').value || null,
-      event_date: document.getElementById('evt-date').value,
-      event_time: document.getElementById('evt-time').value || null,
-      location: document.getElementById('evt-location').value || null,
-      status: document.getElementById('evt-status').value,
-      assigned_to: document.getElementById('evt-assigned').value || null,
+      title,
+      description: description || null,
+      event_date: eventDate,
+      event_time: eventTime || null,
+      location: location || null,
+      status,
+      assigned_to: assignedTo || null,
       observations: [buildEventMeta(creatorMeta), observationsUser].filter(Boolean).join('\n').trim() || null,
       user_id: state.currentUser.id,
     };

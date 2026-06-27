@@ -255,6 +255,13 @@
                         <span class="font-medium">Eventos</span>
                     </button>
 
+                    <button onclick="showSection('documents')" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                        <span class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-folder-tree text-gray-700 dark:text-gray-200"></i>
+                        </span>
+                        <span class="font-medium">Documentos</span>
+                    </button>
+
                     <button onclick="showSection('reports')" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
                         <span class="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-file-pdf text-gray-700 dark:text-gray-200"></i>
@@ -719,7 +726,7 @@
                             <!-- Quick Actions -->
                             <div class="mb-8">
                                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Acciones Rápidas</h2>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                                     <button onclick="showSection('activities'); setTimeout(() => openActivityModal(), 100)" class="flex flex-col items-center justify-center p-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 border border-blue-200 dark:border-blue-800 rounded-xl transition-all group">
                                         <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                             <i class="fas fa-plus text-xl"></i>
@@ -737,6 +744,12 @@
                                             <i class="fas fa-file-pdf text-xl"></i>
                                         </div>
                                         <span class="font-medium text-green-900 dark:text-green-100">Imprimir Reporte</span>
+                                    </button>
+                                    <button onclick="showSection('documents')" class="flex flex-col items-center justify-center p-4 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800 rounded-xl transition-all group">
+                                        <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-800 text-amber-600 dark:text-amber-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                            <i class="fas fa-folder-plus text-xl"></i>
+                                        </div>
+                                        <span class="font-medium text-amber-900 dark:text-amber-100">Digitalizar Docs</span>
                                     </button>
                                     <button onclick="openGlobalSearch()" class="flex flex-col items-center justify-center p-4 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-all group">
                                         <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -1438,6 +1451,116 @@
                     <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                         <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
                             No hay eventos registrados
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Documents Section -->
+                <section id="section-documents" class="section app-section app-section--documents hidden">
+                    <div class="relative rounded-2xl overflow-hidden mb-6 p-6 bg-gradient-to-r from-amber-700 via-orange-700 to-red-800 text-white shadow-xl">
+                        <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0);background-size:24px 24px"></div>
+                        <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h2 class="text-2xl font-black mb-1 drop-shadow">Documentos y Digitalización</h2>
+                                <p class="text-amber-100 text-sm">Sube archivos, agrega texto digitalizado y centraliza evidencia técnica o administrativa.</p>
+                            </div>
+                            <div class="inline-flex items-center px-3 py-2 rounded-xl bg-white/20 border border-white/30 text-sm font-semibold">
+                                Total: <span id="documents-count" class="ml-2">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div class="xl:col-span-1 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 id="documents-form-title" class="text-lg font-bold text-gray-900 dark:text-white">Nuevo documento / digitalización</h3>
+                                <button id="doc-reset-btn" type="button" onclick="clearDocumentForm()" class="px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-700">
+                                    Limpiar formulario
+                                </button>
+                            </div>
+
+                            <form id="form-document" class="space-y-4">
+                                <input type="hidden" id="doc-id">
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Titulo *</label>
+                                    <input id="doc-title" type="text" required placeholder="Ej. Oficio de mantenimiento laboratorio" class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all">
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Categoria</label>
+                                        <select id="doc-category" class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all">
+                                            <option value="general">General</option>
+                                            <option value="oficio">Oficio</option>
+                                            <option value="evidencia">Evidencia</option>
+                                            <option value="manual">Manual</option>
+                                            <option value="acta">Acta</option>
+                                            <option value="inventario">Inventario</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Etiquetas</label>
+                                        <input id="doc-tags" type="text" placeholder="equipo, laboratorio, semestre" class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Archivo (max 8MB)</label>
+                                    <input id="doc-file" type="file" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt,.jpg,.jpeg,.png,.webp" class="w-full text-sm text-gray-700 dark:text-gray-300">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">URL de origen (opcional)</label>
+                                    <input id="doc-source-url" type="url" placeholder="https://..." class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Texto digitalizado</label>
+                                    <textarea id="doc-digital-text" rows="4" placeholder="Pega aqui el contenido transcrito de un documento escaneado..." class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all resize-y"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">Notas</label>
+                                    <textarea id="doc-notes" rows="3" placeholder="Notas tecnicas o administrativas" class="w-full px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 border border-transparent focus:border-amber-400 text-gray-900 dark:text-white transition-all resize-y"></textarea>
+                                </div>
+
+                                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors">
+                                    <i class="fas fa-floppy-disk"></i>
+                                    <span id="doc-submit-text">Guardar documento</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="xl:col-span-2 space-y-4">
+                            <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-4">
+                                <div class="flex flex-col md:flex-row md:items-center gap-3">
+                                    <div class="relative flex-1">
+                                        <input type="text" id="search-documents" placeholder="Buscar por titulo, etiquetas, notas, categoria o archivo..." onkeyup="filterDocuments()"
+                                            class="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-amber-400 text-gray-900 dark:text-white transition-all">
+                                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                    <select id="filter-doc-category" onchange="filterDocuments()" class="px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-transparent focus:border-amber-400 transition-all">
+                                        <option value="">Todas las categorias</option>
+                                        <option value="oficio">Oficio</option>
+                                        <option value="evidencia">Evidencia</option>
+                                        <option value="manual">Manual</option>
+                                        <option value="acta">Acta</option>
+                                        <option value="inventario">Inventario</option>
+                                        <option value="general">General</option>
+                                    </select>
+                                    <button type="button" onclick="clearDocumentsFilters()" class="px-4 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                                        <i class="fas fa-broom mr-1"></i> Limpiar
+                                    </button>
+                                    <button type="button" onclick="exportDocumentsCSV()" class="px-4 py-2.5 rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-700 transition-all">
+                                        <i class="fas fa-file-csv mr-1"></i> CSV
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="documents-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">Sin documentos registrados.</div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -2549,6 +2672,9 @@
     <!-- Floating Action Button -->
     <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3" id="fab-container">
         <div id="fab-menu" class="hidden flex flex-col gap-3 items-end transition-all opacity-0 translate-y-4">
+            <button onclick="showSection('documents')" class="flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-amber-700 transition-colors">
+                <span>Documentos</span> <i class="fas fa-folder-plus"></i>
+            </button>
             <button onclick="showSection('reports')" class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-700 transition-colors">
                 <span>Reporte</span> <i class="fas fa-file-pdf"></i>
             </button>

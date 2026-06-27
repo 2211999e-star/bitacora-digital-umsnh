@@ -72,6 +72,18 @@ import {
   activateUser,
   getRoleName,
 } from './usuarios.js?v=1.5.4';
+import {
+  loadDocuments,
+  filterDocuments,
+  clearDocumentsFilters,
+  clearDocumentForm,
+  handleDocumentSubmit,
+  editDocument,
+  deleteDocument,
+  openDocument,
+  downloadDocument,
+  exportDocumentsCSV,
+} from './documentos.js?v=1.5.4';
 import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js?v=1.5.4';
 
 let supabase = createSupabase();
@@ -233,7 +245,18 @@ function renderGlobalSearchResults(queryRaw = '') {
     .slice(0, 8)
     .map((ev) => ({ type: 'event', id: ev.id, title: ev.title || 'Evento', meta: ev.status || 'Sin estado' }));
 
-  const items = [...activityMatches, ...eventMatches].slice(0, 12);
+  const documentMatches = (state.documentsData || [])
+    .filter((doc) => {
+      const haystack = [doc?.title, doc?.category, doc?.tags, doc?.notes, doc?.fileName, doc?.digitalText, doc?.sourceUrl]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    })
+    .slice(0, 8)
+    .map((doc) => ({ type: 'document', id: doc.id, title: doc.title || 'Documento', meta: doc.category || 'Sin categoria' }));
+
+  const items = [...activityMatches, ...eventMatches, ...documentMatches].slice(0, 12);
   if (!items.length) {
     results.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Sin resultados.</div>';
     return;
@@ -259,8 +282,13 @@ function renderGlobalSearchResults(queryRaw = '') {
         showSection('activities');
         setTimeout(() => viewActivity(dbCtx, item.id), 60);
       } else {
-        showSection('events');
-        setTimeout(() => editEvent(dbCtx, item.id), 60);
+        if (item.type === 'event') {
+          showSection('events');
+          setTimeout(() => editEvent(dbCtx, item.id), 60);
+        } else {
+          showSection('documents');
+          setTimeout(() => editDocument(item.id), 60);
+        }
       }
     });
     results.appendChild(btn);
@@ -376,6 +404,24 @@ function buildCmdkItems() {
     });
   });
 
+  // Documentos
+  (state.documentsData || []).forEach((doc) => {
+    const title = (doc?.title || '').trim() || 'Documento';
+    const subtitle = [doc?.category ? `Categoria: ${doc.category}` : null, doc?.fileName ? `Archivo: ${doc.fileName}` : null]
+      .filter(Boolean)
+      .join(' · ');
+    const search = [doc?.title, doc?.category, doc?.tags, doc?.notes, doc?.fileName, doc?.digitalText, doc?.sourceUrl, subtitle]
+      .filter(Boolean)
+      .join(' ');
+    items.push({
+      type: 'document',
+      id: doc.id,
+      title,
+      subtitle,
+      search,
+    });
+  });
+
   return items;
 }
 
@@ -392,7 +438,7 @@ function renderCmdkResults(queryRaw) {
   cmdk.activeIndex = Math.min(cmdk.activeIndex, Math.max(filtered.length - 1, 0));
 
   metaEl.textContent = q
-    ? `${filtered.length} resultado(s) · Incidencias: ${(filtered || []).filter((x) => x.type === 'activity').length} · Eventos: ${(filtered || []).filter((x) => x.type === 'event').length}`
+    ? `${filtered.length} resultado(s) · Incidencias: ${(filtered || []).filter((x) => x.type === 'activity').length} · Eventos: ${(filtered || []).filter((x) => x.type === 'event').length} · Documentos: ${(filtered || []).filter((x) => x.type === 'document').length}`
     : `Sugerencias: ${filtered.length} · Recientes: ${(cmdk.recents || []).length}`;
 
   resultsEl.innerHTML = '';
@@ -457,7 +503,7 @@ function renderCmdkResults(queryRaw) {
 
     const subtitle = document.createElement('div');
     subtitle.className = 'text-xs text-gray-500 dark:text-gray-400 truncate mt-1';
-    subtitle.textContent = it.subtitle || (it.type === 'activity' ? 'Incidencia' : 'Evento');
+    subtitle.textContent = it.subtitle || (it.type === 'activity' ? 'Incidencia' : it.type === 'event' ? 'Evento' : 'Documento');
 
     left.appendChild(title);
     left.appendChild(subtitle);
@@ -465,7 +511,7 @@ function renderCmdkResults(queryRaw) {
     const tag = document.createElement('span');
     tag.className =
       'shrink-0 inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200';
-    tag.textContent = it.type === 'activity' ? 'Incidencia' : 'Evento';
+    tag.textContent = it.type === 'activity' ? 'Incidencia' : it.type === 'event' ? 'Evento' : 'Documento';
 
     top.appendChild(left);
     top.appendChild(tag);
@@ -485,6 +531,9 @@ function renderCmdkResults(queryRaw) {
       } else if (it.type === 'event') {
         window.showSection?.('events');
         setTimeout(() => window.editEvent?.(it.id), 50);
+      } else if (it.type === 'document') {
+        window.showSection?.('documents');
+        setTimeout(() => window.editDocument?.(it.id), 50);
       }
     });
 
@@ -668,6 +717,7 @@ function showApp() {
     loadDashboardData(dbCtx);
     loadActivities(dbCtx);
     loadEvents(dbCtx);
+    loadDocuments();
 
     if (state.currentUser && state.currentUser.role === 'admin') loadUsers(dbCtx);
 
@@ -764,6 +814,7 @@ function showSection(sectionName) {
     dashboard: 'Dashboard',
     activities: 'Incidencias',
     events: 'Eventos',
+    documents: 'Documentos',
     reports: 'Reportes',
     settings: 'Configuración',
     users: 'Usuarios',
@@ -799,6 +850,8 @@ function showSection(sectionName) {
     loadActivities(dbCtx);
   } else if (sectionName === 'events') {
     loadEvents(dbCtx);
+  } else if (sectionName === 'documents') {
+    loadDocuments();
   } else if (sectionName === 'reports') {
     updateReportStats();
   } else if (sectionName === 'settings') {
@@ -829,6 +882,9 @@ function initializeEventListeners() {
 
   // Event Form
   document.getElementById('form-event')?.addEventListener('submit', (e) => handleEventSubmit(dbCtx, e));
+
+  // Documents Form
+  document.getElementById('form-document')?.addEventListener('submit', (e) => handleDocumentSubmit(dbCtx, e));
 
   // User Form
   document.getElementById('form-user')?.addEventListener('submit', (e) => handleUserSubmit(dbCtx, e));
@@ -917,6 +973,9 @@ function initializeEventListeners() {
         } else if (it.type === 'event') {
           window.showSection?.('events');
           setTimeout(() => window.editEvent?.(it.id), 50);
+        } else if (it.type === 'document') {
+          window.showSection?.('documents');
+          setTimeout(() => window.editDocument?.(it.id), 50);
         }
       }
     });
@@ -1172,6 +1231,16 @@ window.closeEventModal = closeEventModal;
 window.editEvent = (id) => editEvent(dbCtx, id);
 window.exportEventsCSV = () => exportEventsCSV();
 window.deleteEvent = (id) => deleteEvent(dbCtx, id);
+
+// Documentos
+window.filterDocuments = filterDocuments;
+window.clearDocumentsFilters = clearDocumentsFilters;
+window.clearDocumentForm = clearDocumentForm;
+window.editDocument = (id) => editDocument(id);
+window.deleteDocument = (id) => deleteDocument(id);
+window.openDocument = (id) => openDocument(id);
+window.downloadDocument = (id) => downloadDocument(id);
+window.exportDocumentsCSV = () => exportDocumentsCSV();
 
 // Usuarios
 window.showUserModal = showUserModal;

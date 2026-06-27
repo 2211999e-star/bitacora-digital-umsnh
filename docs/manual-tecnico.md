@@ -23,6 +23,7 @@ pagina-main/
 │  ├─ dashboard.js        # dashboard + charts + notificaciones
 │  ├─ incidencias.js      # CRUD incidencias + MSINFO32 + muestra
 │  ├─ eventos.js          # CRUD eventos
+│  ├─ documentos.js       # repositorio documental + digitalización local
 │  ├─ reportes.js         # controles de reportes + export PDF
 │  ├─ usuarios.js         # CRUD profiles (admin)
 │  ├─ permissions.js      # helpers de permisos UI
@@ -35,6 +36,8 @@ pagina-main/
 │  ├─ tables.css
 │  ├─ dashboard.css
 │  └─ responsive.css
+├─ img/
+│  └─ logos/
 ├─ supabase-schema.sql
 └─ .env.example
 ```
@@ -66,6 +69,7 @@ El fallback implementa:
 
 Persistencia:
 - `localStorage` con prefijo `bitacora_umich_` (por ejemplo: `bitacora_umich_activities`).
+- Repositorio documental local: `bitacora_umich_documents_v1`.
 
 ## 5. Configuración de Supabase
 ### 5.1 Dónde se definen URL/ANON KEY
@@ -124,7 +128,7 @@ Al ser SPA estática, basta con subir:
 - `index.html`
 - `/js/*`
 - `/css/*`
-- `/assets/*`
+- `/img/*`
 
 Si se usa Supabase:
 - Agregar el dominio a **Allowed Redirect URLs** (Auth settings).

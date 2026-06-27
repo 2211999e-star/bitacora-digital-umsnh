@@ -1,7 +1,7 @@
 # Bitácora Digital Institucional UMSNH
 
 Sistema web tipo “sistema en la nube” para la **Comisión de Servicios Informáticos** de la **Universidad Michoacana de San Nicolás de Hidalgo (UMSNH)**.  
-Permite registrar, administrar y dar seguimiento a **incidencias**, **eventos** y **reportes oficiales en PDF**, con soporte de **modo offline** (localStorage) y **conexión opcional a Supabase**.
+Permite registrar, administrar y dar seguimiento a **incidencias**, **eventos**, **documentos digitalizados** y **reportes oficiales en PDF**, con soporte de **modo offline** (localStorage) y **conexión opcional a Supabase**.
 
 ---
 
@@ -12,6 +12,7 @@ La Bitácora Digital está pensada para uso institucional y académico. Su objet
 - Centralizar el registro de incidencias de soporte (equipo, usuario, área, diagnóstico, estatus, responsable, etc.).
 - Dar seguimiento por **estado** (Pendiente / En proceso / Completado / Cancelado) y **prioridad**.
 - Registrar **eventos/actividades programadas**.
+- Centralizar **documentos y archivos** con captura de texto digitalizado.
 - Generar **reportes PDF** con encabezado institucional, periodos, firma y logos.
 - Trabajar **sin internet** en modo offline y permitir **respaldo/importación**.
 
@@ -46,6 +47,12 @@ Acciones:
 - Registro de eventos con fecha/hora, ubicación, asignado, estado y observaciones.
 - Vista en tarjetas.
 - Eliminación (solo admin).
+
+### Documentos y digitalización
+- Carga de archivos (PDF/imagen/ofimática) con metadatos.
+- Captura de texto digitalizado y URL de referencia.
+- Búsqueda por título, etiquetas, categoría o contenido.
+- Descarga, edición, eliminación y exportación CSV del repositorio documental.
 
 ### Reportes (PDF)
 - Reporte general, por mantenimiento (preventivo/correctivo) o por rango de fechas.
@@ -90,6 +97,7 @@ pagina-main/
 │  ├─ dashboard.js
 │  ├─ incidencias.js
 │  ├─ eventos.js
+│  ├─ documentos.js
 │  ├─ reportes.js
 │  ├─ usuarios.js
 │  ├─ config.js
@@ -115,13 +123,13 @@ pagina-main/
 
 ### ¿Qué hace cada archivo?
 - **index.html**  
-  Contiene toda la estructura del sistema: login, sidebar, secciones (dashboard/incidencias/eventos/reportes/configuración/usuarios) y modales.
+  Contiene toda la estructura del sistema: login, sidebar, secciones (dashboard/incidencias/eventos/documentos/reportes/configuración/usuarios) y modales.
 
 - **js/app.js**  
   Entry ES Module. Inicializa la app, configura listeners y re-asigna todas las funciones requeridas por `onclick="..."` a `window.*` para mantener compatibilidad.
 
 - **js/** (módulos)  
-  Separación por dominio (auth/dashboard/incidencias/eventos/reportes/usuarios/config/database/permissions/utils) sin perder funcionalidad.
+  Separación por dominio (auth/dashboard/incidencias/eventos/documentos/reportes/usuarios/config/database/permissions/utils) sin perder funcionalidad.
 
 - **css/style.css**  
   Agregador de estilos. Importa los parciales para mantener un único `<link>` en `index.html`.

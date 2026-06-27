@@ -23,6 +23,7 @@ En el menú lateral puedes acceder a:
 - **Dashboard**: indicadores, gráficas y recordatorios.
 - **Incidencias**: alta/consulta/edición de incidencias.
 - **Eventos**: registro de eventos y seguimiento.
+- **Documentos**: subida de archivos y captura de texto digitalizado.
 - **Reportes**: exportación de PDFs (incidencias y eventos).
 - **Configuración**: modo offline / Supabase / respaldo / preferencias.
 - **Usuarios** (solo Admin): consulta de cuentas; la gestión completa queda para el administrador principal.
@@ -75,7 +76,28 @@ Solo **Administrador** puede eliminar incidencias.
 - Editar: según permisos.
 - Eliminar: solo **Administrador**.
 
-## 6. Reportes (PDF)
+## 6. Documentos y digitalización
+### 6.1 Registrar documento
+1. Ve a **Documentos**.
+2. Completa título, categoría y etiquetas.
+3. Agrega al menos una fuente de contenido:
+   - Archivo (PDF/imagen/ofimática), o
+   - URL de origen, o
+   - Texto digitalizado.
+4. Guarda.
+
+### 6.2 Buscar y clasificar
+- Usa el buscador para encontrar por título, etiquetas o contenido.
+- Filtra por categoría.
+- Exporta el resultado actual en CSV.
+
+### 6.3 Editar, abrir y descargar
+- **Abrir**: muestra vista previa (archivo/URL/texto).
+- **Descargar**: baja el archivo original (o TXT si es solo texto).
+- **Editar**: actualiza metadatos y contenido.
+- **Eliminar**: remueve el documento del repositorio local.
+
+## 7. Reportes (PDF)
 En **Reportes** puedes generar:
 - **Reporte de incidencias** (con filtros por rango de fechas).
 - **Reporte preventivo/correctivo** (por tipo de servicio).
@@ -87,7 +109,7 @@ El PDF incluye:
 - Estadísticas por estado
 - Firma (opcional) y logos (opcionales)
 
-## 7. Configuración
+## 8. Configuración
 En **Configuración** puedes:
 - Ver si estás en **modo offline** o **conectado a Supabase**.
 - Guardar/editar **Supabase URL** y **ANON KEY**.
@@ -95,7 +117,7 @@ En **Configuración** puedes:
 - Exportar respaldo (JSON) e importar respaldo.
 - Configurar datos institucionales de reportes (dependencia/facultad/firma).
 
-## 8. Roles y permisos (resumen)
+## 9. Roles y permisos (resumen)
 - **Administrador**: acceso total (incluye usuarios y eliminaciones).
 - **Coordinador**: puede editar/gestionar y generar reportes (según configuración).
 - **Practicante**: registro/seguimiento básico (sin eliminaciones).

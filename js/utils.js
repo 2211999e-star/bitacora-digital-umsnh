@@ -7,6 +7,7 @@ export const state = {
   currentUser: null,
   activitiesData: [],
   eventsData: [],
+  documentsData: [],
   usersData: [],
   currentPage: 1,
   itemsPerPage: 10,
