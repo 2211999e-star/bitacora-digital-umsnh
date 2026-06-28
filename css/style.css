@@ -729,3 +729,198 @@
         margin-bottom: 0.85rem !important;
     }
 }
+
+/* =============================================================
+   Visual Reset (Clean Review Mode)
+   ============================================================= */
+
+body {
+    background: #f1f5f9 !important;
+}
+
+.dark body {
+    background: #020617 !important;
+}
+
+#login-screen {
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%) !important;
+}
+
+.dark #login-screen {
+    background: linear-gradient(180deg, #020617 0%, #0b1220 100%) !important;
+}
+
+.login-shell-pro {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+}
+
+.dark .login-shell-pro {
+    border-color: #334155 !important;
+    background: #0f172a !important;
+    box-shadow: 0 12px 28px rgba(2, 6, 23, 0.45) !important;
+}
+
+.login-panel-left {
+    background: #0f172a !important;
+}
+
+.dark .login-panel-left {
+    background: #020617 !important;
+}
+
+.login-panel-right {
+    background: #ffffff !important;
+}
+
+.dark .login-panel-right {
+    background: #0f172a !important;
+}
+
+#main-content {
+    background: #f1f5f9 !important;
+}
+
+.dark #main-content {
+    background: #020617 !important;
+}
+
+.app-section {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 14px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.dark .app-section {
+    border-color: #334155 !important;
+    background: #0f172a !important;
+}
+
+.section-hero {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    background: #f8fafc !important;
+}
+
+.section-hero::after {
+    display: none !important;
+}
+
+.section-hero__title {
+    color: #0f172a !important;
+    font-size: 1.35rem !important;
+}
+
+.section-hero__subtitle {
+    color: #475569 !important;
+    font-size: 0.86rem !important;
+}
+
+.dark .section-hero {
+    border-color: #334155 !important;
+    background: #111827 !important;
+}
+
+.dark .section-hero__title {
+    color: #e2e8f0 !important;
+}
+
+.dark .section-hero__subtitle {
+    color: #94a3b8 !important;
+}
+
+.section-hero--dashboard { border-left: 4px solid #0f766e !important; }
+.section-hero--activities { border-left: 4px solid #1d4ed8 !important; }
+.section-hero--events { border-left: 4px solid #0f766e !important; }
+.section-hero--documents { border-left: 4px solid #b45309 !important; }
+.section-hero--reports { border-left: 4px solid #1e3a8a !important; }
+.section-hero--settings { border-left: 4px solid #334155 !important; }
+.section-hero--users { border-left: 4px solid #0f172a !important; }
+
+#app-container .section .rounded-xl,
+#app-container .section .rounded-2xl,
+#app-container .section .rounded-3xl,
+#app-container .section .dashboard-panel,
+#app-container .section .dashboard-summary-card,
+#app-container .section .dashboard-health-card,
+#app-container .section .dashboard-kpi-card,
+#app-container .section .table-panel {
+    border: 1px solid #dbe3ee !important;
+    box-shadow: none !important;
+    transform: none !important;
+    background-image: none !important;
+}
+
+.dark #app-container .section .rounded-xl,
+.dark #app-container .section .rounded-2xl,
+.dark #app-container .section .rounded-3xl,
+.dark #app-container .section .dashboard-panel,
+.dark #app-container .section .dashboard-summary-card,
+.dark #app-container .section .dashboard-health-card,
+.dark #app-container .section .dashboard-kpi-card,
+.dark #app-container .section .table-panel {
+    border-color: #334155 !important;
+}
+
+#hero-slider-container {
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+.dark #hero-slider-container {
+    border-color: #334155 !important;
+}
+
+@media (max-width: 768px) {
+    .app-content-shell {
+        padding: 0.65rem !important;
+    }
+
+    .app-section {
+        border-radius: 12px !important;
+        padding: 0.75rem !important;
+    }
+
+    #hero-slider-container {
+        height: 170px !important;
+    }
+
+    .section-hero__title {
+        font-size: 1.1rem !important;
+    }
+
+    .section-hero__subtitle {
+        font-size: 0.78rem !important;
+    }
+}
+
+/* Extra minimal pass */
+#hero-slider-container {
+    display: none !important;
+}
+
+#sidebar {
+    border-right: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.dark #sidebar {
+    border-right-color: #334155 !important;
+    background: #0f172a !important;
+}
+
+#main-content > header {
+    border-bottom: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.dark #main-content > header {
+    border-bottom-color: #334155 !important;
+    background: #0f172a !important;
+}
