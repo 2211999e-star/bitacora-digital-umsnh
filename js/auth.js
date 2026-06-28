@@ -8,7 +8,6 @@ import {
   LOCAL_ADMIN_PASSWORD,
   LOCAL_STORAGE_PREFIX,
   PRIMARY_ADMIN_EMAIL,
-  isReviewModeEnabled,
 } from './config.js?v=1.5.4';
 import { getAppSetting } from './config.js?v=1.5.4';
 import { showLoader, hideLoader } from './utils.js?v=1.5.4';
@@ -67,81 +66,96 @@ export async function handleLogin(ctx, e) {
 
   let email = (document.getElementById('login-email')?.value || '').trim();
   const password = document.getElementById('login-password')?.value || '';
+  const localAdminAliases = new Set([
+    String(LOCAL_ADMIN_USERNAME || '').toLowerCase(),
+    String(PRIMARY_ADMIN_EMAIL || '').toLowerCase(),
+    String(PRIMARY_ADMIN_EMAIL || '').toLowerCase().split('@')[0],
+  ]);
 
   // Si no contiene '@' y no es el usuario administrador local, autocompletar con el dominio institucional
   if (email && !email.includes('@')) {
-    const isLocalUsername = (email.toLowerCase() === LOCAL_ADMIN_USERNAME.toLowerCase() || email === '2211999e' || email === '22119993');
+    const isLocalUsername = localAdminAliases.has(String(email || '').toLowerCase());
     if (!isLocalUsername) {
       email = `${email}@umich.mx`;
     }
   }
 
+  const isLocalAdmin = localAdminAliases.has(String(email || '').toLowerCase());
+
   try {
     showLoader();
 
-    // Tip UX: si el usuario intenta entrar con credenciales demo, guiar para activar Modo revisión
-    const isDemoAttempt =
-      String(email || '').toLowerCase().startsWith('demo.') &&
-      String(email || '').toLowerCase().endsWith('@umich.mx') &&
-      String(password || '') === 'demo1234';
-    if (isDemoAttempt && !isReviewModeEnabled()) {
-      const res = await Swal.fire({
-        icon: 'info',
-        title: 'Modo revisión',
-        html:
-          'Detecté que intentas usar un <b>acceso demo</b>.<br><br>' +
-          'Para que funcione, primero activa <b>Modo revisión</b> (no toca datos reales).<br><br>' +
-          '¿Quieres activarlo ahora?',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, activar',
-        cancelButtonText: 'Cancelar',
+    // Login local de usuarios precargados/creados (cuando se trabaja en fallback local)
+    if (supabase.__local && !isLocalAdmin) {
+      const { data: rows } = await supabase.from('profiles').select('*');
+      const users = Array.isArray(rows) ? rows : [];
+      const matchedUser = users.find((u) => {
+        const mail = String(u?.email || '').toLowerCase();
+        const typed = String(email || '').toLowerCase();
+        return typed === mail || typed === mail.split('@')[0];
       });
-      if (res.isConfirmed) {
-        localStorage.setItem(`${LOCAL_STORAGE_PREFIX}reviewMode`, 'true');
-        window.location.reload();
-        return;
-      }
-    }
 
-    // =========================
-    // Modo revisión: accesos demo (no toca datos reales)
-    // =========================
-    if (isReviewModeEnabled()) {
-      const demos = [
-        { email: 'demo.admin@umich.mx', pass: 'demo1234', role: 'admin', full_name: 'Admin Demo' },
-        { email: 'demo.coordinador@umich.mx', pass: 'demo1234', role: 'coordinator', full_name: 'Coordinador Demo' },
-        { email: 'demo.practicante@umich.mx', pass: 'demo1234', role: 'practitioner', full_name: 'Practicante Demo' },
-      ];
-      const match = demos.find((d) => d.email.toLowerCase() === String(email).toLowerCase() && password === d.pass);
-      if (match) {
-        state.currentUser = { id: `review-${match.role}`, email: match.email, full_name: match.full_name, role: match.role, account_status: 'approved' };
+      const passMapKey = `${LOCAL_STORAGE_PREFIX}localUserPasswords`;
+      const passMap = (() => {
         try {
-          localStorage.setItem(
-            `${LOCAL_STORAGE_PREFIX}session`,
-            JSON.stringify({
-              user: {
-                id: state.currentUser.id,
-                email: state.currentUser.email,
-                user_metadata: {
-                  full_name: state.currentUser.full_name,
-                  role: state.currentUser.role,
-                },
-              },
-            }),
-          );
+          return JSON.parse(localStorage.getItem(passMapKey) || '{}') || {};
         } catch {
-          // noop
+          return {};
         }
-        ui.updateUserDisplay();
-        ui.updateAdminMenu();
-        ui.showApp();
-        Swal.fire({ icon: 'success', title: 'Modo revisión', text: `Entraste como ${match.full_name}`, timer: 1600, showConfirmButton: false });
-        return;
+      })();
+
+      if (matchedUser) {
+        const expected = String(passMap[String(matchedUser.email || '').toLowerCase()] || '');
+        const status = getAccountStatus(matchedUser || {});
+        if (String(password) === expected && status === 'approved') {
+          state.currentUser = {
+            id: matchedUser.id,
+            email: matchedUser.email,
+            full_name: matchedUser.full_name || String(matchedUser.email || '').split('@')[0],
+            role: matchedUser.role || 'practitioner',
+            account_status: status,
+          };
+
+          try {
+            localStorage.setItem(
+              `${LOCAL_STORAGE_PREFIX}session`,
+              JSON.stringify({
+                user: {
+                  id: state.currentUser.id,
+                  email: state.currentUser.email,
+                  user_metadata: {
+                    full_name: state.currentUser.full_name,
+                    email: state.currentUser.email,
+                    role: state.currentUser.role,
+                  },
+                },
+              }),
+            );
+          } catch {
+            // noop
+          }
+
+          ui.updateUserDisplay();
+          ui.updateAdminMenu();
+          ui.showApp();
+
+          Swal.fire({
+            icon: 'success',
+            title: '¡Bienvenido!',
+            text: `Hola, ${state.currentUser.full_name} (Modo Local)`,
+            timer: 1700,
+            showConfirmButton: false,
+          });
+          return;
+        }
+
+        if (status !== 'approved') {
+          Swal.fire({ icon: 'warning', title: 'Acceso restringido', text: getBlockedLoginMessage(status) });
+          return;
+        }
       }
     }
 
-    // Login local "admin demo" (funciona incluso sin Supabase)
-    const isLocalAdmin = (email === LOCAL_ADMIN_USERNAME || email === '2211999e' || email === '22119993');
     if (isLocalAdmin && password === LOCAL_ADMIN_PASSWORD) {
       if (supabase.__local) {
         state.currentUser = {
@@ -319,7 +333,7 @@ export async function handleRegister(ctx, e) {
       Swal.fire({
         icon: 'info',
         title: 'Requiere base de datos',
-        text: 'Para solicitar acceso en línea, primero configura Supabase en Configuración (o desactiva Modo revisión).',
+        text: 'Para solicitar acceso en línea, primero configura Supabase en Configuración.',
       });
       return;
     }

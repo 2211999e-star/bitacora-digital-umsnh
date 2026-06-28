@@ -233,12 +233,53 @@ export async function handleUserSubmit({ supabase } = {}, e) {
     if (!id) {
       // Create new user
       if (supabase.__local) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Requiere Supabase',
-          text: 'Para crear usuarios en la nube (practicantes/coordinadores), primero configura Supabase en Configuración.',
+        if (!password) {
+          Swal.fire({ icon: 'error', title: 'Error', text: 'La contraseña es requerida para nuevos usuarios' });
+          hideLoader();
+          return;
+        }
+
+        const localEmail = String(email || '').trim().toLowerCase();
+        const { data: existingRows } = await supabase.from('profiles').select('*');
+        const exists = Array.isArray(existingRows)
+          && existingRows.some((u) => String(u?.email || '').toLowerCase() === localEmail);
+        if (exists) {
+          Swal.fire({ icon: 'warning', title: 'Correo duplicado', text: 'Ya existe un usuario con ese correo.' });
+          hideLoader();
+          return;
+        }
+
+        const localId = `local-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+        const { error: localInsertError } = await supabase.from('profiles').insert({
+          id: localId,
+          email: localEmail,
+          full_name: name,
+          role,
+          is_active: isActive,
+          account_status,
         });
-        hideLoader();
+        if (localInsertError) throw localInsertError;
+
+        const passMapKey = 'bitacora_umich_localUserPasswords';
+        let passMap = {};
+        try {
+          passMap = JSON.parse(localStorage.getItem(passMapKey) || '{}') || {};
+        } catch {
+          passMap = {};
+        }
+        passMap[localEmail] = String(password);
+        localStorage.setItem(passMapKey, JSON.stringify(passMap));
+
+        closeUserModal();
+        await loadUsers({ supabase });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Creado',
+          text: `El usuario ha sido creado por ${state.currentUser?.full_name || state.currentUser?.email || 'el usuario actual'}`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
         return;
       }
 

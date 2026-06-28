@@ -30,3 +30,233 @@
     background-color: #1f2937 !important;
     color: #f9fafb !important;
 }
+
+/* ======================================================================
+   UI Facelift V2 (index + dashboard + incidencias + eventos + documentos
+   + reportes + configuracion + usuarios)
+   ====================================================================== */
+
+:root {
+    --ux-card-radius: 1.1rem;
+    --ux-card-border: rgba(148, 163, 184, 0.34);
+    --ux-card-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.dark {
+    --ux-card-border: rgba(71, 85, 105, 0.62);
+    --ux-card-shadow: 0 18px 36px rgba(2, 6, 23, 0.42);
+}
+
+#app-container .section {
+    animation: sectionReveal 0.28s ease-out;
+}
+
+@keyframes sectionReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#app-container .section .bg-white,
+#app-container .section .dark\:bg-gray-900 {
+    border-radius: var(--ux-card-radius);
+}
+
+#app-container .section .border {
+    border-color: var(--ux-card-border);
+}
+
+#app-container .section .shadow-sm,
+#app-container .section .shadow-xl,
+#app-container .section .shadow-lg {
+    box-shadow: var(--ux-card-shadow);
+}
+
+#app-container .section h2 {
+    letter-spacing: -0.02em;
+}
+
+.app-section--dashboard h2 {
+    background-image: linear-gradient(120deg, #0f172a, #0f766e) !important;
+}
+
+.app-section--activities h2 {
+    background-image: linear-gradient(120deg, #1d4ed8, #0e7490) !important;
+}
+
+.app-section--events h2 {
+    background-image: linear-gradient(120deg, #0f766e, #0369a1) !important;
+}
+
+.app-section--documents h2 {
+    background-image: linear-gradient(120deg, #b45309, #9a3412) !important;
+}
+
+.app-section--reports h2 {
+    background-image: linear-gradient(120deg, #1e3a8a, #0f766e) !important;
+}
+
+.app-section--settings h2 {
+    background-image: linear-gradient(120deg, #334155, #0f766e) !important;
+}
+
+.app-section--users h2 {
+    background-image: linear-gradient(120deg, #0f172a, #1d4ed8) !important;
+}
+
+/* Index/Login */
+#login-screen .login-compact-card {
+    border: 1px solid rgba(125, 211, 252, 0.36);
+    box-shadow: 0 26px 52px rgba(2, 6, 23, 0.18);
+}
+
+.dark #login-screen .login-compact-card {
+    border-color: rgba(30, 64, 175, 0.45);
+    box-shadow: 0 30px 58px rgba(2, 6, 23, 0.58);
+}
+
+#login-screen .login-admin-credentials {
+    border-width: 1px;
+    box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.16);
+}
+
+/* Dashboard */
+.app-section--dashboard .dashboard-panel,
+.app-section--dashboard .dashboard-summary-card,
+.app-section--dashboard .dashboard-health-card,
+.app-section--dashboard .dashboard-kpi-card {
+    backdrop-filter: blur(8px);
+}
+
+.app-section--dashboard .dashboard-summary-card:hover,
+.app-section--dashboard .dashboard-health-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Incidencias */
+.app-section--activities #maintenance-forms > form,
+.app-section--activities details.table-panel,
+.app-section--activities #activities-records-grid > article,
+.app-section--activities #activities-records-grid > div {
+    border-radius: 1.25rem;
+}
+
+.app-section--activities #activities-records-grid > article,
+.app-section--activities #activities-records-grid > div {
+    border: 1px solid var(--ux-card-border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.92));
+}
+
+.dark .app-section--activities #activities-records-grid > article,
+.dark .app-section--activities #activities-records-grid > div {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.92));
+}
+
+.app-section--activities #activities-summary .state-block,
+.app-section--activities #activities-summary .state-block__title {
+    border-radius: 1rem;
+}
+
+/* Eventos */
+.app-section--events #events-grid > article,
+.app-section--events #events-grid > div {
+    border: 1px solid var(--ux-card-border);
+    border-radius: 1.1rem;
+    box-shadow: var(--ux-card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-section--events #events-grid > article:hover,
+.app-section--events #events-grid > div:hover {
+    transform: translateY(-2px);
+}
+
+.app-section--events .rounded-2xl.overflow-hidden.mb-6 {
+    box-shadow: 0 20px 40px rgba(13, 148, 136, 0.2);
+}
+
+/* Documentos */
+.app-section--documents #documents-grid > article,
+.app-section--documents #documents-grid > div {
+    border-radius: 1.1rem;
+    box-shadow: 0 14px 28px rgba(180, 83, 9, 0.12);
+}
+
+.app-section--documents .xl\:col-span-1,
+.app-section--documents .xl\:col-span-2 > .bg-white {
+    border-radius: 1.2rem;
+}
+
+/* Reportes */
+.app-section--reports .grid > .bg-white {
+    border-radius: 1.15rem;
+}
+
+.app-section--reports button[class*="bg-gradient-to-r"] {
+    box-shadow: 0 14px 28px rgba(30, 64, 175, 0.25);
+}
+
+/* Configuracion */
+.app-section--settings .settings-summary-card,
+.app-section--settings .settings-card {
+    border-radius: 1rem;
+    border: 1px solid var(--ux-card-border);
+    box-shadow: var(--ux-card-shadow);
+}
+
+.app-section--settings .settings-summary-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9));
+}
+
+.dark .app-section--settings .settings-summary-card {
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(15, 23, 42, 0.9));
+}
+
+/* Usuarios */
+.app-section--users > .bg-white {
+    border-radius: 1.2rem;
+}
+
+.app-section--users table thead tr {
+    background: linear-gradient(90deg, rgba(241, 245, 249, 0.96), rgba(226, 232, 240, 0.9));
+}
+
+.dark .app-section--users table thead tr {
+    background: linear-gradient(90deg, rgba(30, 41, 59, 0.96), rgba(15, 23, 42, 0.92));
+}
+
+.app-section--users #table-users tr:hover {
+    background: rgba(14, 116, 144, 0.06);
+}
+
+.dark .app-section--users #table-users tr:hover {
+    background: rgba(14, 116, 144, 0.12);
+}
+
+/* Main shell polish */
+#main-content > header {
+    border-bottom-color: rgba(148, 163, 184, 0.28);
+}
+
+.dark #main-content > header {
+    border-bottom-color: rgba(71, 85, 105, 0.55);
+}
+
+@media (max-width: 1024px) {
+    #app-container .section {
+        gap: 1rem;
+    }
+
+    .app-section--dashboard .grid,
+    .app-section--activities .grid,
+    .app-section--reports .grid,
+    .app-section--settings .grid,
+    .app-section--users .grid {
+        gap: 1rem;
+    }
+}

@@ -89,7 +89,7 @@ Recomendación:
 - El trigger `handle_new_user()` crea perfiles nuevos como:
   - `account_status = 'pending'`
   - `is_active = false`
-- Solo el administrador principal (`22119993@umich.mx`) cumple `is_primary_admin()` y puede:
+- Solo el administrador principal (`221199e@umich.mx`) cumple `is_primary_admin()` y puede:
   - aprobar/rechazar/suspender usuarios
   - cambiar roles
   - actualizar configuración crítica (tabla `settings`)
