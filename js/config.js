@@ -16,11 +16,11 @@ export const PRIMARY_ADMIN_EMAIL = '221199e@umich.mx';
 export const REVIEW_MODE_KEY = `${LOCAL_STORAGE_PREFIX}reviewMode`; // 'true' | 'false'
 
 export function isReviewModeEnabled() {
-  return localStorage.getItem(REVIEW_MODE_KEY) === 'true';
+  return false;
 }
 
 export function setReviewModeEnabled(enabled) {
-  localStorage.setItem(REVIEW_MODE_KEY, enabled ? 'true' : 'false');
+  localStorage.setItem(REVIEW_MODE_KEY, 'false');
 }
 
 // Forzar modo offline (útil cuando Supabase está configurado pero aún no tiene tablas/policies)

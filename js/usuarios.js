@@ -3,10 +3,59 @@
  * Gestión de usuarios (profiles) - solo admin.
  */
 
-import { state, showLoader, hideLoader, buildStateBlock } from './utils.js?v=1.5.4';
-import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL } from './config.js?v=1.5.4';
+import { state, showLoader, hideLoader, buildStateBlock } from './utils.js?v=1.6.1';
+import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL, LOCAL_STORAGE_PREFIX, LOCAL_ADMIN_PASSWORD } from './config.js?v=1.5.4';
 import { createClient } from './database.js?v=1.5.4';
 import { isAdmin, isPrimaryAdmin } from './permissions.js?v=1.5.4';
+
+async function ensureLocalSeedUsers(supabase) {
+  if (!supabase?.__local) return;
+
+  const { data: existing } = await supabase.from('profiles').select('*');
+  if (Array.isArray(existing) && existing.length > 0) return;
+
+  const nowIso = new Date().toISOString();
+  const seedUsers = [
+    {
+      id: 'local-admin',
+      email: PRIMARY_ADMIN_EMAIL,
+      full_name: 'Administrador',
+      role: 'admin',
+      is_active: true,
+      account_status: 'approved',
+      created_at: nowIso,
+    },
+    {
+      id: `local-user-${Date.now()}-coord`,
+      email: 'coordinador@umich.mx',
+      full_name: 'Coordinador General',
+      role: 'coordinator',
+      is_active: true,
+      account_status: 'approved',
+      created_at: nowIso,
+    },
+    {
+      id: `local-user-${Date.now()}-prac`,
+      email: 'practicante@umich.mx',
+      full_name: 'Practicante Soporte',
+      role: 'practitioner',
+      is_active: true,
+      account_status: 'approved',
+      created_at: nowIso,
+    },
+  ];
+
+  const { error } = await supabase.from('profiles').insert(seedUsers);
+  if (error) throw error;
+
+  const passMapKey = `${LOCAL_STORAGE_PREFIX}localUserPasswords`;
+  const passMap = {
+    [PRIMARY_ADMIN_EMAIL.toLowerCase()]: LOCAL_ADMIN_PASSWORD,
+    'coordinador@umich.mx': '123456789',
+    'practicante@umich.mx': '123456789',
+  };
+  localStorage.setItem(passMapKey, JSON.stringify(passMap));
+}
 
 export function getRoleName(role) {
   const roles = {
@@ -21,10 +70,22 @@ export async function loadUsers({ supabase } = {}) {
   if (!isAdmin(state.currentUser)) return;
 
   try {
+    await ensureLocalSeedUsers(supabase);
     const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
     if (error) throw error;
 
-    state.usersData = data || [];
+    let rows = Array.isArray(data) ? data : [];
+    if (supabase?.__local && rows.length === 0) {
+      try {
+        const raw = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}profiles`) || '[]';
+        const localRows = JSON.parse(raw) || [];
+        if (Array.isArray(localRows) && localRows.length > 0) rows = localRows;
+      } catch {
+        // noop
+      }
+    }
+
+    state.usersData = rows;
     renderUsersTable();
   } catch (error) {
     console.error('Error loading users:', error);

@@ -6,8 +6,8 @@
 
 console.log('app.js: módulo importándose...');
 
-import { createSupabase } from './database.js?v=1.5.4';
-import { state, hideLoader, copyToClipboard, showToast, buildStateBlock } from './utils.js?v=1.5.6';
+import { createSupabase } from './database.js?v=1.6.1';
+import { state, hideLoader, copyToClipboard, showToast, buildStateBlock } from './utils.js?v=1.6.1';
 import {
   applyThemePreference,
   getThemePreference,
@@ -24,10 +24,10 @@ import {
   setReviewModeEnabled,
   setForceOfflineEnabled,
   PRIMARY_ADMIN_EMAIL,
-} from './config.js?v=1.5.4';
-import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.5.4';
-import { handleRegister } from './auth.js?v=1.5.4';
-import { loadDashboardData, updateReportStats, showNotifications, updateCharts } from './dashboard.js?v=1.5.4';
+} from './config.js?v=1.6.1';
+import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.6.2';
+import { handleRegister } from './auth.js?v=1.6.2';
+import { loadDashboardData, updateReportStats, showNotifications, updateCharts } from './dashboard.js?v=1.6.1';
 import {
   loadActivities,
   filterActivities,
@@ -58,8 +58,8 @@ import {
   copyMsinfoCommand,
   downloadMsinfoScript,
   initializeIndependentMaintenanceForms,
-} from './incidencias.js?v=1.5.6';
-import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.5.6';
+} from './incidencias.js?v=1.6.1';
+import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.6.1';
 import {
   loadUsers,
   showUserModal,
@@ -71,7 +71,7 @@ import {
   suspendUser,
   activateUser,
   getRoleName,
-} from './usuarios.js?v=1.5.6';
+} from './usuarios.js?v=1.6.3';
 import {
   loadDocuments,
   filterDocuments,
@@ -83,8 +83,8 @@ import {
   openDocument,
   downloadDocument,
   exportDocumentsCSV,
-} from './documentos.js?v=1.5.4';
-import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js?v=1.5.4';
+} from './documentos.js?v=1.6.1';
+import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js?v=1.6.1';
 
 let supabase = createSupabase();
 const dbCtx = { supabase };

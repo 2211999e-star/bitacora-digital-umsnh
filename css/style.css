@@ -260,3 +260,50 @@
         gap: 1rem;
     }
 }
+
+/* Usabilidad transversal */
+#app-container .section input,
+#app-container .section select,
+#app-container .section textarea {
+    border-radius: 0.8rem;
+    min-height: 2.65rem;
+}
+
+#app-container .section textarea {
+    min-height: 6.25rem;
+}
+
+#app-container .section button {
+    min-height: 2.65rem;
+}
+
+#app-container .section .app-section-header {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.38);
+}
+
+.dark #app-container .section .app-section-header {
+    border-bottom-color: rgba(71, 85, 105, 0.55);
+}
+
+.app-section--activities .app-section-header > div:last-child,
+.app-section--events .app-section-header > div:last-child,
+.app-section--documents .app-section-header > div:last-child,
+.app-section--reports .app-section-header > div:last-child,
+.app-section--settings .app-section-header > div:last-child,
+.app-section--users .app-section-header > div:last-child {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .app-section--activities .app-section-header > div:last-child > button,
+    .app-section--events .app-section-header > div:last-child > button,
+    .app-section--documents .app-section-header > div:last-child > button,
+    .app-section--reports .app-section-header > div:last-child > button,
+    .app-section--settings .app-section-header > div:last-child > button,
+    .app-section--users .app-section-header > div:last-child > button {
+        width: 100%;
+        justify-content: center;
+    }
+}

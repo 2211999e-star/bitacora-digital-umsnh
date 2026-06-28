@@ -13,13 +13,17 @@
     <meta name="application-name" content="Bitácora Digital">
     <!-- Fuerza modo offline ANTES de cargar módulos -->
     <script>
-        // Verificar si hay credenciales de Supabase válidas
+        // Ajuste de arranque: evita quedar atrapado en offline cuando ya hay credenciales.
         const hasSupabaseUrl = localStorage.getItem('bitacora_umich_supabaseUrl');
         const hasSupabaseKey = localStorage.getItem('bitacora_umich_supabaseAnonKey');
-        
-        // Si no hay credenciales, forzar modo offline
+        const autoOfflineKey = 'bitacora_umich_autoOfflineForced';
+
         if (!hasSupabaseUrl || !hasSupabaseKey) {
             localStorage.setItem('bitacora_umich_forceOffline', 'true');
+            localStorage.setItem(autoOfflineKey, 'true');
+        } else if (localStorage.getItem(autoOfflineKey) === 'true') {
+            localStorage.setItem('bitacora_umich_forceOffline', 'false');
+            localStorage.removeItem(autoOfflineKey);
         }
     </script>
     <link rel="stylesheet" href="./css/tailwind.css">
@@ -32,7 +36,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css?v=1.6.0">
+    <link rel="stylesheet" href="./css/style.css?v=1.6.1">
     <!-- Supabase JS Client (global) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Wrapper para funciones de window que se llaman desde onclick -->
@@ -90,7 +94,7 @@
 
                 <form id="login-form" class="space-y-4">
                     <div id="login-network-status" class="hidden rounded-xl p-3 text-sm font-medium bg-yellow-50 dark:bg-yellow-900/20 text-yellow-900 dark:text-yellow-100 border border-yellow-200 dark:border-yellow-800">
-                        Sin conexión a internet. El modo local o de revisión puede usarse sin red.
+                        Sin conexión a internet. Puedes usar modo local sin red y sincronizar después.
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -2623,7 +2627,7 @@
         }, 5000);
     </script>
     <!-- Cache-busting para GitHub Pages / navegadores -->
-    <script type="module" src="./js/app.js?v=1.6.0"></script>
+    <script type="module" src="./js/app.js?v=1.6.4"></script>
     <script>
         // Service Worker (PWA / cache offline)
         (function () {

@@ -34,6 +34,67 @@ function getBlockedLoginMessage(status) {
   return 'No se pudo iniciar sesión.';
 }
 
+function ensureLocalProfilesBootstrap() {
+  const profilesKey = `${LOCAL_STORAGE_PREFIX}profiles`;
+  const passMapKey = `${LOCAL_STORAGE_PREFIX}localUserPasswords`;
+
+  let profiles = [];
+  try {
+    profiles = JSON.parse(localStorage.getItem(profilesKey) || '[]') || [];
+  } catch {
+    profiles = [];
+  }
+
+  if (!Array.isArray(profiles) || profiles.length === 0) {
+    const nowIso = new Date().toISOString();
+    profiles = [
+      {
+        id: 'local-admin',
+        email: PRIMARY_ADMIN_EMAIL,
+        full_name: 'Administrador',
+        role: 'admin',
+        is_active: true,
+        account_status: 'approved',
+        created_at: nowIso,
+      },
+      {
+        id: `local-user-${Date.now()}-coord`,
+        email: 'coordinador@umich.mx',
+        full_name: 'Coordinador General',
+        role: 'coordinator',
+        is_active: true,
+        account_status: 'approved',
+        created_at: nowIso,
+      },
+      {
+        id: `local-user-${Date.now()}-prac`,
+        email: 'practicante@umich.mx',
+        full_name: 'Practicante Soporte',
+        role: 'practitioner',
+        is_active: true,
+        account_status: 'approved',
+        created_at: nowIso,
+      },
+    ];
+    localStorage.setItem(profilesKey, JSON.stringify(profiles));
+  }
+
+  let passMap = {};
+  try {
+    passMap = JSON.parse(localStorage.getItem(passMapKey) || '{}') || {};
+  } catch {
+    passMap = {};
+  }
+
+  const merged = {
+    ...passMap,
+    [PRIMARY_ADMIN_EMAIL.toLowerCase()]: passMap[PRIMARY_ADMIN_EMAIL.toLowerCase()] || LOCAL_ADMIN_PASSWORD,
+    'coordinador@umich.mx': passMap['coordinador@umich.mx'] || '123456789',
+    'practicante@umich.mx': passMap['practicante@umich.mx'] || '123456789',
+  };
+  localStorage.setItem(passMapKey, JSON.stringify(merged));
+}
+
 export async function loadUserProfile({ supabase, state, ui }, userId) {
   try {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
@@ -84,6 +145,10 @@ export async function handleLogin(ctx, e) {
 
   try {
     showLoader();
+
+    if (supabase.__local) {
+      ensureLocalProfilesBootstrap();
+    }
 
     // Login local de usuarios precargados/creados (cuando se trabaja en fallback local)
     if (supabase.__local && !isLocalAdmin) {
