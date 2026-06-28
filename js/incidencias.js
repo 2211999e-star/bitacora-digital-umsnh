@@ -18,10 +18,10 @@ import {
   showToast,
   buildStateBlock,
 } from './utils.js?v=1.5.4';
-import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
+import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.7.1';
 import { updateNotificationBadge, loadDashboardData } from './dashboard.js?v=1.5.4';
 import { exportPDF } from './reportes.js?v=1.5.4';
-import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
+import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.7.1';
 
 /**
  * Construye un bloque de metadata embebido en Observaciones para mantener compatibilidad

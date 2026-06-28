@@ -4,7 +4,7 @@
  */
 
 import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast, buildStateBlock } from './utils.js?v=1.5.4';
-import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
+import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.7.1';
 import { updateNotificationBadge } from './dashboard.js?v=1.5.4';
 
 function buildEventMeta(meta = {}) {

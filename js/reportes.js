@@ -4,7 +4,7 @@
  */
 
 import { state, showLoader, hideLoader, formatDate, getStatusText, getPriorityText } from './utils.js?v=1.5.4';
-import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
+import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.7.1';
 
 export function initializeReportControls() {
   const urlToDataUrl = (url) =>

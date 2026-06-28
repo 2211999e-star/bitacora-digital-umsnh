@@ -924,3 +924,97 @@ body {
     border-bottom-color: #334155 !important;
     background: #0f172a !important;
 }
+
+/* =============================================================
+   Login Single-Frame Layout (UMSNH)
+   ============================================================= */
+
+#login-screen {
+    padding: 1rem !important;
+}
+
+.login-shell-pro {
+    width: 100% !important;
+    max-width: 880px !important;
+    display: block !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.dark .login-shell-pro {
+    border-color: #334155 !important;
+}
+
+.login-panel-left,
+.login-panel-right {
+    padding: 1.25rem 1.25rem !important;
+}
+
+.login-panel-left {
+    border-bottom: 1px solid #dbe4ef;
+    text-align: center;
+}
+
+.dark .login-panel-left {
+    border-bottom-color: #334155;
+}
+
+.login-panel-left .flex.items-center.gap-3 {
+    justify-content: center;
+}
+
+.login-panel-left h2,
+.login-panel-left p,
+.login-panel-left ul,
+.login-panel-left .login-quick-users {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-trust-list {
+    text-align: left;
+    max-width: 560px;
+}
+
+.login-quick-users .flex {
+    justify-content: center;
+}
+
+.login-panel-right {
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+.login-panel-right .mb-5,
+.login-panel-right #login-form,
+.login-panel-right .mt-5 {
+    max-width: 100%;
+}
+
+.login-panel-right .mt-5 .flex.items-center.justify-between {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .login-shell-pro {
+        max-width: 100% !important;
+        border-radius: 14px !important;
+    }
+
+    .login-panel-left,
+    .login-panel-right {
+        padding: 1rem !important;
+    }
+
+    .login-panel-left h2 {
+        font-size: 1.2rem !important;
+        line-height: 1.35;
+    }
+
+    .login-panel-right h3 {
+        font-size: 1.35rem !important;
+    }
+}

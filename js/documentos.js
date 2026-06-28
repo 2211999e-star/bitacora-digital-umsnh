@@ -4,7 +4,7 @@
  */
 
 import { state, downloadCSV, showToast, escapeHtml } from './utils.js?v=1.5.4';
-import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
+import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.7.1';
 
 const DOCS_KEY = `${LOCAL_STORAGE_PREFIX}documents_v1`;
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB

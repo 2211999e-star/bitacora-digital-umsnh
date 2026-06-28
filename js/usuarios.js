@@ -4,9 +4,9 @@
  */
 
 import { state, showLoader, hideLoader, buildStateBlock } from './utils.js?v=1.6.1';
-import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL, LOCAL_STORAGE_PREFIX, LOCAL_ADMIN_PASSWORD } from './config.js?v=1.5.4';
+import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL, LOCAL_STORAGE_PREFIX, LOCAL_ADMIN_PASSWORD } from './config.js?v=1.7.1';
 import { createClient } from './database.js?v=1.5.4';
-import { isAdmin, isPrimaryAdmin } from './permissions.js?v=1.5.4';
+import { isAdmin, isPrimaryAdmin } from './permissions.js?v=1.7.1';
 
 async function ensureLocalSeedUsers(supabase) {
   if (!supabase?.__local) return;

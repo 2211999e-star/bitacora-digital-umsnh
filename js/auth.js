@@ -8,8 +8,8 @@ import {
   LOCAL_ADMIN_PASSWORD,
   LOCAL_STORAGE_PREFIX,
   PRIMARY_ADMIN_EMAIL,
-} from './config.js?v=1.5.4';
-import { getAppSetting } from './config.js?v=1.5.4';
+} from './config.js?v=1.7.1';
+import { getAppSetting } from './config.js?v=1.7.1';
 import { showLoader, hideLoader } from './utils.js?v=1.5.4';
 
 /**

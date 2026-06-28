@@ -10,7 +10,7 @@
 // Supabase JS se carga globalmente desde index.html
 // Accesible como: window.supabase.createClient()
 
-import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isForceOfflineEnabled, isReviewModeEnabled } from './config.js?v=1.5.4';
+import { getSupabaseConfig, LOCAL_STORAGE_PREFIX, isForceOfflineEnabled, isReviewModeEnabled } from './config.js?v=1.7.1';
 
 // Helper para obtener createClient en tiempo de ejecución
 function getCreateClient() {

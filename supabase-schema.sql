@@ -133,7 +133,7 @@ as $$
       and p.role = 'admin'
       and p.is_active = true
       and p.account_status = 'approved'
-      and lower(p.email) = lower('221199e@umich.mx')
+      and lower(p.email) = lower('2211999e@umich.mx')
   );
 $$;
 
@@ -443,7 +443,7 @@ begin
     'approved',
     true
   from auth.users u
-  where lower(u.email) = lower('221199e@umich.mx')
+  where lower(u.email) = lower('2211999e@umich.mx')
   on conflict (id) do update
     set email = excluded.email,
         full_name = excluded.full_name,

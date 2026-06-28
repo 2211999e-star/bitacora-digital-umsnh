@@ -27,6 +27,6 @@ export function canDelete(user) {
  * @param {string} primaryEmail
  * @returns {boolean}
  */
-export function isPrimaryAdmin(user, primaryEmail = '221199e@umich.mx') {
+export function isPrimaryAdmin(user, primaryEmail = '2211999e@umich.mx') {
   return Boolean(user) && user.role === 'admin' && String(user.email || '').toLowerCase() === String(primaryEmail).toLowerCase();
 }

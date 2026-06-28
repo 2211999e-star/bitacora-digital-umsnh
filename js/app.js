@@ -21,9 +21,9 @@ import {
   LOCAL_STORAGE_PREFIX,
   isForceOfflineEnabled,
   setForceOfflineEnabled,
-} from './config.js?v=1.6.1';
-import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.6.2';
-import { handleRegister } from './auth.js?v=1.6.2';
+} from './config.js?v=1.7.1';
+import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.7.1';
+import { handleRegister } from './auth.js?v=1.7.1';
 import { loadDashboardData, updateReportStats, showNotifications, updateCharts } from './dashboard.js?v=1.6.1';
 import {
   loadActivities,
@@ -656,7 +656,7 @@ function showLogin() {
   document.getElementById('modal-register')?.classList.add('hidden');
   const loginUser = document.getElementById('login-email');
   if (loginUser && !String(loginUser.value || '').trim()) {
-    loginUser.value = '221199e';
+    loginUser.value = '2211999e';
   }
 
   setTimeout(() => loginUser?.focus?.(), 0);
