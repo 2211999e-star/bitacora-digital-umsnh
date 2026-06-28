@@ -8,6 +8,7 @@ import { LOCAL_STORAGE_PREFIX } from './config.js?v=1.5.4';
 
 const DOCS_KEY = `${LOCAL_STORAGE_PREFIX}documents_v1`;
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
+const DOC_DRAFT_KEY = `${LOCAL_STORAGE_PREFIX}document_form_draft_v1`;
 
 function uid() {
   try {
@@ -93,6 +94,66 @@ function setFormMode(editing = false) {
   if (titleEl) titleEl.textContent = editing ? 'Editar documento' : 'Nuevo documento / digitalización';
   if (submitText) submitText.textContent = editing ? 'Actualizar documento' : 'Guardar documento';
   if (resetBtn) resetBtn.textContent = editing ? 'Cancelar edición' : 'Limpiar formulario';
+}
+
+function saveDocumentDraft() {
+  const form = document.getElementById('form-document');
+  if (!form) return;
+
+  const values = {};
+  Array.from(form.elements || []).forEach((el) => {
+    if (!el?.name || el.disabled) return;
+    if (el.type === 'file') return;
+    if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+    values[el.name] = el.value;
+  });
+
+  localStorage.setItem(DOC_DRAFT_KEY, JSON.stringify({ values, savedAt: Date.now() }));
+}
+
+function restoreDocumentDraft() {
+  const form = document.getElementById('form-document');
+  if (!form || form.dataset.draftRestored === 'true') return;
+  form.dataset.draftRestored = 'true';
+
+  const raw = localStorage.getItem(DOC_DRAFT_KEY);
+  if (!raw) return;
+
+  try {
+    const parsed = JSON.parse(raw);
+    const values = parsed?.values && typeof parsed.values === 'object' ? parsed.values : null;
+    if (!values) return;
+
+    Object.entries(values).forEach(([name, value]) => {
+      const field = form.elements.namedItem(name);
+      if (field && typeof field.value !== 'undefined') field.value = String(value ?? '');
+    });
+
+    showToast({ type: 'success', title: 'Borrador recuperado', message: 'Se restauro tu captura de documento.' });
+  } catch {
+    localStorage.removeItem(DOC_DRAFT_KEY);
+  }
+}
+
+function clearDocumentDraft() {
+  localStorage.removeItem(DOC_DRAFT_KEY);
+}
+
+function wireDocumentDraft() {
+  const form = document.getElementById('form-document');
+  if (!form || form.dataset.draftWired === 'true') return;
+  form.dataset.draftWired = 'true';
+
+  restoreDocumentDraft();
+
+  let timer = null;
+  const scheduleSave = () => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(saveDocumentDraft, 250);
+  };
+
+  form.addEventListener('input', scheduleSave);
+  form.addEventListener('change', scheduleSave);
 }
 
 function renderDocuments(list = state.documentsData || []) {
@@ -184,6 +245,7 @@ function filteredDocuments() {
 }
 
 export function loadDocuments() {
+  wireDocumentDraft();
   const rows = readDocs().sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
   state.documentsData = rows;
   filterDocuments();
@@ -206,6 +268,7 @@ export function clearDocumentForm() {
   const id = document.getElementById('doc-id');
   if (id) id.value = '';
   clearFileInput();
+  clearDocumentDraft();
   setFormMode(false);
 }
 
@@ -270,6 +333,7 @@ export async function handleDocumentSubmit(_ctx, e) {
 
   loadDocuments();
   clearDocumentForm();
+  clearDocumentDraft();
   showToast({
     type: 'success',
     title: existing ? 'Documento actualizado' : 'Documento guardado',

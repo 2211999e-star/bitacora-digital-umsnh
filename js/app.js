@@ -55,7 +55,7 @@ import {
   copyMsinfoCommand,
   downloadMsinfoScript,
   initializeIndependentMaintenanceForms,
-} from './incidencias.js?v=1.6.1';
+} from './incidencias.js?v=1.6.6';
 import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.6.1';
 import {
   loadUsers,
@@ -80,7 +80,7 @@ import {
   openDocument,
   downloadDocument,
   exportDocumentsCSV,
-} from './documentos.js?v=1.6.1';
+} from './documentos.js?v=1.6.6';
 import { initializeReportControls, clearSignature, clearReportLogo, exportPDF, exportMaintenanceReport } from './reportes.js?v=1.6.1';
 
 let supabase = createSupabase();

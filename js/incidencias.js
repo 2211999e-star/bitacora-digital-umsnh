@@ -76,6 +76,75 @@ function getMaintenanceLabel(type = 'correctivo') {
   return String(type).toLowerCase() === 'preventivo' ? 'preventivo' : 'correctivo';
 }
 
+function getMaintenanceDraftKey(formId = '') {
+  return `${LOCAL_STORAGE_PREFIX}maintenance_draft_${formId}`;
+}
+
+function restoreMaintenanceDraft(form) {
+  if (!form?.id) return;
+  const raw = localStorage.getItem(getMaintenanceDraftKey(form.id));
+  if (!raw) return;
+
+  try {
+    const parsed = JSON.parse(raw);
+    const values = parsed?.values && typeof parsed.values === 'object' ? parsed.values : null;
+    if (!values) return;
+
+    Object.entries(values).forEach(([name, value]) => {
+      const field = form.elements.namedItem(name);
+      if (field && typeof field.value !== 'undefined') {
+        field.value = String(value ?? '');
+      }
+    });
+
+    const statusValue = String(values.status || '');
+    if (statusValue) {
+      form.querySelectorAll('.im-status-btn').forEach((btn) => btn.classList.remove('active'));
+      const selected = form.querySelector(`.im-status-btn[data-value="${statusValue}"]`);
+      if (selected) selected.classList.add('active');
+    }
+
+    showToast({ type: 'success', title: 'Borrador recuperado', message: 'Continuas desde tu ultimo avance.' });
+  } catch {
+    localStorage.removeItem(getMaintenanceDraftKey(form.id));
+  }
+}
+
+function saveMaintenanceDraft(form) {
+  if (!form?.id) return;
+  const values = {};
+
+  Array.from(form.elements || []).forEach((el) => {
+    if (!el?.name || el.disabled) return;
+    if (el.type === 'file') return;
+    if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+    values[el.name] = el.value;
+  });
+
+  localStorage.setItem(getMaintenanceDraftKey(form.id), JSON.stringify({ values, savedAt: Date.now() }));
+}
+
+function clearMaintenanceDraft(form) {
+  if (!form?.id) return;
+  localStorage.removeItem(getMaintenanceDraftKey(form.id));
+}
+
+function wireMaintenanceDraft(form) {
+  if (!form || form.dataset.draftWired === 'true') return;
+  form.dataset.draftWired = 'true';
+
+  restoreMaintenanceDraft(form);
+
+  let timer = null;
+  const scheduleSave = () => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => saveMaintenanceDraft(form), 250);
+  };
+
+  form.addEventListener('input', scheduleSave);
+  form.addEventListener('change', scheduleSave);
+}
+
 function setInlineSubmitState(form, isLoading = false) {
   const button = form?.querySelector('button[type="submit"]');
   if (!button) return;
@@ -348,6 +417,7 @@ async function handleIndependentMaintenanceSubmit({ supabase } = {}, event) {
     if (error) throw error;
 
     form.reset();
+    clearMaintenanceDraft(form);
     await loadActivities({ supabase });
     await loadDashboardData({ supabase });
 
@@ -379,6 +449,7 @@ export function initializeIndependentMaintenanceForms({ supabase } = {}) {
     const form = document.getElementById(formId);
     if (!form || form.dataset.wired === 'true') return;
     form.dataset.wired = 'true';
+    wireMaintenanceDraft(form);
     form.addEventListener('submit', (event) => handleIndependentMaintenanceSubmit({ supabase }, event));
   });
 }

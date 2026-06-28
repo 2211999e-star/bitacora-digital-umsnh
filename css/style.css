@@ -351,3 +351,103 @@
 .section-hero--reports { background: linear-gradient(120deg, #1e3a8a, #0f766e); }
 .section-hero--settings { background: linear-gradient(120deg, #334155, #0f766e); }
 .section-hero--users { background: linear-gradient(120deg, #0f172a, #1d4ed8); }
+
+/* Login V3 */
+#login-screen {
+    background:
+        radial-gradient(900px 520px at 10% 5%, rgba(14, 116, 144, 0.25), transparent 60%),
+        radial-gradient(700px 420px at 92% 10%, rgba(30, 64, 175, 0.2), transparent 58%),
+        linear-gradient(145deg, #ecfeff 0%, #f8fafc 45%, #eef2ff 100%);
+}
+
+.dark #login-screen {
+    background:
+        radial-gradient(900px 560px at 10% 5%, rgba(20, 184, 166, 0.2), transparent 60%),
+        radial-gradient(760px 450px at 92% 10%, rgba(59, 130, 246, 0.2), transparent 58%),
+        linear-gradient(145deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
+}
+
+.login-shell-pro {
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.dark .login-shell-pro {
+    border-color: rgba(71, 85, 105, 0.5);
+    background: rgba(15, 23, 42, 0.88);
+    box-shadow: 0 34px 64px rgba(2, 6, 23, 0.55);
+}
+
+.login-panel-left {
+    background: linear-gradient(145deg, #0e7490, #1d4ed8 60%, #0f172a);
+}
+
+.dark .login-panel-left {
+    background: linear-gradient(145deg, #0f766e, #1e3a8a 58%, #020617);
+}
+
+.login-panel-right {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
+}
+
+.dark .login-panel-right {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.9));
+}
+
+.login-trust-list {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.login-trust-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.login-trust-list i {
+    color: #a7f3d0;
+}
+
+.login-chip {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    background: rgba(255, 255, 255, 0.14);
+    color: #ecfeff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    transition: all 0.18s ease;
+}
+
+.login-chip:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.24);
+}
+
+#login-screen #login-email,
+#login-screen #login-password {
+    border-color: rgba(148, 163, 184, 0.34);
+    background: #ffffff;
+}
+
+.dark #login-screen #login-email,
+.dark #login-screen #login-password {
+    border-color: rgba(71, 85, 105, 0.6);
+    background: rgba(30, 41, 59, 0.72);
+}
+
+/* Better global card rhythm */
+#app-container .section .rounded-xl,
+#app-container .section .rounded-2xl,
+#app-container .section .rounded-3xl {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+#app-container .section .rounded-xl:hover,
+#app-container .section .rounded-2xl:hover,
+#app-container .section .rounded-3xl:hover {
+    transform: translateY(-1px);
+}
