@@ -658,8 +658,46 @@ function showLogin() {
   document.getElementById('app-container')?.classList.add('hidden');
   document.getElementById('modal-register')?.classList.add('hidden');
   document.getElementById('review-banner')?.classList.add('hidden');
+
+  const loginUser = document.getElementById('login-email');
+  if (loginUser && !String(loginUser.value || '').trim()) {
+    loginUser.value = '2211999e';
+  }
+
+  setTimeout(() => loginUser?.focus?.(), 0);
+
   updateLoginNetworkStatus();
   hideLoader();
+}
+
+function wireInterfaceFallbacks() {
+  if (document.body.dataset.interfaceFallbacksWired) return;
+  document.body.dataset.interfaceFallbacksWired = 'true';
+
+  // Refuerzo de navegación por secciones.
+  document.querySelectorAll(".nav-item[onclick*='showSection']").forEach((btn) => {
+    if (btn.dataset.fallbackWired) return;
+    const onclick = String(btn.getAttribute('onclick') || '');
+    const m = onclick.match(/showSection\('([^']+)'\)/);
+    if (!m?.[1]) return;
+    const target = m[1];
+    btn.dataset.fallbackWired = 'true';
+    btn.addEventListener('click', () => showSection(target));
+  });
+
+  // Refuerzo de acciones frecuentes en cabecera/FAB.
+  const attach = (selector, handler) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      if (el.dataset.fallbackWired) return;
+      el.dataset.fallbackWired = 'true';
+      el.addEventListener('click', handler);
+    });
+  };
+
+  attach("[onclick*='openGlobalSearch()']", () => openGlobalSearch());
+  attach("[onclick*='closeAllPanels()']", () => closeAllPanels());
+  attach("[onclick*='openEventModal()']", () => showEventModal());
+  attach("[onclick*='openActivityModal()']", () => showActivityModal());
 }
 
 function openRegisterModal() {
@@ -1014,6 +1052,8 @@ function initializeEventListeners() {
       });
     });
   }
+
+  wireInterfaceFallbacks();
 
   initializeA11yEnhancements();
 }
