@@ -36,7 +36,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/style.css?v=1.7.2">
+    <link rel="stylesheet" href="./css/style.css?v=1.7.3">
     <!-- Supabase JS Client (global) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Wrapper para funciones de window que se llaman desde onclick -->
@@ -2617,7 +2617,7 @@
         }, 5000);
     </script>
     <!-- Cache-busting para GitHub Pages / navegadores -->
-    <script type="module" src="./js/app.js?v=1.7.1"></script>
+    <script type="module" src="./js/app.js?v=1.7.2"></script>
     <script>
         // Service Worker (PWA / cache offline)
         (function () {
@@ -2643,7 +2643,7 @@
                 if (qs.has('nosw')) return;
 
                 let reloaded = false;
-                navigator.serviceWorker.register('./sw.js?v=7').then((reg) => {
+                navigator.serviceWorker.register('./sw.js?v=8').then((reg) => {
                     try { reg.update?.(); } catch { }
 
                     // Si hay una versión en espera, pedir activación inmediata

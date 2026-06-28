@@ -8,7 +8,7 @@
  */
 
 // Incrementa este valor cuando cambien CSS/JS para evitar servir assets viejos.
-const CACHE_VERSION = 'bitacora-cache-v9';
+const CACHE_VERSION = 'bitacora-cache-v10';
 
 // Nota: se cachean SOLO recursos locales del repo (evitamos CDNs por CORS y variaciones).
 const PRECACHE_URLS = [
