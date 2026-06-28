@@ -7,7 +7,7 @@
 console.log('app.js: módulo importándose...');
 
 import { createSupabase } from './database.js?v=1.5.4';
-import { state, hideLoader, copyToClipboard, showToast } from './utils.js?v=1.5.4';
+import { state, hideLoader, copyToClipboard, showToast, buildStateBlock } from './utils.js?v=1.5.6';
 import {
   applyThemePreference,
   getThemePreference,
@@ -58,8 +58,8 @@ import {
   copyMsinfoCommand,
   downloadMsinfoScript,
   initializeIndependentMaintenanceForms,
-} from './incidencias.js?v=1.5.5';
-import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.5.4';
+} from './incidencias.js?v=1.5.6';
+import { loadEvents, filterEvents, clearEventsFilters, showEventModal, closeEventModal, editEvent, deleteEvent, handleEventSubmit, exportEventsCSV } from './eventos.js?v=1.5.6';
 import {
   loadUsers,
   showUserModal,
@@ -71,7 +71,7 @@ import {
   suspendUser,
   activateUser,
   getRoleName,
-} from './usuarios.js?v=1.5.4';
+} from './usuarios.js?v=1.5.6';
 import {
   loadDocuments,
   filterDocuments,
@@ -258,7 +258,11 @@ function renderGlobalSearchResults(queryRaw = '') {
 
   const items = [...activityMatches, ...eventMatches, ...documentMatches].slice(0, 12);
   if (!items.length) {
-    results.innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Sin resultados.</div>';
+    results.innerHTML = buildStateBlock({
+      type: 'empty',
+      title: 'Sin resultados',
+      message: 'Ajusta tu busqueda con otro termino o categoria.'
+    });
     return;
   }
 
@@ -474,8 +478,12 @@ function renderCmdkResults(queryRaw) {
 
   if (!filtered.length) {
     const empty = document.createElement('div');
-    empty.className = 'p-4 text-sm text-gray-600 dark:text-gray-300';
-    empty.textContent = 'Sin resultados.';
+    empty.className = 'p-3';
+    empty.innerHTML = buildStateBlock({
+      type: 'empty',
+      title: 'Sin resultados',
+      message: 'Prueba otra palabra clave o limpia filtros recientes.'
+    });
     resultsEl.appendChild(empty);
     return;
   }
@@ -1006,6 +1014,79 @@ function initializeEventListeners() {
       });
     });
   }
+
+  initializeA11yEnhancements();
+}
+
+function initializeA11yEnhancements() {
+  if (document.body.dataset.a11yWired) return;
+  document.body.dataset.a11yWired = 'true';
+
+  const modalIds = ['modal-register', 'modal-activity', 'modal-activity-advanced', 'modal-event', 'modal-user', 'modal-command', 'global-search-modal'];
+
+  const isVisible = (el) => el && !el.classList.contains('hidden');
+  const focusablesIn = (root) => {
+    if (!root) return [];
+    return Array.from(
+      root.querySelectorAll('a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')
+    ).filter((el) => el.offsetParent !== null);
+  };
+
+  modalIds.forEach((id) => {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    if (!modal.getAttribute('role')) modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-hidden', modal.classList.contains('hidden') ? 'true' : 'false');
+  });
+
+  const observer = new MutationObserver(() => {
+    modalIds.forEach((id) => {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      const visible = isVisible(modal);
+      modal.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      if (visible && !modal.dataset.focusReady) {
+        modal.dataset.focusReady = '1';
+        const focusables = focusablesIn(modal);
+        setTimeout(() => focusables[0]?.focus?.(), 0);
+      }
+      if (!visible) modal.dataset.focusReady = '';
+    });
+  });
+
+  modalIds.forEach((id) => {
+    const modal = document.getElementById(id);
+    if (modal) observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const openModal = modalIds.map((id) => document.getElementById(id)).find((el) => isVisible(el));
+    if (!openModal) return;
+
+    const focusables = focusablesIn(openModal);
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
+  document.querySelectorAll('button[title]:not([aria-label])').forEach((btn) => {
+    btn.setAttribute('aria-label', btn.getAttribute('title') || 'Accion');
+  });
+
+  document.querySelectorAll('table').forEach((table, idx) => {
+    if (!table.getAttribute('aria-label')) table.setAttribute('aria-label', `Tabla de datos ${idx + 1}`);
+    table.querySelectorAll('thead th').forEach((th) => th.setAttribute('scope', 'col'));
+  });
 }
 
 async function initializeApp() {

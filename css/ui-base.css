@@ -1,0 +1,106 @@
+/* Componentes base reutilizables */
+.ui-card,
+.ui-panel {
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-lg);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface) 92%, transparent), color-mix(in srgb, var(--ui-color-surface-soft) 86%, transparent));
+  box-shadow: var(--ui-shadow-sm);
+}
+
+.ui-card:hover,
+.ui-panel:hover {
+  box-shadow: var(--ui-shadow-md);
+}
+
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+  border-radius: var(--ui-radius-md);
+  padding: 0.6rem 1rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  transition: transform var(--ui-time-fast) ease, box-shadow var(--ui-time-fast) ease, background-color var(--ui-time-fast) ease;
+}
+
+.ui-btn:hover {
+  transform: translateY(-1px);
+}
+
+.ui-btn-primary {
+  color: #f8fafc;
+  background: linear-gradient(135deg, var(--ui-color-brand-strong), var(--ui-color-brand));
+}
+
+.ui-btn-primary:hover {
+  box-shadow: var(--ui-shadow-md);
+}
+
+.dark .ui-btn-primary {
+  color: #052e2b;
+  background: linear-gradient(135deg, #99f6e4, #67e8f9);
+}
+
+.ui-btn-secondary {
+  color: var(--ui-color-text);
+  border-color: var(--ui-color-border);
+  background: color-mix(in srgb, var(--ui-color-surface) 90%, transparent);
+}
+
+.ui-field {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: var(--ui-radius-md);
+  border: 1px solid color-mix(in srgb, var(--ui-color-border) 82%, transparent);
+  background: color-mix(in srgb, var(--ui-color-surface) 88%, transparent);
+  color: var(--ui-color-text);
+  padding: 0.65rem 0.85rem;
+  transition: border-color var(--ui-time-fast) ease, box-shadow var(--ui-time-fast) ease;
+}
+
+.ui-field:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--ui-color-brand) 68%, #ffffff 32%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-color-brand) 26%, transparent);
+}
+
+.ui-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-space-2);
+  border: 1px dashed color-mix(in srgb, var(--ui-color-border) 86%, transparent);
+  border-radius: var(--ui-radius-lg);
+  background: color-mix(in srgb, var(--ui-color-surface-soft) 82%, transparent);
+  padding: var(--ui-space-8) var(--ui-space-5);
+  text-align: center;
+}
+
+/* AA: foco visible consistente en elementos accionables de tablas y modales */
+.table-panel button:focus-visible,
+[role='dialog'] button:focus-visible,
+[role='dialog'] a:focus-visible,
+[role='dialog'] input:focus-visible,
+[role='dialog'] select:focus-visible,
+[role='dialog'] textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ui-color-brand) 70%, #ffffff 30%);
+  outline-offset: 2px;
+}
+
+.table-panel thead th {
+  color: #334155;
+}
+
+.dark .table-panel thead th {
+  color: #e2e8f0;
+}
+
+.table-panel tbody td {
+  color: #0f172a;
+}
+
+.dark .table-panel tbody td {
+  color: #e2e8f0;
+}

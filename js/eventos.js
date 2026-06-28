@@ -3,7 +3,7 @@
  * CRUD de eventos (events) + filtros y modales.
  */
 
-import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast } from './utils.js?v=1.5.4';
+import { state, showLoader, hideLoader, formatDate, getStatusText, getBadgeClass, downloadCSV, showToast, buildStateBlock } from './utils.js?v=1.5.4';
 import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
 import { updateNotificationBadge } from './dashboard.js?v=1.5.4';
 
@@ -40,6 +40,16 @@ export async function loadEvents({ supabase } = {}) {
     updateNotificationBadge();
   } catch (error) {
     console.error('Error loading events:', error);
+    const grid = document.getElementById('events-grid');
+    if (grid) {
+      grid.innerHTML = buildStateBlock({
+        type: 'error',
+        title: 'No se pudieron cargar los eventos',
+        message: 'Verifica conexion, permisos o intenta recargar la pagina.',
+        actionText: 'Reintentar',
+        actionOnclick: 'loadEvents()'
+      });
+    }
   }
 }
 
@@ -48,21 +58,13 @@ function renderEventsGrid(list = state.eventsData) {
   if (!grid) return;
 
   if (!list || list.length === 0) {
-    grid.innerHTML = `
-      <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
-        <div class="mx-auto max-w-md flex flex-col items-center gap-2">
-          <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <i class="fas fa-calendar-days text-gray-500 dark:text-gray-300"></i>
-          </div>
-          <div class="font-semibold">No hay eventos registrados</div>
-          <div class="text-sm">Crea tu primer evento o ajusta los filtros.</div>
-          <button onclick="showEventModal()" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
-            <i class="fas fa-plus mr-2"></i>
-            Nuevo evento
-          </button>
-        </div>
-      </div>
-    `;
+    grid.innerHTML = `<div class="col-span-full">${buildStateBlock({
+      type: 'empty',
+      title: 'No hay eventos registrados',
+      message: 'Crea tu primer evento o ajusta los filtros activos.',
+      actionText: 'Nuevo evento',
+      actionOnclick: 'showEventModal()'
+    })}</div>`;
     return;
   }
 

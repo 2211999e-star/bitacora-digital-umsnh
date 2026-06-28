@@ -154,6 +154,38 @@ export function showToast({ type = 'success', title = 'Listo', message = '', dur
   });
 }
 
+export function buildStateBlock({
+  type = 'empty',
+  title = 'Sin resultados',
+  message = '',
+  actionText = '',
+  actionOnclick = '',
+} = {}) {
+  const map = {
+    loading: { icon: 'fa-spinner fa-spin', title: 'Cargando informacion' },
+    empty: { icon: 'fa-inbox', title: 'Sin resultados' },
+    error: { icon: 'fa-triangle-exclamation', title: 'Ocurrio un error' },
+    success: { icon: 'fa-circle-check', title: 'Operacion completada' },
+  };
+
+  const kind = map[type] ? type : 'empty';
+  const meta = map[kind];
+  const safeTitle = escapeHtml(title || meta.title);
+  const safeMessage = escapeHtml(message || '');
+  const safeActionText = escapeHtml(actionText || '');
+  const canInline = /^[\w\s().,'"-]*$/.test(String(actionOnclick || ''));
+  const actionAttr = safeActionText && canInline && actionOnclick ? `onclick="${actionOnclick}"` : '';
+
+  return `
+    <div class="state-screen state-screen--${kind}" role="status" aria-live="polite">
+      <span class="state-icon"><i class="fas ${meta.icon}"></i></span>
+      <p class="state-title">${safeTitle}</p>
+      ${safeMessage ? `<p class="state-message">${safeMessage}</p>` : ''}
+      ${safeActionText ? `<button type="button" ${actionAttr} class="ui-btn ui-btn-primary mt-1">${safeActionText}</button>` : ''}
+    </div>
+  `;
+}
+
 export function escapeHtml(text) {
   return String(text ?? '')
     .replaceAll('&', '&amp;')

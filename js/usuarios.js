@@ -3,7 +3,7 @@
  * Gestión de usuarios (profiles) - solo admin.
  */
 
-import { state, showLoader, hideLoader } from './utils.js?v=1.5.4';
+import { state, showLoader, hideLoader, buildStateBlock } from './utils.js?v=1.5.4';
 import { getSupabaseConfig, PRIMARY_ADMIN_EMAIL } from './config.js?v=1.5.4';
 import { createClient } from './database.js?v=1.5.4';
 import { isAdmin, isPrimaryAdmin } from './permissions.js?v=1.5.4';
@@ -28,6 +28,22 @@ export async function loadUsers({ supabase } = {}) {
     renderUsersTable();
   } catch (error) {
     console.error('Error loading users:', error);
+    const tbody = document.getElementById('table-users');
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-6 py-8">
+            ${buildStateBlock({
+              type: 'error',
+              title: 'No se pudieron cargar usuarios',
+              message: 'Valida conexion y permisos del administrador.',
+              actionText: 'Reintentar',
+              actionOnclick: 'loadUsers()'
+            })}
+          </td>
+        </tr>
+      `;
+    }
   }
 }
 
@@ -54,8 +70,12 @@ function renderUsersTable() {
   if (!state.usersData.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-          No hay usuarios registrados
+        <td colspan="5" class="px-6 py-8">
+          ${buildStateBlock({
+            type: 'empty',
+            title: 'No hay usuarios registrados',
+            message: 'Cuando se aprueben solicitudes apareceran en esta tabla.'
+          })}
         </td>
       </tr>
     `;

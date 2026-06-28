@@ -16,6 +16,7 @@ import {
   isoDate,
   downloadCSV,
   showToast,
+  buildStateBlock,
 } from './utils.js?v=1.5.4';
 import { canEditOwnedOrRole, canDelete } from './permissions.js?v=1.5.4';
 import { updateNotificationBadge, loadDashboardData } from './dashboard.js?v=1.5.4';
@@ -158,15 +159,13 @@ function renderActivitiesCards(list = []) {
   if (!grid) return;
 
   if (!list.length) {
-    grid.innerHTML = `
-      <div class="col-span-full rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 bg-transparent border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
-        <div class="w-16 h-16 mx-auto rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-center">
-          <i class="fas fa-clipboard-list text-gray-400 dark:text-gray-500 text-2xl"></i>
-        </div>
-        <h4 class="text-xl font-bold text-gray-900 dark:text-white mt-5">No hay incidencias registradas</h4>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-sm mx-auto">Crea una nueva incidencia preventiva o correctiva para empezar a llevar el control.</p>
-      </div>
-    `;
+    grid.innerHTML = `<div class="col-span-full">${buildStateBlock({
+      type: 'empty',
+      title: 'No hay incidencias registradas',
+      message: 'Crea una incidencia preventiva o correctiva para comenzar el control.',
+      actionText: 'Nueva correctiva',
+      actionOnclick: "openMaintenanceFormSection('correctivo')"
+    })}</div>`;
     return;
   }
 
@@ -725,6 +724,28 @@ export async function loadActivities({ supabase } = {}) {
     updateNotificationBadge();
   } catch (error) {
     console.error('Error loading activities:', error);
+    const tbody = document.getElementById('table-activities');
+    const cards = document.getElementById('activities-records-grid');
+    if (cards) {
+      cards.innerHTML = `<div class="col-span-full">${buildStateBlock({
+        type: 'error',
+        title: 'No se pudieron cargar incidencias',
+        message: 'Intenta recargar la pagina o revisa conexion y permisos.',
+        actionText: 'Reintentar',
+        actionOnclick: 'loadActivities()'
+      })}</div>`;
+    }
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="px-6 py-8">${buildStateBlock({
+            type: 'error',
+            title: 'Error al consultar tabla de incidencias',
+            message: 'No se pudo completar la carga de registros.'
+          })}</td>
+        </tr>
+      `;
+    }
   }
 }
 
@@ -878,18 +899,14 @@ export function renderActivitiesTable() {
     renderActivitiesCards([]);
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-          <div class="flex flex-col items-center gap-2">
-            <div class="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-              <i class="fas fa-clipboard-list text-gray-500 dark:text-gray-300"></i>
-            </div>
-            <div class="font-semibold">No se encontraron incidencias</div>
-            <div class="text-sm">Prueba cambiando filtros o crea una nueva incidencia.</div>
-            <button onclick="openMaintenanceFormSection('correctivo')" class="mt-2 bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all">
-              <i class="fas fa-plus mr-2"></i>
-              Nueva correctiva
-            </button>
-          </div>
+        <td colspan="8" class="px-6 py-8">
+          ${buildStateBlock({
+            type: 'empty',
+            title: 'No se encontraron incidencias',
+            message: 'Prueba cambiando filtros o crea una nueva incidencia.',
+            actionText: 'Nueva correctiva',
+            actionOnclick: "openMaintenanceFormSection('correctivo')"
+          })}
         </td>
       </tr>
     `;

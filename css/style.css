@@ -1,6 +1,9 @@
 /* Custom Styles for Bitácora Digital UMICH */
 /* Este archivo actúa como "agregador" para mantener un punto único de carga. */
 
+@import url("./tokens.css");
+@import url("./ui-base.css");
+@import url("./states.css");
 @import url("./components.css");
 @import url("./forms.css");
 @import url("./tables.css");
