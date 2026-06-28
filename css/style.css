@@ -307,3 +307,47 @@
         justify-content: center;
     }
 }
+
+/* Banners unificados por sección */
+.section-hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.1);
+}
+
+.section-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.24) 1px, transparent 0);
+    background-size: 22px 22px;
+    opacity: 0.2;
+}
+
+.section-hero__title {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    position: relative;
+    z-index: 1;
+}
+
+.section-hero__subtitle {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.86rem;
+    margin-top: 0.2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.section-hero--dashboard { background: linear-gradient(120deg, #0f766e, #0f172a); }
+.section-hero--activities { background: linear-gradient(120deg, #1d4ed8, #0e7490); }
+.section-hero--events { background: linear-gradient(120deg, #0f766e, #155e75); }
+.section-hero--documents { background: linear-gradient(120deg, #b45309, #9a3412); }
+.section-hero--reports { background: linear-gradient(120deg, #1e3a8a, #0f766e); }
+.section-hero--settings { background: linear-gradient(120deg, #334155, #0f766e); }
+.section-hero--users { background: linear-gradient(120deg, #0f172a, #1d4ed8); }

@@ -167,7 +167,6 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
   const modeEl = document.getElementById('storage-mode');
   const modeBadgeEl = document.getElementById('storage-mode-badge');
   const summaryStorageEl = document.getElementById('cfg-summary-storage');
-  const summaryReviewEl = document.getElementById('cfg-summary-review');
   const summaryUserEl = document.getElementById('cfg-summary-user');
   const summaryRoleEl = document.getElementById('cfg-summary-role');
   if (modeEl) {
@@ -224,13 +223,6 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
   if (urlInput) urlInput.value = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}supabaseUrl`) || url || '';
   if (keyInput) keyInput.value = localStorage.getItem(`${LOCAL_STORAGE_PREFIX}supabaseAnonKey`) || anonKey || '';
 
-  // Modo revisión
-  const reviewStatusEl = document.getElementById('cfg-review-mode-status');
-  const reviewActionBtn = document.getElementById('cfg-review-mode-action');
-  const reviewEnabled = isReviewModeEnabled();
-  if (summaryReviewEl) {
-    summaryReviewEl.textContent = reviewEnabled ? 'Modo revisión activo' : 'Modo revisión desactivado';
-  }
   if (summaryUserEl) {
     summaryUserEl.textContent = currentUser?.full_name || String(currentUser?.email || '').split('@')[0] || 'Usuario actual';
   }
@@ -238,20 +230,6 @@ export function initializeSettingsControls({ supabase, currentUser } = {}) {
     const roleMap = { admin: 'Administrador', coordinator: 'Coordinador', practitioner: 'Practicante' };
     summaryRoleEl.textContent = roleMap[currentUser?.role] || 'Sin rol definido';
   }
-  if (reviewStatusEl) {
-    reviewStatusEl.textContent = reviewEnabled ? 'Activo' : 'Desactivado';
-    reviewStatusEl.className = `status-chip ${reviewEnabled ? 'status-warning' : 'status-muted'}`;
-  }
-  if (reviewActionBtn) {
-    reviewActionBtn.innerHTML = reviewEnabled
-      ? '<i class="fas fa-toggle-off mr-2"></i>Desactivar modo revisión'
-      : '<i class="fas fa-flask mr-2"></i>Activar modo revisión';
-    reviewActionBtn.setAttribute('onclick', reviewEnabled ? 'disableReviewMode()' : 'enableReviewMode()');
-    reviewActionBtn.className = reviewEnabled
-      ? 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-lg font-medium hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-all'
-      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all';
-  }
-
   // Configuración institucional para PDF (sin duplicar lógica: se guarda en los mismos keys de reportes)
   const bindMirror = (cfgId, reportId, storageKey, fallbackValue = '') => {
     const cfgEl = document.getElementById(cfgId);

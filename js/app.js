@@ -20,10 +20,7 @@ import {
   clearOfflineData,
   LOCAL_STORAGE_PREFIX,
   isForceOfflineEnabled,
-  isReviewModeEnabled,
-  setReviewModeEnabled,
   setForceOfflineEnabled,
-  PRIMARY_ADMIN_EMAIL,
 } from './config.js?v=1.6.1';
 import { handleLogin, logout, togglePassword, loadUserProfile } from './auth.js?v=1.6.2';
 import { handleRegister } from './auth.js?v=1.6.2';
@@ -593,7 +590,7 @@ function updateLoginNetworkStatus() {
   const online = typeof navigator !== 'undefined' ? navigator.onLine : true;
   if (!online) {
     el.classList.remove('hidden');
-    el.textContent = 'Sin internet. Usa modo local o modo revisión para continuar.';
+    el.textContent = 'Sin internet. Usa modo local para continuar.';
     el.classList.remove('bg-green-100', 'text-green-700', 'border-green-200', 'dark:bg-green-900/20', 'dark:text-green-300', 'dark:border-green-900/40');
     el.classList.add('bg-yellow-50', 'text-yellow-900', 'border-yellow-200', 'dark:bg-yellow-900/20', 'dark:text-yellow-100', 'dark:border-yellow-800');
     return;
@@ -657,8 +654,6 @@ function showLogin() {
   document.getElementById('login-screen')?.classList.remove('hidden');
   document.getElementById('app-container')?.classList.add('hidden');
   document.getElementById('modal-register')?.classList.add('hidden');
-  document.getElementById('review-banner')?.classList.add('hidden');
-
   const loginUser = document.getElementById('login-email');
   if (loginUser && !String(loginUser.value || '').trim()) {
     loginUser.value = '221199e';
@@ -735,23 +730,9 @@ function initializeGlobalErrorHandling() {
   });
 }
 
-function enableReviewMode() {
-  setReviewModeEnabled(true);
-  window.location.reload();
-}
-
-function disableReviewMode() {
-  setReviewModeEnabled(false);
-  window.location.reload();
-}
-
 function showApp() {
   document.getElementById('login-screen')?.classList.add('hidden');
   document.getElementById('app-container')?.classList.remove('hidden');
-
-  // Banner de Modo revisión
-  const banner = document.getElementById('review-banner');
-  if (banner) banner.classList.toggle('hidden', !isReviewModeEnabled());
 
   // Estado de conexión / modo
   updateNetStatusPill();
@@ -1134,15 +1115,6 @@ async function initializeApp() {
     initializeGlobalErrorHandling();
     initializeEventListeners();
 
-    // Modo revisión: datos demo (solo local)
-    if (isReviewModeEnabled() && supabase.__local) {
-      try {
-        await seedReviewModeData();
-      } catch (e) {
-        console.warn('Error seeding review data:', e);
-      }
-    }
-
     // Si estamos en modo fallback (sin credenciales válidas), 
     // mostrar login directamente sin esperar por Supabase
     if (supabase.__local) {
@@ -1228,7 +1200,7 @@ async function initializeApp() {
       Swal.fire({
         icon: 'warning',
         title: 'No se pudo conectar con Supabase',
-        text: 'El servicio backend no está disponible. Usa modo revisión o modo offline para continuar.',
+        text: 'El servicio backend no está disponible. Usa modo offline para continuar.',
         confirmButtonText: 'Entendido',
       });
     }
@@ -1243,38 +1215,6 @@ async function initializeApp() {
       }
     }, 100);
   }
-}
-
-async function seedReviewModeData() {
-  const key = `${LOCAL_STORAGE_PREFIX}reviewSeeded_v1`;
-  if (localStorage.getItem(key) === 'true') return;
-
-  const demoProfiles = [
-    { id: 'review-admin', email: PRIMARY_ADMIN_EMAIL, full_name: 'Admin Demo', role: 'admin', account_status: 'approved', is_active: true },
-    { id: 'review-coordinator', email: 'demo.coordinador@umich.mx', full_name: 'Coordinador Demo', role: 'coordinator', account_status: 'approved', is_active: true },
-    { id: 'review-practitioner', email: 'demo.practicante@umich.mx', full_name: 'Practicante Demo', role: 'practitioner', account_status: 'approved', is_active: true },
-  ];
-
-  const today = new Date();
-  const iso = today.toISOString().slice(0, 10);
-
-  const demoEvents = [
-    { title: 'Soporte a evento académico', event_date: iso, event_time: '10:00', location: 'Auditorio', status: 'pendiente', description: 'Prueba de agenda en modo revisión', observations: 'MUESTRA: modo revisión' },
-    { title: 'Mantenimiento laboratorio', event_date: iso, event_time: '13:30', location: 'Laboratorio 2', status: 'en_proceso', description: 'Revisión de equipos', observations: 'MUESTRA: modo revisión' },
-  ];
-
-  try {
-    await supabase.from('profiles').insert(demoProfiles);
-  } catch {
-    // noop
-  }
-  try {
-    await supabase.from('events').insert(demoEvents);
-  } catch {
-    // noop
-  }
-
-  localStorage.setItem(key, 'true');
 }
 
 const ui = { showLogin, showApp, updateUserDisplay, updateAdminMenu };
@@ -1295,9 +1235,6 @@ window.logout = () => logout({ supabase, state, ui });
 window.togglePassword = togglePassword;
 window.openRegisterModal = openRegisterModal;
 window.closeRegisterModal = closeRegisterModal;
-window.enableReviewMode = enableReviewMode;
-window.disableReviewMode = disableReviewMode;
-
 // Navegación y layout
 window.showSection = showSection;
 window.toggleSidebar = toggleSidebar;
