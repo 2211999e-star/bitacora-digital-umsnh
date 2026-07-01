@@ -1,0 +1,430 @@
+/* ============================================
+   MEJORAS DE LAYOUT GENERAL - Versión 1.0
+   ============================================
+   Elimina espacios en blanco desagradables,
+   mejora la distribución de contenido,
+   y hace la interfaz más profesional
+*/
+
+/* ============================================
+   HEADER MEJORADO
+   ============================================ */
+
+header {
+  /* Aumentar padding para mejor uso del espacio */
+  padding: 0.75rem 1rem !important;
+}
+
+/* Header content - mejor distribución */
+header .max-w-7xl {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 !important;
+}
+
+/* Distribuir mejor los botones del header */
+header .flex.items-center.justify-between {
+  gap: 1rem;
+}
+
+/* ============================================
+   MAIN CONTENT - Eliminar espacios en blanco
+   ============================================ */
+
+#main-content {
+  background: linear-gradient(135deg, 
+    var(--simple-bg-light, #fafbfc) 0%,
+    var(--simple-bg-light, #f5f7fa) 100%);
+}
+
+/* Hacer que el contenido llene mejor el espacio */
+#main-content > div:first-child {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ============================================
+   SECCIONES - Mejor padding y espaciado
+   ============================================ */
+
+.section {
+  padding: 1.5rem 1rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Contenedor principal de secciones */
+.section > div:first-child {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ============================================
+   CARDS Y CONTENEDORES - Mejorar distribución
+   ============================================ */
+
+/* Cards que ocupen mejor el espacio */
+.card, .simple-card {
+  display: flex;
+  flex-direction: column;
+  min-height: auto;
+  transition: all 0.2s ease;
+}
+
+/* Grillas adaptativas mejoradas */
+.grid, [class*="grid-cols"] {
+  gap: 1.25rem;
+}
+
+/* Asegurar que las columnas se distribuyan bien */
+@media (min-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ============================================
+   HERO SECTION - Mejor visualización
+   ============================================ */
+
+/* Sección hero en cada página */
+.section-header, [class*="section-hero"] {
+  background: linear-gradient(135deg,
+    rgba(93, 202, 165, 0.05) 0%,
+    rgba(34, 197, 94, 0.02) 100%);
+  padding: 2rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(93, 202, 165, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.section-header h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--simple-text, #1a202c);
+}
+
+.section-header p {
+  color: var(--simple-secondary, #718096);
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   BOTONES DE ACCIÓN - Distribución mejorada
+   ============================================ */
+
+/* Action bar - botones bien distribuidos */
+.action-bar, [class*="button-group"] {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+/* Botones primarios */
+.btn-primary {
+  min-width: 130px;
+  padding: 0.625rem 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* ============================================
+   FORMULARIOS - Mejor visualización
+   ============================================ */
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+form > div {
+  display: flex;
+  flex-direction: column;
+}
+
+form > .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ============================================
+   TABLAS - Mejor distribución
+   ============================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th {
+  padding: 0.875rem;
+  font-weight: 600;
+  background: rgba(93, 202, 165, 0.08);
+  border-bottom: 2px solid rgba(93, 202, 165, 0.2);
+}
+
+table td {
+  padding: 0.875rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   MODALES Y OVERLAYS - Mejor proporción
+   ============================================ */
+
+dialog {
+  max-width: 90vw;
+  width: auto;
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   SIDEBAR Y NAVEGACIÓN - Mejor espaciado
+   ============================================ */
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#sidebar nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+nav button, .nav-item {
+  width: 100%;
+  margin-bottom: 0.25rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 6px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+nav button:hover, .nav-item:hover {
+  background-color: rgba(93, 202, 165, 0.1);
+  transform: translateX(2px);
+}
+
+/* ============================================
+   FOOTER - Cuando existe
+   ============================================ */
+
+footer, [class*="footer"] {
+  margin-top: auto;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.02);
+  font-size: 0.85rem;
+  color: var(--simple-secondary, #718096);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ============================================
+   NOTIFICACIONES - Panel mejorado
+   ============================================ */
+
+#notifications-panel, [id*="notification"] {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-width: 400px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Notificación individual */
+.notification-item, [class*="notification-item"] {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 0.2s ease;
+}
+
+.notification-item:hover {
+  background: rgba(93, 202, 165, 0.05);
+}
+
+/* ============================================
+   ESPACIOS EN BLANCO - Control automático
+   ============================================ */
+
+/* Evitar espacios en blanco excesivos */
+main > * {
+  min-height: auto;
+}
+
+/* Padding responsive mejorado */
+@media (max-width: 640px) {
+  .section {
+    padding: 1rem 0.75rem;
+  }
+  
+  form {
+    padding: 1rem;
+  }
+  
+  header {
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .section {
+    padding: 1.25rem 1rem;
+  }
+  
+  form {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .section {
+    padding: 2rem 1.5rem;
+  }
+  
+  form {
+    padding: 2rem;
+  }
+}
+
+/* ============================================
+   EFECTOS Y TRANSICIONES
+   ============================================ */
+
+/* Transiciones suaves */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Animación de entrada suave */
+.section {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   MODO OSCURO - Colores mejorados
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  #main-content {
+    background: linear-gradient(135deg,
+      #0f1419 0%,
+      #1a1f2e 100%);
+  }
+  
+  form {
+    background: #1e2139;
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  table th {
+    background: rgba(93, 202, 165, 0.12);
+  }
+  
+  .notification-item:hover {
+    background: rgba(93, 202, 165, 0.1);
+  }
+}
+
+/* ============================================
+   HELPERS - Clases útiles
+   ============================================ */
+
+/* Llenar espacio verticalmente */
+.fill-space {
+  flex: 1;
+  min-height: 100%;
+}
+
+/* Contenedor centrado máximo ancho */
+.max-content-width {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Espaciador responsive */
+.space-responsive {
+  margin: 1rem;
+}
+
+@media (max-width: 640px) {
+  .space-responsive {
+    margin: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .space-responsive {
+    margin: 1.5rem;
+  }
+}
+
+/* Evitar overflow */
+.no-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================
+   FIN DE LAYOUT-IMPROVEMENTS.CSS
+   ============================================ */

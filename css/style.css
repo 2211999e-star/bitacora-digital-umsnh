@@ -28,6 +28,7 @@
 @import url("./dashboard.css");
 @import url("./responsive.css");
 @import url("./mobile-responsive.css");
+@import url("./layout-improvements.css");
 
 /* SweetAlert2 Dark Mode overrides */
 .dark .swal2-popup {
