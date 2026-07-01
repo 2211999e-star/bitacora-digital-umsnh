@@ -853,42 +853,32 @@
 
  <!-- Events Section -->
  <section id="section-events" class="section events hidden">
- <div class="section-hero section-hero--events mb-5">
- <h2 class="section-hero__title">Eventos</h2>
- <p class="section-hero__subtitle">Actividades programadas, seguimiento y control por estado.</p>
- </div>
- <!-- Events Header Banner -->
- <div class="relative rounded-2xl overflow-hidden mb-6 p-6 bg-gradient-to-r from-purple-700 via-violet-700 to-indigo-800 text-white shadow-xl hidden">
- <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 1px, transparent 0);background-size:24px 24px"></div>
- <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
- <div>
- <h2 class="text-2xl font-black mb-1 drop-shadow">Eventos</h2>
- <p class="text-purple-100 text-sm">Actividades programadas, seguimiento y control por estado.</p>
- </div>
- <div class="flex flex-wrap gap-2">
- <button onclick="showEventModal()" class="flex items-center gap-2 bg-white text-purple-700 px-4 py-2 rounded-xl font-bold hover:bg-purple-50 transition-all shadow-lg">
- <i class="fas fa-plus"></i> Nuevo evento
- </button>
- <button onclick="exportEventsCSV()" class="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-xl font-semibold hover:bg-white/30 transition-all border border-white/30">
- <i class="fas fa-file-csv"></i> CSV
- </button>
- <button onclick="exportPDF('events')" class="flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-xl font-semibold hover:bg-white/30 transition-all border border-white/30">
- <i class="fas fa-file-pdf"></i> PDF
- </button>
- </div>
- </div>
+ <!-- Hero Section -->
+ <div class="mb-8">
+ <h2 class="text-4xl font-bold text-simple-text mb-2">Eventos</h2>
+ <p class="text-simple-text-secondary">Gestión de eventos, actividades programadas y calendario de reuniones.</p>
  </div>
 
- <!-- Events Filters -->
- <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-6 p-4 bg-white dark:bg-gray-900 rounded-xl simple-border">
- <div class="relative flex-1">
- <input type="text" id="search-events" placeholder="Buscar evento por título, ubicación..."
- class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg focus:border-purple-400 dark:focus:border-purple-600 text-simple-text transition-all"
+ <!-- Actions Bar -->
+ <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+ <button onclick="showEventModal()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-all">
+ <i class="fas fa-plus"></i> Nuevo Evento
+ </button>
+ <button onclick="exportEventsCSV()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-semibold transition-all">
+ <i class="fas fa-file-csv"></i> Exportar CSV
+ </button>
+ </div>
+
+ <!-- Filters -->
+ <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 p-4 rounded-lg bg-gray-900 border border-gray-800">
+ <div class="relative">
+ <input type="text" id="search-events" placeholder="Buscar evento..."
+ class="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-teal-500 text-simple-text transition-all"
  onkeyup="filterEvents()">
- <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+ <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
  </div>
  <select id="filter-events-status" onchange="filterEvents()"
- class="bg-gray-100 dark:bg-gray-800 text-simple-text px-4 py-2 rounded-lg border border-transparent focus:border-purple-400 dark:focus:border-purple-600 transition-all">
+ class="px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-teal-500 text-simple-text transition-all">
  <option value="">Todos los estados</option>
  <option value="activos">Activos</option>
  <option value="pendiente">Pendiente</option>
@@ -897,21 +887,23 @@
  <option value="cancelado">Cancelado</option>
  </select>
  <select id="filter-events-date" onchange="filterEvents()"
- class="bg-gray-100 dark:bg-gray-800 text-simple-text px-4 py-2 rounded-lg border border-transparent focus:border-purple-400 dark:focus:border-purple-600 transition-all">
+ class="px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg focus:border-teal-500 text-simple-text transition-all">
  <option value="">Todas las fechas</option>
  <option value="today">Hoy</option>
  <option value="next7">Próximos 7 días</option>
  <option value="overdue">Atrasados</option>
  </select>
- <button type="button" onclick="clearEventsFilters()" class="simple-btn simple-btn-secondary text-simple-text font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+ <button type="button" onclick="clearEventsFilters()" class="px-4 py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-simple-text font-semibold transition-all">
  <i class="fas fa-times mr-1"></i> Limpiar
  </button>
  </div>
 
- <!-- Events Grid -->
- <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
- <div class="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
- No hay eventos registrados
+ <!-- Results Grid -->
+ <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+ <div class="col-span-full py-16 text-center">
+ <i class="fas fa-calendar text-4xl text-gray-600 mb-4"></i>
+ <p class="text-simple-text-secondary text-lg font-medium">No hay eventos registrados</p>
+ <p class="text-gray-600 text-sm mt-2">Crea tu primer evento para comenzar</p>
  </div>
  </div>
  </section>
