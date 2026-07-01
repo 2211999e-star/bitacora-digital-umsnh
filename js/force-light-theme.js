@@ -1,7 +1,7 @@
 /**
  * force-light-theme.js
  * Inyecta CSS agresivo para forzar modo light en toda la aplicación
- * Se ejecuta DESPUÉS de que se cargue la página para máxima especificidad
+ * EXCEPTO el login (que se deja intacto)
  */
 
 (function forceLightTheme() {
@@ -14,6 +14,7 @@
     style.id = 'forced-light-theme-ultra';
     style.textContent = `
       /* ============= ULTRA AGGRESSIVE LIGHT THEME OVERRIDE ============= */
+      /* NOTA: El login NO se modifica - se deja completamente intacto */
 
       /* 1. Remove dark class if present */
       html {
@@ -25,8 +26,13 @@
         --simple-text: #1a1a1a !important;
       }
 
-      /* 2. Global backgrounds - maximum specificity */
-      html, html.dark, body, body.dark, main, main.dark {
+      /* 2. Global backgrounds - maximum specificity - EXCEPTO LOGIN */
+      html:not(.login-visible), 
+      html.dark:not(.login-visible),
+      body:not([data-page="login"]),
+      body.dark:not([data-page="login"]),
+      main:not(.login-page),
+      main.dark:not(.login-page) {
         background-color: #f5f5f5 !important;
         color: #1a1a1a !important;
       }
@@ -45,9 +51,11 @@
         color: #1a1a1a !important;
       }
 
-      /* 5. ALL SECTIONS - maximum specificity override */
-      .section, .section.dark,
-      [id^="section-"], [id^="section-"].dark,
+      /* 5. ALL SECTIONS - maximum specificity override - EXCEPTO LOGIN */
+      .section:not(.login-screen), 
+      .section.dark:not(.login-screen),
+      [id^="section-"]:not(#login-screen), 
+      [id^="section-"].dark:not(#login-screen),
       #section-dashboard, #section-dashboard.dark,
       #section-incidencias, #section-incidencias.dark,
       #section-eventos, #section-eventos.dark,
@@ -61,8 +69,8 @@
       }
 
       /* 6. Dark mode variant override - CRITICAL */
-      html.dark .section,
-      html.dark [id^="section-"],
+      html.dark .section:not(.login-screen),
+      html.dark [id^="section-"]:not(#login-screen),
       html.dark .bg-gray-900,
       html.dark .bg-gray-800,
       html.dark .dark\\:bg-gray-900 {
@@ -71,35 +79,60 @@
       }
 
       /* 7. Cards and panels */
-      .card, .card.dark, .panel, .panel.dark,
+      .card:not(.login-card), 
+      .card.dark:not(.login-card),
+      .panel:not(.login-panel),
+      .panel.dark:not(.login-panel),
       .dashboard-summary-card, .dashboard-summary-card.dark,
       .dashboard-kpi-card, .dashboard-kpi-card.dark,
-      [class*="card"], [class*="card"].dark,
-      [class*="panel"], [class*="panel"].dark {
+      [class*="card"]:not(.login-card), 
+      [class*="card"].dark:not(.login-card),
+      [class*="panel"]:not(.login-panel),
+      [class*="panel"].dark:not(.login-panel) {
         background-color: #ffffff !important;
         color: #1a1a1a !important;
         border: 1px solid #e0e0e0 !important;
       }
 
       /* 8. Buttons */
-      button, button.dark, [role="button"], [role="button"].dark {
+      button:not(.login-btn), 
+      button.dark:not(.login-btn),
+      [role="button"]:not(.login-btn),
+      [role="button"].dark:not(.login-btn) {
         background-color: #0066cc !important;
         color: #ffffff !important;
         border: none !important;
       }
 
-      button:hover, button:hover.dark {
+      button:not(.login-btn):hover,
+      button:not(.login-btn):hover.dark {
         background-color: #004699 !important;
       }
 
-      /* 9. Forms */
-      input, input.dark, textarea, textarea.dark, select, select.dark {
+      /* 9. Forms - PERO NO EL LOGIN */
+      .umsnh-login__form,
+      #login-form,
+      .login-screen,
+      #login-screen {
+        /* NO MODIFICAR - DEJAR INTACTO */
+      }
+
+      /* Otros formularios SÍ se modifican */
+      form:not(.umsnh-login__form):not(#login-form),
+      input:not(.login-input), 
+      input.dark:not(.login-input),
+      textarea:not(.login-textarea),
+      textarea.dark:not(.login-textarea),
+      select:not(.login-select),
+      select.dark:not(.login-select) {
         background-color: #ffffff !important;
         color: #1a1a1a !important;
         border: 1px solid #d0d0d0 !important;
       }
 
-      input:focus, textarea:focus, select:focus {
+      input:not(.login-input):focus,
+      textarea:not(.login-textarea):focus,
+      select:not(.login-select):focus {
         background-color: #ffffff !important;
         color: #1a1a1a !important;
         border-color: #0066cc !important;
@@ -116,44 +149,24 @@
       }
 
       /* 11. Text elements */
-      p, span, a, li, label, h1, h2, h3, h4, h5, h6 {
+      p:not(.login-text), 
+      span:not(.login-text), 
+      a:not(.login-link), 
+      li:not(.login-item), 
+      label:not(.login-label),
+      h1:not(.login-heading), 
+      h2:not(.login-heading),
+      h3:not(.login-heading),
+      h4:not(.login-heading),
+      h5:not(.login-heading),
+      h6:not(.login-heading) {
         color: #1a1a1a !important;
       }
 
-      /* 12. Utilities: remove all dark color overrides */
-      .dark\\:text-white, .dark\\:text-gray-100, .dark\\:text-gray-50 {
-        color: #1a1a1a !important;
-      }
-
-      .dark\\:bg-gray-900, .dark\\:bg-gray-800, .dark\\:bg-gray-700,
-      .dark\\:bg-slate-900, .dark\\:bg-slate-800 {
-        background-color: #ffffff !important;
-      }
-
-      /* 13. Specific dark theme color overrides from Tailwind */
-      html.dark .dark\\:bg-gray-900,
-      html.dark .dark\\:bg-gray-800,
-      html.dark .dark\\:text-white {
-        background-color: #ffffff !important;
-        color: #1a1a1a !important;
-      }
-
-      /* 14. Remove any dark filters */
-      html.dark, html.dark * {
-        filter: none !important;
-      }
-
-      /* 15. Footer */
+      /* 12. Footer */
       footer, [role="contentinfo"] {
         background-color: #f8f9fa !important;
         color: #1a1a1a !important;
-      }
-
-      /* 16. Force remove dark class styles */
-      @supports selector(:has(+ *)) {
-        :root:has(.dark) {
-          color-scheme: light !important;
-        }
       }
     `;
 
@@ -166,7 +179,7 @@
       });
     }
 
-    // Remove dark class if present
+    // Remove dark class if present (pero solo en sections, no en login)
     document.documentElement.classList.remove('dark');
 
     // Monitor for class changes
