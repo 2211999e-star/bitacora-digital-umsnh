@@ -7,15 +7,16 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
+  /* Tema Claro (por defecto) */
   --simple-primary: #5dcaa5;
-  --simple-text: #f8fafc;
-  --simple-text-secondary: #a8bacf;
-  --simple-text-tertiary: #8798ae;
-  --simple-bg: #070e19;
-  --simple-bg-card: rgba(7, 14, 25, 0.65);
-  --simple-bg-input: rgba(15, 23, 42, 0.8);
-  --simple-border: rgba(255, 255, 255, 0.08);
-  --simple-border-light: rgba(255, 255, 255, 0.12);
+  --simple-text: #1a202c;
+  --simple-text-secondary: #718096;
+  --simple-text-tertiary: #a0aec0;
+  --simple-bg: #ffffff;
+  --simple-bg-card: rgba(255, 255, 255, 0.95);
+  --simple-bg-input: rgba(248, 250, 252, 0.9);
+  --simple-border: rgba(0, 0, 0, 0.08);
+  --simple-border-light: rgba(0, 0, 0, 0.12);
   --simple-radius: 0.8rem;
   --simple-spacing-xs: 0.5rem;
   --simple-spacing-sm: 1rem;
@@ -25,13 +26,29 @@
   --simple-transition: all 0.2s ease;
 }
 
+/* Modo Oscuro */
+html.dark {
+  --simple-text: #f8fafc;
+  --simple-text-secondary: #a8bacf;
+  --simple-text-tertiary: #8798ae;
+  --simple-bg: #070e19;
+  --simple-bg-card: rgba(7, 14, 25, 0.65);
+  --simple-bg-input: rgba(15, 23, 42, 0.8);
+  --simple-border: rgba(255, 255, 255, 0.08);
+  --simple-border-light: rgba(255, 255, 255, 0.12);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    CONTENEDOR PRINCIPAL
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 #app-shell {
-  background: linear-gradient(140deg, #0a1628, #0d2137 50%, #0a2a2a);
+  background: linear-gradient(140deg, #ffffff, #fafbfc 50%, #f5f7fa);
   color: var(--simple-text);
+}
+
+html.dark #app-shell {
+  background: linear-gradient(140deg, #0a1628, #0d2137 50%, #0a2a2a);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════

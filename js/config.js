@@ -58,7 +58,7 @@ export function getThemePreference() {
   const old = localStorage.getItem('darkMode');
   if (old === 'true') return 'dark';
   if (old === 'false') return 'light';
-  return 'system';
+  return 'light'; // Cambio: 'light' por defecto en lugar de 'system'
 }
 
 export function updateThemeButtonsUI(pref = getThemePreference()) {
