@@ -1,0 +1,604 @@
+/**
+ * premium-global.css
+ * Aplicar el diseño premium a TODO el sistema
+ * Incidencias, Eventos, Documentos, Reportes, Usuarios, Configuración
+ */
+
+/* ============================================================================
+   FONDO GLOBAL (TODOS LOS NAVEGADORES)
+   ============================================================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  transition: all 0.3s ease;
+}
+
+/* ============================================================================
+   APP CONTAINER - MEJORAS GLOBALES
+   ============================================================================ */
+
+#app-container {
+  background: transparent;
+}
+
+#app-container .section {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   HEADERS - TODAS LAS SECCIONES
+   ============================================================================ */
+
+#main-content > header {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+#main-content > header:hover {
+  border-bottom-color: rgba(14, 165, 233, 0.2);
+}
+
+/* ============================================================================
+   SECCIÓN HEROES - Todos
+   ============================================================================ */
+
+.section-hero {
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.section-hero__title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-stats-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.section-hero__subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================================================
+   INCIDENCIAS (ACTIVITIES)
+   ============================================================================ */
+
+#section-activities .section-hero__title {
+  background: linear-gradient(135deg, #1d4ed8, #0e7490);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-activities .card,
+#section-activities .bg-white,
+#section-activities .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-activities .card:hover,
+#section-activities .bg-white:hover,
+#section-activities .dark\:bg-gray-900:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.12) !important;
+}
+
+/* ============================================================================
+   EVENTOS (EVENTS)
+   ============================================================================ */
+
+#section-events .section-hero__title {
+  background: linear-gradient(135deg, #0f766e, #0369a1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-events .card,
+#section-events .bg-white,
+#section-events .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-events .card:hover {
+  border-color: rgba(0, 150, 136, 0.4) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(0, 150, 136, 0.12) !important;
+}
+
+/* ============================================================================
+   DOCUMENTOS
+   ============================================================================ */
+
+#section-documents .section-hero__title {
+  background: linear-gradient(135deg, #b45309, #9a3412);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-documents .card,
+#section-documents .bg-white,
+#section-documents .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-documents .card:hover {
+  border-color: rgba(217, 119, 6, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(217, 119, 6, 0.12) !important;
+}
+
+/* ============================================================================
+   REPORTES
+   ============================================================================ */
+
+#section-reports .section-hero__title {
+  background: linear-gradient(135deg, #1e3a8a, #0f766e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-reports .card,
+#section-reports .bg-white,
+#section-reports .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-reports .card:hover {
+  border-color: rgba(30, 64, 175, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(30, 64, 175, 0.12) !important;
+}
+
+/* ============================================================================
+   USUARIOS
+   ============================================================================ */
+
+#section-users .section-hero__title {
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-users .card,
+#section-users .bg-white,
+#section-users .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-users .card:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.12) !important;
+}
+
+/* ============================================================================
+   CONFIGURACIÓN
+   ============================================================================ */
+
+#section-settings .section-hero__title {
+  background: linear-gradient(135deg, #334155, #0f766e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#section-settings .card,
+#section-settings .bg-white,
+#section-settings .dark\:bg-gray-900 {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-settings .card:hover {
+  border-color: rgba(100, 116, 139, 0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 24px rgba(100, 116, 139, 0.12) !important;
+}
+
+/* ============================================================================
+   TABLAS GLOBALES
+   ============================================================================ */
+
+table {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)) !important;
+  border-radius: 1rem !important;
+  overflow: hidden;
+}
+
+table thead {
+  background: linear-gradient(90deg, rgba(14, 165, 233, 0.08), rgba(168, 85, 247, 0.08)) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+table thead th {
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 0.75rem !important;
+  color: var(--color-text-secondary) !important;
+  padding: 1rem !important;
+}
+
+table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+table tbody tr:hover {
+  background: rgba(14, 165, 233, 0.06) !important;
+  border-bottom-color: rgba(14, 165, 233, 0.2) !important;
+}
+
+table tbody td {
+  padding: 1rem !important;
+  border: none !important;
+}
+
+/* ============================================================================
+   FORMULARIOS GLOBALES
+   ============================================================================ */
+
+input,
+select,
+textarea,
+.form-input,
+.form-select,
+.form-textarea {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  color: var(--color-text) !important;
+  font-family: var(--font-sans) !important;
+  transition: all 0.2s ease !important;
+  padding: 0.75rem 1rem !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+/* ============================================================================
+   BOTONES GLOBALES
+   ============================================================================ */
+
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-warning,
+.btn-danger {
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  border: none !important;
+  cursor: pointer !important;
+  min-height: 2.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+}
+
+button:hover,
+.btn:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-success:hover,
+.btn-warning:hover,
+.btn-danger:hover {
+  transform: translateY(-2px) !important;
+}
+
+button:active,
+.btn:active {
+  transform: translateY(0) !important;
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* ============================================================================
+   BADGES GLOBALES
+   ============================================================================ */
+
+.badge,
+.status-chip {
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  transition: all 0.2s ease !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.badge:hover,
+.status-chip:hover {
+  transform: scale(1.05) !important;
+}
+
+/* ============================================================================
+   SIDEBAR Y NAVEGACIÓN
+   ============================================================================ */
+
+#sidebar,
+#main-sidebar,
+.sidebar,
+nav {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* ============================================================================
+   EFECTOS DE CARGA
+   ============================================================================ */
+
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.05) 25%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    rgba(255, 255, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 0.75rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   MODALES Y DIALOGS
+   ============================================================================ */
+
+.modal,
+.dialog,
+.modal-content {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   NOTIFICACIONES
+   ============================================================================ */
+
+.alert,
+.toast,
+.notification {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 0.75rem !important;
+  padding: 1rem !important;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   SCROLL SMOOTH
+   ============================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-primary-600), var(--color-stats-600));
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-primary-700), var(--color-stats-700));
+  box-shadow: 0 0 6px rgba(14, 165, 233, 0.3);
+}
+
+/* ============================================================================
+   RESPONSIVE GLOBAL
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .section-hero__title {
+    font-size: 1.875rem !important;
+  }
+
+  button,
+  .btn {
+    min-height: 2.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 0.625rem 0.75rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-hero__title {
+    font-size: 1.5rem !important;
+  }
+
+  button,
+  .btn {
+    min-height: 2rem !important;
+    font-size: 0.85rem !important;
+    padding: 0.5rem !important;
+  }
+
+  table thead th,
+  table tbody td {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* ============================================================================
+   MODO OSCURO/CLARO GLOBAL
+   ============================================================================ */
+
+.light {
+  --text-color: #111827;
+  --bg-color: #ffffff;
+  --border-color: rgba(71, 85, 105, 0.15);
+}
+
+.dark {
+  --text-color: #e5e7eb;
+  --bg-color: #0a0e27;
+  --border-color: rgba(100, 120, 160, 0.2);
+}
+
+/* ============================================================================
+   TRANSICIONES SUAVES
+   ============================================================================ */
+
+* {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* ============================================================================
+   PRIORIDAD VISUAL
+   ============================================================================ */
+
+.priority-critical {
+  border-left: 4px solid var(--color-danger-600) !important;
+  padding-left: 1rem !important;
+}
+
+.priority-high {
+  border-left: 4px solid var(--color-warning-600) !important;
+  padding-left: 1rem !important;
+}
+
+.priority-medium {
+  border-left: 4px solid var(--color-primary-600) !important;
+  padding-left: 1rem !important;
+}
+
+.priority-low {
+  border-left: 4px solid var(--color-neutral-500) !important;
+  padding-left: 1rem !important;
+}

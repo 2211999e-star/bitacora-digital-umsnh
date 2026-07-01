@@ -1,0 +1,438 @@
+/**
+ * premium-enhancements.css
+ * Mejoras premium para el dashboard existente
+ * Estos estilos se aplican sobre la estructura HTML actual
+ */
+
+/* ============================================================================
+   FONDO DEL SISTEMA
+   ============================================================================ */
+
+body {
+  background: linear-gradient(135deg, 
+    rgba(10, 14, 39, 0.95) 0%,
+    rgba(13, 26, 61, 0.95) 25%,
+    rgba(21, 27, 58, 0.95) 50%,
+    rgba(10, 14, 39, 0.95) 100%) fixed !important;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================================
+   MEJORAR HERO SECTION DEL DASHBOARD
+   ============================================================================ */
+
+#section-dashboard .section-hero {
+  margin-bottom: 2rem;
+}
+
+#section-dashboard .section-hero__title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-stats-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+#section-dashboard .section-hero__subtitle {
+  font-size: 1.125rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ============================================================================
+   MEJORAR TARJETAS DEL DASHBOARD
+   ============================================================================ */
+
+#section-dashboard .dashboard-summary-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.25rem !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  padding: 1.5rem !important;
+  position: relative;
+  overflow: hidden;
+}
+
+#section-dashboard .dashboard-summary-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+#section-dashboard .dashboard-summary-card:hover {
+  transform: translateY(-6px) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2) !important;
+}
+
+#section-dashboard .dashboard-summary-card:hover::before {
+  opacity: 1;
+}
+
+/* ============================================================================
+   INDICADORES (STATS)
+   ============================================================================ */
+
+#section-dashboard .stat-card,
+#section-dashboard .dashboard-stat-btn {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+#section-dashboard .stat-card:hover,
+#section-dashboard .dashboard-stat-btn:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(14, 165, 233, 0.4) !important;
+  box-shadow: 0 15px 30px rgba(14, 165, 233, 0.15) !important;
+}
+
+#section-dashboard .count {
+  font-size: 2.25rem !important;
+  font-weight: 800 !important;
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-stats-500));
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+/* ============================================================================
+   TARJETAS DE SALUD (HEALTH)
+   ============================================================================ */
+
+#section-dashboard .dashboard-health-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(15px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1rem !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  padding: 1.5rem !important;
+}
+
+#section-dashboard .dashboard-health-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(14, 165, 233, 0.4) !important;
+  box-shadow: 0 15px 30px rgba(14, 165, 233, 0.15) !important;
+}
+
+/* ============================================================================
+   TARJETAS KPI
+   ============================================================================ */
+
+#section-dashboard .dashboard-kpi-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 0.875rem !important;
+  transition: all 0.2s ease !important;
+}
+
+#section-dashboard .dashboard-kpi-card:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+}
+
+/* ============================================================================
+   PANEL DEL DASHBOARD
+   ============================================================================ */
+
+#section-dashboard .dashboard-panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 1.25rem !important;
+  transition: all 0.3s ease !important;
+}
+
+#section-dashboard .dashboard-panel:hover {
+  border-color: rgba(14, 165, 233, 0.3) !important;
+  box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1) !important;
+}
+
+/* ============================================================================
+   ACCIONES RÁPIDAS
+   ============================================================================ */
+
+#section-dashboard .dashboard-hero-action {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 0.875rem !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  padding: 1rem !important;
+}
+
+#section-dashboard .dashboard-hero-action:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.2) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)) !important;
+}
+
+/* ============================================================================
+   BOTONES
+   ============================================================================ */
+
+#section-dashboard .btn-primary,
+#section-dashboard button[class*="bg-blue"],
+#section-dashboard button[class*="bg-black"] {
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700)) !important;
+  box-shadow: 0 10px 20px rgba(2, 132, 199, 0.2) !important;
+  border: none !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+#section-dashboard .btn-primary:hover,
+#section-dashboard button[class*="bg-blue"]:hover,
+#section-dashboard button[class*="bg-black"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 15px 30px rgba(2, 132, 199, 0.3) !important;
+}
+
+#section-dashboard .btn-primary:active,
+#section-dashboard button[class*="bg-blue"]:active,
+#section-dashboard button[class*="bg-black"]:active {
+  transform: translateY(0) !important;
+}
+
+/* ============================================================================
+   GRÁFICOS
+   ============================================================================ */
+
+#section-dashboard .dashboard-chart {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+#section-dashboard .dashboard-chart canvas {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+/* ============================================================================
+   TIMELINES Y LISTAS
+   ============================================================================ */
+
+#section-dashboard .timeline-item {
+  animation: slideLeft 0.5s ease-out;
+}
+
+#section-dashboard .activity-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease !important;
+}
+
+#section-dashboard .activity-item:hover {
+  background: rgba(14, 165, 233, 0.05) !important;
+}
+
+/* ============================================================================
+   BADGES Y CHIPS
+   ============================================================================ */
+
+#section-dashboard .status-chip {
+  padding: 0.4rem 0.8rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  display: inline-block !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+#section-dashboard .badge {
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.2s ease !important;
+}
+
+#section-dashboard .badge:hover {
+  transform: scale(1.05);
+}
+
+/* ============================================================================
+   INPUTS Y FORMS
+   ============================================================================ */
+
+#section-dashboard input,
+#section-dashboard select,
+#section-dashboard textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  color: var(--color-text) !important;
+  transition: all 0.2s ease !important;
+}
+
+#section-dashboard input:focus,
+#section-dashboard select:focus,
+#section-dashboard textarea:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(14, 165, 233, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+  outline: none !important;
+}
+
+/* ============================================================================
+   ANIMACIONES DE ENTRADA
+   ============================================================================ */
+
+#section-dashboard .stat-card:nth-child(1),
+#section-dashboard .card:nth-child(1) {
+  animation: fadeInUp 0.5s ease-out 0s;
+}
+
+#section-dashboard .stat-card:nth-child(2),
+#section-dashboard .card:nth-child(2) {
+  animation: fadeInUp 0.5s ease-out 0.1s;
+}
+
+#section-dashboard .stat-card:nth-child(3),
+#section-dashboard .card:nth-child(3) {
+  animation: fadeInUp 0.5s ease-out 0.2s;
+}
+
+#section-dashboard .stat-card:nth-child(4),
+#section-dashboard .card:nth-child(4) {
+  animation: fadeInUp 0.5s ease-out 0.3s;
+}
+
+#section-dashboard .stat-card:nth-child(n+5),
+#section-dashboard .card:nth-child(n+5) {
+  animation: fadeInUp 0.5s ease-out 0.4s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ============================================================================
+   LOADER PREMIUM
+   ============================================================================ */
+
+#loader {
+  background: linear-gradient(135deg, 
+    rgba(10, 14, 39, 0.98) 0%,
+    rgba(13, 26, 61, 0.98) 100%) !important;
+}
+
+#loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* ============================================================================
+   SCROLLBAR PREMIUM
+   ============================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-primary-600), var(--color-stats-600));
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-primary-700), var(--color-stats-700));
+}
+
+/* ============================================================================
+   RESPONSIVE - MOBILE FIRST
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  #section-dashboard .section-hero__title {
+    font-size: 1.875rem;
+  }
+
+  #section-dashboard .stat-card {
+    padding: 1rem;
+  }
+
+  #section-dashboard .dashboard-panel {
+    padding: 1rem;
+  }
+
+  #section-dashboard button {
+    min-height: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #section-dashboard .section-hero__title {
+    font-size: 1.5rem;
+  }
+
+  #section-dashboard .grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* ============================================================================
+   MODO PREFIERE MOVIMIENTO REDUCIDO
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

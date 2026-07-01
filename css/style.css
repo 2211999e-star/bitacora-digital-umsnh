@@ -1,6 +1,18 @@
 /* Custom Styles for Bitácora Digital UMICH */
 /* Este archivo actúa como "agregador" para mantener un punto único de carga. */
 
+/* ======================================================================
+   SISTEMA DE DISEÑO PREMIUM - Importar primero
+   ====================================================================== */
+@import url("./design-system.css");
+@import url("./premium-dashboard.css");
+@import url("./premium-animations.css");
+@import url("./premium-enhancements.css");
+@import url("./premium-global.css");
+
+/* ======================================================================
+   ESTILOS HEREDADOS - Mantener para compatibilidad
+   ====================================================================== */
 @import url("./tokens.css");
 @import url("./ui-base.css");
 @import url("./states.css");
