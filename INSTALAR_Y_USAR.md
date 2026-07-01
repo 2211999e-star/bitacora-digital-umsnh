@@ -16,7 +16,7 @@ python3 -m http.server 8000
 Luego abre: `http://localhost:8000/bitacora-digital-umsnh/`
 
 **Credenciales de prueba:**
-- Usuario: `2211999e`
+- Usuario: `221199e`
 - Contraseña: `123456789`
 
 Los datos se guardarán en localStorage de tu navegador.
@@ -122,7 +122,7 @@ sistema-mantenimiento-web/
 - **Auditoría automática** - Todos los cambios quedan registrados
 
 ### Credenciales locales (modo offline):
-- Usuario: `2211999e`
+- Usuario: `221199e`
 - Contraseña: `123456789`
 - ⚠️ Solo para desarrollo/pruebas
 

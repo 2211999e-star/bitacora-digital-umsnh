@@ -258,6 +258,45 @@ const results = quickSearch(activities, 'computadora', ['description', 'brand'])
 
 ### Usar Debounce para Búsqueda Real-Time
 
+---
+
+## 🎨 Fase Visual 2026-06-27 (Login + Diseño Global)
+
+### Cambios aplicados
+
+1. Login rediseñado con layout dual:
+- Panel institucional con propuesta de valor
+- Panel de acceso con mejor jerarquía y legibilidad
+- Compatibilidad completa con eventos e IDs existentes
+
+2. Sistema tipográfico y visual:
+- Títulos con Sora
+- Texto base con Nunito Sans
+- Paleta institucional slate + teal (sin sesgo morado)
+
+3. Estandarización de módulos internos:
+- Tarjetas con misma profundidad/sombra/borde
+- Botones primarios y secundarios con comportamiento consistente
+- Inputs/selects/labels homologados en todas las secciones
+- Tablas con encabezados más claros y densidad legible
+
+### Recomendaciones siguientes (priorizadas)
+
+1. Sistema de diseño formal:
+- Centralizar tokens de color, spacing y tipografía en un solo archivo dedicado.
+
+2. Biblioteca de componentes:
+- Definir clases utilitarias para card, panel, button, field, badge y empty-state.
+
+3. Accesibilidad AA:
+- Ejecutar revisión de contraste y teclado en modales, tablas y formularios.
+
+4. Estados UX:
+- Unificar vistas de carga, sin datos y error con mensajes institucionales.
+
+5. Performance visual:
+- Medir costo de sombras/filtros en equipos de bajo recurso y ajustar si es necesario.
+
 ```javascript
 import { debounce } from './js/enhancements.js';
 
