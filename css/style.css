@@ -2,13 +2,18 @@
 /* Este archivo actúa como "agregador" para mantener un punto único de carga. */
 
 /* ======================================================================
-   SISTEMA DE DISEÑO PREMIUM - Importar primero
+   SISTEMA DE DISEÑO MINIMALISTA - Nuevo diseño simple (como login)
    ====================================================================== */
-@import url("./design-system.css");
-@import url("./premium-dashboard.css");
-@import url("./premium-animations.css");
-@import url("./premium-enhancements.css");
-@import url("./premium-global.css");
+@import url("./simple-design-system.css");
+
+/* ======================================================================
+   SISTEMA DE DISEÑO PREMIUM - DESHABILITADO (usar minimalista en su lugar)
+   ====================================================================== */
+/* @import url("./design-system.css"); */
+/* @import url("./premium-dashboard.css"); */
+/* @import url("./premium-animations.css"); */
+/* @import url("./premium-enhancements.css"); */
+/* @import url("./premium-global.css"); */
 
 /* ======================================================================
    ESTILOS HEREDADOS - Mantener para compatibilidad
