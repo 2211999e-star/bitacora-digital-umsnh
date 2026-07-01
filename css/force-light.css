@@ -1,0 +1,82 @@
+/* ========================================================================
+   FORZAR MODO LIGHT - AGRESIVO
+   ======================================================================== */
+
+/* Remover clase dark si existe */
+html.dark {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity)) !important;
+  color: #1a1a1a !important;
+}
+
+html.dark::before {
+  display: none !important;
+}
+
+html.dark * {
+  --tw-bg-opacity: 1 !important;
+  --tw-text-opacity: 1 !important;
+  background-color: transparent !important;
+  color: #1a1a1a !important;
+}
+
+/* Forzar colores claros en TODO */
+:root {
+  color-scheme: light !important;
+}
+
+* {
+  color-scheme: light !important;
+}
+
+body, html, #app-shell, main {
+  background-color: #f8f9fa !important;
+  background-image: none !important;
+  color: #1a1a1a !important;
+}
+
+/* Eliminar degradados oscuros */
+[style*="linear-gradient"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+}
+
+/* Forzar todos los backgrounds a claro */
+div, section, article, aside, header, footer, main, nav {
+  background-color: inherit !important;
+  color: #1a1a1a !important;
+}
+
+/* Inputs y forms */
+input, textarea, select, button {
+  color: #1a1a1a !important;
+}
+
+/* Textos */
+h1, h2, h3, h4, h5, h6, p, span, a, li, label {
+  color: #1a1a1a !important;
+}
+
+/* Bordes y sombras */
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+
+/* Tabs y especiales */
+.dark, [class*="dark"], .dark-mode {
+  background-color: #ffffff !important !important;
+  color: #1a1a1a !important !important;
+}
+
+/* SVG y iconos */
+svg {
+  color: inherit !important;
+}
+
+/* Remover cualquier overlay oscuro */
+[style*="background: rgba(0, 0, 0"] {
+  background: none !important;
+}
+
+/* Forzar visible en todo */
+.section, .card, .modal, [role="dialog"] {
+  visibility: visible !important;
+  opacity: 1 !important;
+}

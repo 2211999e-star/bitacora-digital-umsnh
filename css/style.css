@@ -31,6 +31,9 @@
 @import url("./layout-improvements.css");
 @import url("./header-improvements.css");
 @import url("./panel-improvements.css");
+@import url("./modern-redesign.css");
+@import url("./global-redesign.css");
+@import url("./force-light.css");
 
 /* SweetAlert2 Dark Mode overrides */
 .dark .swal2-popup {

@@ -1,0 +1,700 @@
+/**
+ * REDISEÑO MODERNO Y PROFESIONAL
+ * Interfaz completamente mejorada con colores claros, tipografía profesional,
+ * espaciado elegante y componentes visuales de alta calidad
+ */
+
+/* ============================================ */
+/* 1. LOGIN SCREEN - Diseño Moderno */
+/* ============================================ */
+
+/* Base - Todo el login en light mode */
+#login-screen.umsnh-login {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#login-screen.umsnh-login .umsnh-login__shell {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+#login-screen.umsnh-login .umsnh-login__shell:hover {
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+  border-color: #cbd5e1;
+}
+
+/* Left Panel - Información y características */
+#login-screen.umsnh-login .umsnh-login__left {
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%);
+  border-right: 1px solid #e2e8f0;
+}
+
+#login-screen.umsnh-login .umsnh-login__left h2 {
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__left h2 span {
+  color: #5dcaa5;
+  background: linear-gradient(135deg, #5dcaa5 0%, #2dd4bf 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#login-screen.umsnh-login .umsnh-login__left > p {
+  color: #64748b;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+
+/* Features List */
+#login-screen.umsnh-login .umsnh-login__features {
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__features li {
+  color: #475569;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__features i {
+  color: #5dcaa5;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Quick Access */
+#login-screen.umsnh-login .umsnh-login__quick-access {
+  margin-top: 2rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__quick-access > p {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__quick-access button {
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#login-screen.umsnh-login .umsnh-login__quick-access button:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-2px);
+}
+
+/* Right Panel - Formulario */
+#login-screen.umsnh-login .umsnh-login__right {
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#login-screen.umsnh-login .umsnh-login__kicker {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__right h3 {
+  color: #0f172a;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Form Styling */
+#login-screen.umsnh-login .umsnh-login__form {
+  gap: 1rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__form label {
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+#login-screen.umsnh-login .umsnh-login__field-wrap {
+  position: relative;
+}
+
+#login-screen.umsnh-login input[type="text"],
+#login-screen.umsnh-login input[type="password"],
+#login-screen.umsnh-login input[type="email"] {
+  width: 100%;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#login-screen.umsnh-login input[type="text"]:focus,
+#login-screen.umsnh-login input[type="password"]:focus,
+#login-screen.umsnh-login input[type="email"]:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #5dcaa5;
+  box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.1);
+}
+
+#login-screen.umsnh-login input::placeholder {
+  color: #94a3b8;
+}
+
+/* Show Password Button */
+#login-screen.umsnh-login .umsnh-login__field-wrap > button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: color 0.2s ease;
+}
+
+#login-screen.umsnh-login .umsnh-login__field-wrap > button:hover {
+  color: #5dcaa5;
+}
+
+/* Submit Button */
+#login-screen.umsnh-login button[type="submit"],
+#login-screen.umsnh-login button[type="button"] {
+  background: linear-gradient(135deg, #5dcaa5 0%, #2dd4bf 100%);
+  border: none;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+#login-screen.umsnh-login button[type="submit"]:hover,
+#login-screen.umsnh-login button[type="button"]:hover {
+  box-shadow: 0 10px 30px rgba(93, 202, 165, 0.3);
+  transform: translateY(-2px);
+}
+
+#login-screen.umsnh-login button[type="submit"]:active,
+#login-screen.umsnh-login button[type="button"]:active {
+  transform: translateY(0);
+}
+
+#login-screen.umsnh-login button i {
+  font-size: 1.1rem;
+}
+
+/* Credentials Helper */
+#login-screen.umsnh-login .umsnh-login__credentials {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
+
+#login-screen.umsnh-login .umsnh-login__credentials > p {
+  color: #16a34a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__credentials > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__credentials > div > div {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+#login-screen.umsnh-login code {
+  background: #dcfce7;
+  color: #15803d;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Contact Help */
+#login-screen.umsnh-login .umsnh-login__help {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+#login-screen.umsnh-login .umsnh-login__help a {
+  color: #5dcaa5;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+#login-screen.umsnh-login .umsnh-login__help a:hover {
+  color: #2dd4bf;
+  text-decoration: underline;
+}
+
+/* ============================================ */
+/* 2. HEADER - Diseño Moderno */
+/* ============================================ */
+
+.app-header {
+  background: linear-gradient(90deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 0.75rem 1.5rem;
+}
+
+.app-header h1 {
+  color: #0f172a;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+/* ============================================ */
+/* 3. SIDEBAR - Diseño Moderno */
+/* ============================================ */
+
+.sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-right: 1px solid #e2e8f0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+.sidebar .sidebar-menu a,
+.sidebar .sidebar-menu button {
+  color: #475569;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sidebar .sidebar-menu a:hover,
+.sidebar .sidebar-menu button:hover {
+  background: #f1f5f9;
+  color: #5dcaa5;
+}
+
+.sidebar .sidebar-menu a.active {
+  background: linear-gradient(90deg, rgba(93, 202, 165, 0.1) 0%, rgba(45, 212, 191, 0.05) 100%);
+  color: #5dcaa5;
+  border-left: 3px solid #5dcaa5;
+  padding-left: calc(1rem - 3px);
+}
+
+/* ============================================ */
+/* 4. MAIN SECTIONS - Diseño Moderno */
+/* ============================================ */
+
+.section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  animation: slideInUp 0.4s ease-out;
+}
+
+.section h1,
+.section h2 {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.section p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+/* ============================================ */
+/* 5. CARDS Y COMPONENTES */
+/* ============================================ */
+
+.card, [class*="card"] {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.card:hover {
+  border-color: #5dcaa5;
+  box-shadow: 0 12px 24px rgba(93, 202, 165, 0.15);
+  transform: translateY(-4px);
+}
+
+/* ============================================ */
+/* 6. BUTTONS */
+/* ============================================ */
+
+.btn, button {
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary, button[class*="primary"] {
+  background: linear-gradient(135deg, #5dcaa5 0%, #2dd4bf 100%);
+  color: #ffffff;
+}
+
+.btn-primary:hover, button[class*="primary"]:hover {
+  box-shadow: 0 8px 20px rgba(93, 202, 165, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-secondary, button[class*="secondary"] {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-secondary:hover, button[class*="secondary"]:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+/* ============================================ */
+/* 7. FORMS */
+/* ============================================ */
+
+input, textarea, select {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #5dcaa5;
+  box-shadow: 0 0 0 3px rgba(93, 202, 165, 0.1);
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+label {
+  color: #334155;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* ============================================ */
+/* 8. MODALES Y DIALOGS */
+/* ============================================ */
+
+dialog {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+dialog h2 {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+/* ============================================ */
+/* 9. ESTADÍSTICAS Y CONTADORES */
+/* ============================================ */
+
+.stat-card, [class*="stat"] {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+  border-color: #5dcaa5;
+  box-shadow: 0 8px 20px rgba(93, 202, 165, 0.1);
+}
+
+.stat-card h3, .stat-card .stat-label {
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .stat-value {
+  color: #5dcaa5;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+/* ============================================ */
+/* 10. TABLES */
+/* ============================================ */
+
+table {
+  background: #ffffff;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+thead th {
+  color: #475569;
+  font-weight: 700;
+  padding: 1rem;
+  text-align: left;
+}
+
+tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* ============================================ */
+/* 11. BADGES Y ETIQUETAS */
+/* ============================================ */
+
+.badge, [class*="badge"] {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #0c4a6e;
+}
+
+/* ============================================ */
+/* 12. ANIMACIONES MEJORADAS */
+/* ============================================ */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ============================================ */
+/* 13. MODO OSCURO (OPCIONAL) */
+/* ============================================ */
+
+html.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --border-color: #334155;
+}
+
+html.dark .app-header,
+html.dark .sidebar,
+html.dark .section,
+html.dark .card,
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+html.dark #login-screen.umsnh-login {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0e0f1a 100%);
+}
+
+html.dark #login-screen.umsnh-login .umsnh-login__shell {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+html.dark #login-screen.umsnh-login .umsnh-login__left {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+html.dark button,
+html.dark .btn {
+  color: #f8fafc;
+}
+
+html.dark label,
+html.dark h1,
+html.dark h2,
+html.dark h3 {
+  color: #f8fafc;
+}
+
+html.dark p {
+  color: #cbd5e1;
+}
+
+/* ============================================ */
+/* 14. RESPONSIVE DESIGN */
+/* ============================================ */
+
+@media (max-width: 768px) {
+  #login-screen.umsnh-login .umsnh-login__shell {
+    grid-template-columns: 1fr;
+  }
+
+  #login-screen.umsnh-login .umsnh-login__left {
+    display: none;
+  }
+
+  #login-screen.umsnh-login .umsnh-login__right {
+    padding: 1.5rem;
+  }
+
+  .section {
+    padding: 1.25rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #login-screen.umsnh-login .umsnh-login__shell {
+    margin: 0.5rem;
+    border-radius: 16px;
+  }
+
+  #login-screen.umsnh-login .umsnh-login__right {
+    padding: 1.25rem;
+  }
+
+  .section {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  input, textarea, select {
+    font-size: 16px; /* Evita zoom en iOS */
+  }
+}

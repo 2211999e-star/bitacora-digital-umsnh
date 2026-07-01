@@ -78,8 +78,8 @@ export function updateThemeButtonsUI(pref = getThemePreference()) {
 }
 
 export function applyThemePreference(pref = getThemePreference()) {
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const shouldUseDark = pref === 'dark' || (pref === 'system' && prefersDark);
+  // FORZAR MODO LIGHT: nunca aplicar clase 'dark'
+  const shouldUseDark = false; // Siempre luz
   document.documentElement.classList.toggle('dark', Boolean(shouldUseDark));
   // mantener compatibilidad
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
