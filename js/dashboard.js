@@ -930,11 +930,15 @@ export async function loadDashboardData({ supabase } = {}) {
     const completed = state.activitiesData.filter((a) => a.task_status === 'completado').length;
     const canceled = state.activitiesData.filter((a) => a.task_status === 'cancelado').length;
 
-    // Update stats
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-pending').textContent = pending;
-    document.getElementById('stat-completed').textContent = completed;
-    document.getElementById('stat-in-progress').textContent = inProgress;
+    // Update stats (con verificación de null)
+    const statTotal = document.getElementById('stat-total');
+    if (statTotal) statTotal.textContent = total;
+    const statPending = document.getElementById('stat-pending');
+    if (statPending) statPending.textContent = pending;
+    const statCompleted = document.getElementById('stat-completed');
+    if (statCompleted) statCompleted.textContent = completed;
+    const statInProgress = document.getElementById('stat-in-progress');
+    if (statInProgress) statInProgress.textContent = inProgress;
     const canceledEl = document.getElementById('stat-canceled');
     if (canceledEl) canceledEl.textContent = String(canceled);
 
