@@ -365,158 +365,145 @@
  <div class="simple-section-header">
  <div>
  <h2 class="simple-section-title">Dashboard</h2>
- <p class="simple-section-subtitle">Resumen operativo, acciones rápidas y estado del sistema</p>
+ <p class="simple-section-subtitle">Control rápido del sistema</p>
  </div>
  </div>
 
- <!-- SECTION 1: KEY METRICS - Simple & Clean -->
- <div class="mb-8">
- <h3 class="simple-section-title mb-4">Métricas principales</h3>
+ <!-- MAIN VIEW: Compact & Visual -->
+
+ <!-- SECTION 1: KEY METRICS - Large & Visual -->
+ <div class="mb-6">
  <div class="simple-grid simple-grid-4 gap-4">
  <!-- Stat Card 1: Total -->
- <button type="button" onclick="showSection('activities')" class="simple-kpi-card hover:shadow-lg transition-all">
- <div class="flex items-center justify-between">
- <div class="flex-1">
- <p class="simple-kpi-label">Total</p>
- <p id="dashboard-stat-total" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Incidencias</p>
- </div>
- <i class="fas fa-list text-2xl simple-icon-info opacity-20"></i>
+ <button type="button" onclick="showSection('activities')" class="simple-kpi-card hover:shadow-lg transition-all" style="padding: 2rem 1rem; border: 2px solid rgba(93, 202, 165, 0.3);">
+ <div>
+ <i class="fas fa-list text-4xl simple-icon-info mb-3" style="opacity: 0.6;"></i>
+ <p class="simple-kpi-label text-sm">Total</p>
+ <p id="dashboard-stat-total" class="simple-kpi-value text-5xl font-bold">0</p>
+ <p class="text-simple-secondary text-xs mt-1">Incidencias</p>
  </div>
  </button>
 
  <!-- Stat Card 2: Pendientes -->
- <button type="button" onclick="showSection('activities'); openActivitiesPreset('pendiente')" class="simple-kpi-card hover:shadow-lg transition-all">
- <div class="flex items-center justify-between">
- <div class="flex-1">
- <p class="simple-kpi-label">Pendientes</p>
- <p id="dashboard-stat-pending" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Por atender</p>
- </div>
- <i class="fas fa-clock text-2xl simple-icon-warning opacity-20"></i>
+ <button type="button" onclick="showSection('activities'); openActivitiesPreset('pendiente')" class="simple-kpi-card hover:shadow-lg transition-all" style="padding: 2rem 1rem; border: 2px solid rgba(251, 146, 60, 0.3);">
+ <div>
+ <i class="fas fa-clock text-4xl simple-icon-warning mb-3" style="opacity: 0.6;"></i>
+ <p class="simple-kpi-label text-sm">Pendientes</p>
+ <p id="dashboard-stat-pending" class="simple-kpi-value text-5xl font-bold" style="color: var(--simple-warning);">0</p>
+ <p class="text-simple-secondary text-xs mt-1">Por atender</p>
  </div>
  </button>
 
  <!-- Stat Card 3: En Proceso -->
- <button type="button" onclick="showSection('activities'); openActivitiesPreset('en_proceso')" class="simple-kpi-card hover:shadow-lg transition-all">
- <div class="flex items-center justify-between">
- <div class="flex-1">
- <p class="simple-kpi-label">En proceso</p>
- <p id="dashboard-stat-in-progress" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">En atención</p>
- </div>
- <i class="fas fa-spinner text-2xl simple-icon-info opacity-20"></i>
+ <button type="button" onclick="showSection('activities'); openActivitiesPreset('en_proceso')" class="simple-kpi-card hover:shadow-lg transition-all" style="padding: 2rem 1rem; border: 2px solid rgba(93, 202, 165, 0.3);">
+ <div>
+ <i class="fas fa-spinner text-4xl simple-icon-info mb-3" style="opacity: 0.6;"></i>
+ <p class="simple-kpi-label text-sm">En proceso</p>
+ <p id="dashboard-stat-in-progress" class="simple-kpi-value text-5xl font-bold">0</p>
+ <p class="text-simple-secondary text-xs mt-1">En atención</p>
  </div>
  </button>
 
  <!-- Stat Card 4: Completadas -->
- <button type="button" onclick="showSection('activities'); openActivitiesPreset('completado')" class="simple-kpi-card hover:shadow-lg transition-all">
- <div class="flex items-center justify-between">
- <div class="flex-1">
- <p class="simple-kpi-label">Completadas</p>
- <p id="dashboard-stat-completed" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Resueltas</p>
- </div>
- <i class="fas fa-check-circle text-2xl simple-icon-success opacity-20"></i>
+ <button type="button" onclick="showSection('activities'); openActivitiesPreset('completado')" class="simple-kpi-card hover:shadow-lg transition-all" style="padding: 2rem 1rem; border: 2px solid rgba(34, 197, 94, 0.3);">
+ <div>
+ <i class="fas fa-check-circle text-4xl simple-icon-success mb-3" style="opacity: 0.6;"></i>
+ <p class="simple-kpi-label text-sm">Completadas</p>
+ <p id="dashboard-stat-completed" class="simple-kpi-value text-5xl font-bold" style="color: var(--simple-success);">0</p>
+ <p class="text-simple-secondary text-xs mt-1">Resueltas</p>
  </div>
  </button>
  </div>
  </div>
 
- <!-- SECTION 2: HEALTH STATUS - What needs attention -->
- <div class="mb-8">
- <h3 class="simple-section-title mb-4">Estado del sistema</h3>
+ <!-- SECTION 2: HEALTH STATUS - Large Icons & Visual -->
+ <div class="mb-6">
  <div class="simple-grid simple-grid-3 gap-4">
  <!-- Card: OK -->
- <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('completado')" class="simple-card hover:shadow-lg transition-all">
- <div class="flex items-center justify-between">
- <div>
+ <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('completado')" class="simple-card hover:shadow-lg transition-all" style="padding: 2rem; border-color: var(--simple-success); border-width: 2px;">
+ <div class="text-center">
+ <i class="fas fa-circle-check text-5xl simple-icon-success mb-4" style="opacity: 0.8;"></i>
+ <p class="simple-kpi-value text-4xl font-bold mb-2">0</p>
  <p class="simple-kpi-label">Completadas</p>
- <p id="dashboard-health-ok" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Bajo control</p>
- </div>
- <i class="fas fa-circle-check text-3xl simple-icon-success opacity-30"></i>
+ <p class="text-simple-secondary text-xs">Bajo control</p>
  </div>
  </button>
 
  <!-- Card: Pending Attention -->
- <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('pendiente')" class="simple-card hover:shadow-lg transition-all" style="border-color: var(--simple-warning);">
- <div class="flex items-center justify-between">
- <div>
+ <button type="button" onclick="showSection('activities'); setActivitiesStatusFilter('pendiente')" class="simple-card hover:shadow-lg transition-all" style="padding: 2rem; border-color: var(--simple-warning); border-width: 2px;">
+ <div class="text-center">
+ <i class="fas fa-triangle-exclamation text-5xl simple-icon-warning mb-4" style="opacity: 0.8;"></i>
+ <p class="simple-kpi-value text-4xl font-bold mb-2" style="color: var(--simple-warning);">0</p>
  <p class="simple-kpi-label">Pendientes</p>
- <p id="dashboard-health-warning" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Requieren acción</p>
- </div>
- <i class="fas fa-triangle-exclamation text-3xl simple-icon-warning opacity-30"></i>
+ <p class="text-simple-secondary text-xs">Requieren acción</p>
  </div>
  </button>
 
  <!-- Card: Urgent/Critical -->
- <button type="button" onclick="showSection('activities'); openActivitiesPreset('','','','overdue')" class="simple-card hover:shadow-lg transition-all" style="border-color: var(--simple-danger);">
- <div class="flex items-center justify-between">
- <div>
+ <button type="button" onclick="showSection('activities'); openActivitiesPreset('','','','overdue')" class="simple-card hover:shadow-lg transition-all" style="padding: 2rem; border-color: var(--simple-danger); border-width: 2px;">
+ <div class="text-center">
+ <i class="fas fa-bolt text-5xl simple-icon-danger mb-4" style="opacity: 0.8;"></i>
+ <p class="simple-kpi-value text-4xl font-bold mb-2" style="color: var(--simple-danger);">0</p>
  <p class="simple-kpi-label">Críticas</p>
- <p id="dashboard-health-critical" class="simple-kpi-value">0</p>
- <p class="simple-section-subtitle text-xs mt-1">Urgentes / Vencidas</p>
- </div>
- <i class="fas fa-bolt text-3xl simple-icon-danger opacity-30"></i>
+ <p class="text-simple-secondary text-xs">Urgentes</p>
  </div>
  </button>
  </div>
  </div>
 
- <!-- SECTION 3: QUICK ACTIONS - What to do next -->
- <div class="mb-8">
- <h3 class="simple-section-title mb-4">Acciones rápidas</h3>
- <div class="simple-grid simple-grid-5 gap-3">
- <button onclick="showSection('activities'); setTimeout(() => openActivityModal(), 100)" class="simple-btn simple-btn-secondary">
- <i class="fas fa-plus"></i>
- <span>Nueva incidencia</span>
+ <!-- SECTION 3: QUICK ACTIONS - Compact Row -->
+ <div class="mb-6">
+ <div class="simple-grid simple-grid-5 gap-2">
+ <button onclick="showSection('activities'); setTimeout(() => openActivityModal(), 100)" class="simple-btn simple-btn-secondary" style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">
+ <i class="fas fa-plus"></i> <span>Nueva</span>
  </button>
- <button onclick="showSection('events'); setTimeout(() => openEventModal(), 100)" class="simple-btn simple-btn-secondary">
- <i class="fas fa-calendar-plus"></i>
- <span>Nuevo evento</span>
+ <button onclick="showSection('events'); setTimeout(() => openEventModal(), 100)" class="simple-btn simple-btn-secondary" style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">
+ <i class="fas fa-calendar-plus"></i> <span>Evento</span>
  </button>
- <button onclick="showSection('reports')" class="simple-btn simple-btn-secondary">
- <i class="fas fa-file-pdf"></i>
- <span>Generar reporte</span>
+ <button onclick="showSection('reports')" class="simple-btn simple-btn-secondary" style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">
+ <i class="fas fa-file-pdf"></i> <span>Reporte</span>
  </button>
- <button onclick="showSection('documents')" class="simple-btn simple-btn-secondary">
- <i class="fas fa-folder-plus"></i>
- <span>Digitalizar</span>
+ <button onclick="showSection('documents')" class="simple-btn simple-btn-secondary" style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">
+ <i class="fas fa-folder-plus"></i> <span>Digitalizar</span>
  </button>
- <button onclick="openGlobalSearch()" class="simple-btn simple-btn-secondary">
- <i class="fas fa-search"></i>
- <span>Buscar</span>
+ <button onclick="openGlobalSearch()" class="simple-btn simple-btn-secondary" style="padding: 0.75rem 0.5rem; font-size: 0.85rem;">
+ <i class="fas fa-search"></i> <span>Buscar</span>
  </button>
  </div>
  </div>
 
- <!-- SECTION 4: MAINTENANCE SUMMARY - Preventive vs Corrective -->
- <div class="mb-8">
- <h3 class="simple-section-title mb-4">Resumen de mantenimiento</h3>
+ <!-- COLLAPSIBLE SECTION: More Information -->
+ <details class="mb-6">
+ <summary style="cursor: pointer; padding: 1rem; background: rgba(93, 202, 165, 0.1); border: 1px solid rgba(93, 202, 165, 0.2); border-radius: 8px; font-weight: 600; color: var(--simple-primary); outline: none;">
+ ➕ Más información
+ </summary>
+
+ <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(93, 202, 165, 0.2);">
+ <!-- MAINTENANCE SUMMARY -->
+ <div class="mb-6">
+ <h4 class="simple-section-title text-sm mb-3">Resumen de mantenimiento</h4>
  <div class="simple-grid simple-grid-2 gap-4">
  <!-- Preventive Card -->
  <div class="simple-card">
  <div class="flex items-center justify-between mb-3">
  <div>
- <p class="simple-kpi-label">Mantenimiento preventivo</p>
- <p class="simple-section-subtitle text-xs">Revisiones y controles programados</p>
+ <p class="simple-kpi-label text-sm">Preventivo</p>
+ <p class="text-simple-secondary text-xs">Protección</p>
  </div>
- <span class="simple-badge simple-badge-info">Protección</span>
+ <span class="simple-badge simple-badge-info">P</span>
  </div>
  <div class="simple-grid simple-grid-3 gap-2">
- <div class="simple-card-sm">
- <p class="simple-kpi-label">Total</p>
- <p id="stat-prev-total" class="simple-kpi-value text-xl">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Total</p>
+ <p id="stat-prev-total" class="simple-kpi-value text-lg">0</p>
  </div>
- <div class="simple-card-sm">
- <p class="simple-kpi-label">Pendientes</p>
- <p id="stat-prev-pending" class="simple-kpi-value text-xl" style="color: var(--simple-warning);">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Pendientes</p>
+ <p id="stat-prev-pending" class="simple-kpi-value text-lg" style="color: var(--simple-warning);">0</p>
  </div>
- <div class="simple-card-sm">
- <p class="simple-kpi-label">Completadas</p>
- <p id="stat-prev-completed" class="simple-kpi-value text-xl" style="color: var(--simple-success);">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Completadas</p>
+ <p id="stat-prev-completed" class="simple-kpi-value text-lg" style="color: var(--simple-success);">0</p>
  </div>
  </div>
  </div>
@@ -525,74 +512,71 @@
  <div class="simple-card" style="border-color: var(--simple-danger);">
  <div class="flex items-center justify-between mb-3">
  <div>
- <p class="simple-kpi-label">Mantenimiento correctivo</p>
- <p class="simple-section-subtitle text-xs">Reparación de fallas detectadas</p>
+ <p class="simple-kpi-label text-sm">Correctivo</p>
+ <p class="text-simple-secondary text-xs">Reparación</p>
  </div>
- <span class="simple-badge simple-badge-danger">Reparación</span>
+ <span class="simple-badge simple-badge-danger">R</span>
  </div>
  <div class="simple-grid simple-grid-3 gap-2">
- <div class="simple-card-sm" style="border-color: var(--simple-danger);">
- <p class="simple-kpi-label">Total</p>
- <p id="stat-corr-total" class="simple-kpi-value text-xl">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Total</p>
+ <p id="stat-corr-total" class="simple-kpi-value text-lg">0</p>
  </div>
- <div class="simple-card-sm" style="border-color: var(--simple-warning);">
- <p class="simple-kpi-label">Pendientes</p>
- <p id="stat-corr-pending" class="simple-kpi-value text-xl" style="color: var(--simple-warning);">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Pendientes</p>
+ <p id="stat-corr-pending" class="simple-kpi-value text-lg" style="color: var(--simple-warning);">0</p>
  </div>
- <div class="simple-card-sm" style="border-color: var(--simple-success);">
- <p class="simple-kpi-label">Completadas</p>
- <p id="stat-corr-completed" class="simple-kpi-value text-xl" style="color: var(--simple-success);">0</p>
+ <div class="text-center">
+ <p class="text-simple-secondary text-xs">Completadas</p>
+ <p id="stat-corr-completed" class="simple-kpi-value text-lg" style="color: var(--simple-success);">0</p>
  </div>
  </div>
  </div>
  </div>
  </div>
 
- <!-- SECTION 5: ALERTS & NOTICES - Important information -->
- <div class="mb-8">
- <h3 class="simple-section-title mb-4">Alertas y recordatorios</h3>
+ <!-- ALERTS & NOTICES -->
+ <div class="mb-6">
+ <h4 class="simple-section-title text-sm mb-3">Alertas</h4>
  <div class="simple-grid simple-grid-2 gap-4">
  <!-- Critical Items -->
  <div class="simple-card">
  <div class="flex items-center justify-between mb-3">
- <div>
- <p class="simple-kpi-label">Ítems críticos</p>
- <p class="simple-section-subtitle text-xs">Requieren atención inmediata</p>
- </div>
+ <p class="simple-kpi-label text-sm">Ítems críticos</p>
  <span id="badge-critical" class="simple-badge simple-badge-danger">0</span>
  </div>
- <div id="dashboard-critical-items" class="space-y-2 max-h-48 overflow-y-auto">
- <p class="text-simple-secondary text-sm text-center py-6">No hay ítems críticos</p>
+ <div id="dashboard-critical-items" class="space-y-2 max-h-40 overflow-y-auto text-xs">
+ <p class="text-simple-secondary text-center py-4">No hay ítems críticos</p>
  </div>
  </div>
 
  <!-- Upcoming Events -->
  <div class="simple-card">
  <div class="flex items-center justify-between mb-3">
- <div>
- <p class="simple-kpi-label">Próximos 7 días</p>
- <p class="simple-section-subtitle text-xs">Eventos programados y entregas</p>
- </div>
+ <p class="simple-kpi-label text-sm">Próximos 7 días</p>
  <span id="badge-upcoming" class="simple-badge simple-badge-info">0</span>
  </div>
- <div id="dashboard-upcoming-items" class="space-y-2 max-h-48 overflow-y-auto">
- <p class="text-simple-secondary text-sm text-center py-6">No hay eventos próximos</p>
+ <div id="dashboard-upcoming-items" class="space-y-2 max-h-40 overflow-y-auto text-xs">
+ <p class="text-simple-secondary text-center py-4">No hay eventos próximos</p>
  </div>
  </div>
  </div>
  </div>
 
- <!-- SECTION 6: RECENT ACTIVITY - Log of latest changes -->
- <div class="mb-8">
- <div class="flex items-center justify-between mb-4">
- <h3 class="simple-section-title">Actividad reciente</h3>
- <button onclick="showSection('activities')" class="text-sm font-medium text-simple-primary hover:underline">Ver todas</button>
+ <!-- RECENT ACTIVITY -->
+ <div>
+ <div class="flex items-center justify-between mb-3">
+ <h4 class="simple-section-title text-sm">Actividad reciente</h4>
+ <button onclick="showSection('activities')" class="text-xs font-medium text-simple-primary hover:underline">Ver todas</button>
  </div>
  <div class="simple-card">
- <div id="dashboard-recent-activity" class="space-y-3">
- <p class="text-simple-secondary text-sm text-center py-8">No hay actividad reciente</p>
+ <div id="dashboard-recent-activity" class="space-y-2 max-h-40 overflow-y-auto text-xs">
+ <p class="text-simple-secondary text-center py-4">No hay actividad reciente</p>
  </div>
  </div>
+ </div>
+ </div>
+ </details>
  </div>
  </section>
 
