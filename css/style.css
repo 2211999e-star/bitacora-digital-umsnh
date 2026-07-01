@@ -5,6 +5,7 @@
    SISTEMA DE DISEÑO MINIMALISTA - Nuevo diseño simple (como login)
    ====================================================================== */
 @import url("./simple-design-system.css");
+@import url("./animations-refinements.css");
 
 /* ======================================================================
    SISTEMA DE DISEÑO PREMIUM - DESHABILITADO (usar minimalista en su lugar)
@@ -26,6 +27,7 @@
 @import url("./tables.css");
 @import url("./dashboard.css");
 @import url("./responsive.css");
+@import url("./mobile-responsive.css");
 
 /* SweetAlert2 Dark Mode overrides */
 .dark .swal2-popup {
