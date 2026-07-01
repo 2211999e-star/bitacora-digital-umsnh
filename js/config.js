@@ -58,7 +58,7 @@ export function getThemePreference() {
   const old = localStorage.getItem('darkMode');
   if (old === 'true') return 'dark';
   if (old === 'false') return 'light';
-  return 'light'; // Cambio: 'light' por defecto en lugar de 'system'
+  return 'system'; // Volver a 'system' por defecto (tema oscuro en navegadores oscuros)
 }
 
 export function updateThemeButtonsUI(pref = getThemePreference()) {
@@ -78,8 +78,8 @@ export function updateThemeButtonsUI(pref = getThemePreference()) {
 }
 
 export function applyThemePreference(pref = getThemePreference()) {
-  // FORZAR MODO LIGHT: nunca aplicar clase 'dark'
-  const shouldUseDark = false; // Siempre luz
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const shouldUseDark = pref === 'dark' || (pref === 'system' && prefersDark);
   document.documentElement.classList.toggle('dark', Boolean(shouldUseDark));
   // mantener compatibilidad
   localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
