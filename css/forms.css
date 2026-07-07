@@ -1,0 +1,168 @@
+/* ==========================================================================
+   forms.css
+   Formularios, inputs, selects, focus states y controles relacionados.
+   ========================================================================== */
+
+/* Form Input Focus States */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+}
+
+/* Mejor consistencia visual (inputs/botones) */
+input,
+select,
+textarea {
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(156, 163, 175, 0.4);
+}
+
+.dark input:hover,
+.dark select:hover,
+.dark textarea:hover {
+  border-color: rgba(107, 114, 128, 0.5);
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 0.8;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.18);
+}
+
+.dark button:focus-visible,
+.dark a:focus-visible,
+.dark input:focus-visible,
+.dark select:focus-visible,
+.dark textarea:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+/* Base unificada para controles principales dentro de la app */
+#app-container button,
+#app-container input,
+#app-container select,
+#app-container textarea {
+  border-radius: 0.75rem;
+}
+
+#app-container label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.dark #app-container label {
+  color: #cbd5e1;
+}
+
+#app-container input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+#app-container select {
+  min-height: 2.75rem;
+}
+
+#app-container textarea {
+  line-height: 1.45;
+}
+
+#app-container input:not([type="checkbox"]):not([type="radio"]),
+#app-container select,
+#app-container textarea {
+  border-color: rgba(148, 163, 184, 0.35);
+  background-color: rgba(255, 255, 255, 0.88);
+}
+
+.dark #app-container input:not([type="checkbox"]):not([type="radio"]),
+.dark #app-container select,
+.dark #app-container textarea {
+  border-color: rgba(100, 116, 139, 0.6);
+  background-color: rgba(15, 23, 42, 0.7);
+}
+
+#app-container button {
+  font-weight: 600;
+}
+
+/* Custom Select Arrow */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  appearance: none;
+}
+
+/* Checkbox Styling */
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.dark input[type="checkbox"]:checked {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+
+/* Password Toggle Button */
+.password-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+input[type="file"]::file-selector-button {
+  transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+input[type="file"]:hover::file-selector-button {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+#app-container input[type="file"]::file-selector-button {
+  border: 0;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #0f172a 0%, #0d9488 100%);
+  color: #f8fafc;
+  font-weight: 700;
+  padding: 0.55rem 0.85rem;
+  margin-right: 0.75rem;
+}

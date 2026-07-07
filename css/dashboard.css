@@ -1,0 +1,340 @@
+/* ==========================================================================
+   dashboard.css
+   Ajustes específicos del dashboard (charts, hover en tarjetas, etc.)
+   ========================================================================== */
+
+/* Dashboard charts: evitar “círculo gigante” */
+.dashboard-chart {
+  position: relative;
+  width: 100%;
+}
+
+.dashboard-chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Dashboard: hover sutil en tarjetas */
+#section-dashboard .bg-white.dark\:bg-gray-900 {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+#section-dashboard .bg-white.dark\:bg-gray-900:hover {
+  transform: translateY(-1px);
+}
+
+.dashboard-stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-stat-btn {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.dashboard-stat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(17, 24, 39, 0.08);
+}
+
+.dashboard-stat-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25), 0 18px 32px rgba(17, 24, 39, 0.08);
+}
+
+.dashboard-stat-card::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -35% auto;
+  width: 110px;
+  height: 110px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(17, 24, 39, 0.06), transparent 70%);
+  pointer-events: none;
+}
+
+.dark .dashboard-stat-card::after {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 70%);
+}
+
+#section-dashboard .dashboard-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+#section-dashboard .dashboard-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(17, 24, 39, 0.12), transparent);
+  pointer-events: none;
+}
+
+.dark #section-dashboard .dashboard-panel::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+}
+
+#section-dashboard .dashboard-kpi-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(249, 250, 251, 0.9));
+}
+
+.dark #section-dashboard .dashboard-kpi-card {
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.92));
+}
+
+#section-dashboard .quick-action-grid button {
+  min-height: 4rem;
+}
+
+.dashboard-summary-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 1.35rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.dark .dashboard-summary-card {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: rgba(17, 24, 39, 0.88);
+}
+
+.dashboard-summary-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(17, 24, 39, 0.08);
+}
+
+.dashboard-summary-card .count {
+  font-size: 2.25rem;
+  font-weight: 800;
+}
+
+.dashboard-hero-panel {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(17, 24, 39, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 250, 251, 0.95));
+}
+
+.dark .dashboard-hero-panel {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(17, 24, 39, 0.94), rgba(17, 24, 39, 0.98));
+}
+
+.dashboard-hero-action {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  background: rgba(255, 255, 255, 0.82);
+  font-weight: 700;
+  color: #111827;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.dashboard-hero-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.08);
+}
+
+.dark .dashboard-hero-action {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: rgba(17, 24, 39, 0.8);
+  color: #f9fafb;
+}
+
+.dashboard-meter-track {
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: rgba(229, 231, 235, 0.9);
+  overflow: hidden;
+}
+
+.dark .dashboard-meter-track {
+  background: rgba(31, 41, 55, 0.95);
+}
+
+.dashboard-meter-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #0f172a, #0d9488);
+}
+
+.dark .dashboard-meter-fill {
+  background: linear-gradient(90deg, #ccfbf1, #67e8f9);
+}
+
+.dashboard-health-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  padding: 1.1rem 1.2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 250, 251, 0.9));
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.05);
+}
+
+.dashboard-health-btn {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.dashboard-health-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(17, 24, 39, 0.08);
+}
+
+.dashboard-health-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.3), 0 16px 32px rgba(17, 24, 39, 0.08);
+}
+
+.dark .dashboard-health-card {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.84), rgba(17, 24, 39, 0.94));
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.24);
+}
+
+.dashboard-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.dashboard-calendar-day {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  padding-bottom: 0.25rem;
+}
+
+.dark .dashboard-calendar-day {
+  color: #9ca3af;
+}
+
+.dashboard-calendar-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #111827;
+  background: rgba(249, 250, 251, 0.72);
+}
+
+.dashboard-calendar-cell.is-interactive {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dashboard-calendar-cell.is-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.08);
+}
+
+.dashboard-calendar-cell.is-muted {
+  color: #9ca3af;
+  background: rgba(249, 250, 251, 0.35);
+}
+
+.dashboard-calendar-cell.is-today {
+  box-shadow: inset 0 0 0 2px rgba(17, 24, 39, 0.75);
+}
+
+.dashboard-calendar-cell.has-event {
+  background: rgba(219, 234, 254, 0.95);
+  color: #1d4ed8;
+  border-color: rgba(147, 197, 253, 0.95);
+}
+
+.dashboard-calendar-cell.has-delivery {
+  background: rgba(254, 243, 199, 0.95);
+  color: #b45309;
+  border-color: rgba(252, 211, 77, 0.8);
+}
+
+.dashboard-calendar-cell.is-overdue {
+  background: rgba(254, 226, 226, 0.95);
+  color: #b91c1c;
+  border-color: rgba(252, 165, 165, 0.9);
+}
+
+.dark .dashboard-calendar-cell {
+  border-color: rgba(55, 65, 81, 0.9);
+  background: rgba(17, 24, 39, 0.72);
+  color: #f9fafb;
+}
+
+.dark .dashboard-calendar-cell.is-muted {
+  color: #6b7280;
+  background: rgba(17, 24, 39, 0.35);
+}
+
+.dark .dashboard-calendar-cell.is-today {
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+.dark .dashboard-calendar-cell.has-event {
+  background: rgba(30, 64, 175, 0.28);
+  color: #bfdbfe;
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.dark .dashboard-calendar-cell.has-delivery {
+  background: rgba(120, 53, 15, 0.35);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.dark .dashboard-calendar-cell.is-overdue {
+  background: rgba(127, 29, 29, 0.35);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Chart Container */
+canvas {
+  max-width: 100%;
+}
+
+/* Statistics Cards Animation */
+.stat-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.stat-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.stat-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.stat-card:nth-child(4) {
+  animation-delay: 0.4s;
+}

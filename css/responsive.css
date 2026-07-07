@@ -1,0 +1,115 @@
+/* ==========================================================================
+   responsive.css
+   Accesibilidad (reduced motion), impresión y ajustes responsive.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  #sidebar,
+  header,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .section {
+    display: block !important;
+  }
+
+  table {
+    font-size: 10px;
+  }
+
+  * {
+    color: black !important;
+    background: white !important;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .badge {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+  }
+
+  .modal-shell {
+    max-height: 88svh !important;
+    border-radius: 1rem !important;
+  }
+
+  #global-search-modal .max-w-2xl {
+    max-width: 100%;
+  }
+
+  #login-screen {
+    padding: 1rem;
+  }
+
+  .login-compact-card {
+    border-radius: 1rem;
+  }
+}
+
+/* Más aire en formularios largos (evita sensación “amontonada”) */
+@media (min-width: 768px) {
+  #form-activity label,
+  #form-event label,
+  #form-user label {
+    margin-bottom: 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #app-container {
+    min-height: 100svh;
+    height: auto;
+  }
+
+  #main-content {
+    min-height: 0;
+  }
+
+  /* Tablas: menos “apretado” y mejor lectura en pantallas pequeñas */
+  table th,
+  table td {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .quick-action-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .login-compact-header {
+    align-items: flex-start;
+  }
+}
+

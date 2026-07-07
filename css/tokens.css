@@ -1,0 +1,48 @@
+/* Design tokens: colores, espaciado, radios, sombras y tiempos */
+:root {
+  --ui-color-bg: #f8fafc;
+  --ui-color-surface: #ffffff;
+  --ui-color-surface-soft: #f1f5f9;
+  --ui-color-border: #cbd5e1;
+  --ui-color-text: #0f172a;
+  --ui-color-text-muted: #475569;
+  --ui-color-brand: #0d9488;
+  --ui-color-brand-strong: #0f172a;
+  --ui-color-success: #059669;
+  --ui-color-warning: #d97706;
+  --ui-color-error: #dc2626;
+
+  --ui-space-1: 0.25rem;
+  --ui-space-2: 0.5rem;
+  --ui-space-3: 0.75rem;
+  --ui-space-4: 1rem;
+  --ui-space-5: 1.25rem;
+  --ui-space-6: 1.5rem;
+  --ui-space-8: 2rem;
+
+  --ui-radius-sm: 0.5rem;
+  --ui-radius-md: 0.75rem;
+  --ui-radius-lg: 1rem;
+  --ui-radius-xl: 1.5rem;
+
+  --ui-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.08);
+  --ui-shadow-md: 0 12px 26px rgba(15, 23, 42, 0.1);
+  --ui-shadow-lg: 0 20px 42px rgba(15, 23, 42, 0.14);
+
+  --ui-time-fast: 140ms;
+  --ui-time-normal: 220ms;
+  --ui-time-slow: 320ms;
+}
+
+.dark {
+  --ui-color-bg: #020617;
+  --ui-color-surface: #0f172a;
+  --ui-color-surface-soft: #111827;
+  --ui-color-border: #475569;
+  --ui-color-text: #f8fafc;
+  --ui-color-text-muted: #cbd5e1;
+
+  --ui-shadow-sm: 0 6px 16px rgba(2, 6, 23, 0.35);
+  --ui-shadow-md: 0 16px 30px rgba(2, 6, 23, 0.45);
+  --ui-shadow-lg: 0 24px 46px rgba(2, 6, 23, 0.55);
+}

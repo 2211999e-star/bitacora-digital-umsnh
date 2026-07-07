@@ -1,0 +1,355 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE IMPROVEMENTS
+   Diseño móvil first optimizado para todo tipo de pantallas
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* MOBILE FIRST - Extra Small Devices (< 480px) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 479px) {
+  /* Root adjustments */
+  :root {
+    --simple-spacing-lg: 1rem;
+    --simple-spacing-md: 1rem;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4 {
+    font-size: 1.25rem !important;
+    line-height: 1.3;
+  }
+
+  .text-4xl { font-size: 1.5rem !important; }
+  .text-3xl { font-size: 1.25rem !important; }
+  .text-2xl { font-size: 1.1rem !important; }
+  .text-lg { font-size: 1rem !important; }
+
+  /* Layout */
+  .simple-section {
+    padding: 0.75rem;
+  }
+
+  .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons */
+  button,
+  .simple-btn {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* Inputs */
+  input, textarea, select {
+    font-size: 16px; /* Previene zoom en iOS */
+    min-height: 44px;
+    width: 100%;
+  }
+
+  /* Forms */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  /* Cards */
+  .simple-card {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .simple-kpi-card {
+    padding: 0.75rem;
+  }
+
+  /* Tables */
+  table {
+    font-size: 0.8rem;
+  }
+
+  thead th {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  tbody td {
+    padding: 0.5rem 0.25rem !important;
+  }
+
+  /* Sidebar */
+  aside {
+    max-width: 100% !important;
+    width: 100% !important;
+    position: fixed !important;
+    left: -100%;
+    transition: left 0.3s ease;
+    z-index: 100;
+  }
+
+  aside.open {
+    left: 0;
+  }
+
+  /* Main content full width */
+  main {
+    width: 100% !important;
+  }
+
+  /* Grid responsive */
+  .grid {
+    gap: 0.75rem !important;
+  }
+
+  .flex {
+    flex-wrap: wrap;
+  }
+
+  /* Modal adjustments */
+  [role="dialog"] {
+    padding: 0.5rem !important;
+  }
+
+  .modal-shell {
+    max-height: 90svh !important;
+    border-radius: 1rem 1rem 0 0 !important;
+  }
+
+  /* Spacing adjustments */
+  .mb-8, .mb-6, .mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .p-6, .p-4 {
+    padding: 0.75rem !important;
+  }
+
+  /* Gap reductions */
+  .gap-4, .gap-3, .gap-2 {
+    gap: 0.5rem !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* SMALL - Mobile (480px - 640px) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (min-width: 480px) and (max-width: 639px) {
+  .simple-section {
+    padding: 1rem;
+  }
+
+  .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .text-4xl { font-size: 1.75rem !important; }
+
+  button, .simple-btn {
+    min-height: 44px;
+  }
+
+  .modal-shell {
+    max-height: 92svh !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* TABLET - Medium (640px - 1024px) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .lg\:col-span-2 {
+    grid-column: span 2 !important;
+  }
+
+  .xl\:col-span-2 {
+    grid-column: span 2 !important;
+  }
+
+  /* Sidebar can be visible or hidden toggle */
+  aside {
+    max-width: 200px;
+  }
+
+  main {
+    margin-left: 200px;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* DESKTOP - Large (1024px+) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (min-width: 1024px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .lg\:col-span-2 {
+    grid-column: span 2 !important;
+  }
+
+  .xl\:col-span-2 {
+    grid-column: span 2 !important;
+  }
+
+  aside {
+    max-width: 280px;
+  }
+
+  main {
+    margin-left: 280px;
+  }
+
+  .simple-section {
+    max-width: 1200px;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* TOUCH DEVICE OPTIMIZATIONS */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover effects on touch devices, use :active instead */
+  button:hover,
+  a:hover,
+  .simple-card:hover {
+    transform: none !important;
+  }
+
+  button:active,
+  a:active,
+  .simple-card:active {
+    opacity: 0.8;
+  }
+
+  /* Increase touch targets */
+  button, a, input[type="checkbox"], input[type="radio"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Disable text selection on double-tap */
+  button, a {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* LANDSCAPE MODE ADJUSTMENTS */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .simple-section {
+    padding: 0.5rem;
+  }
+
+  button, .simple-btn {
+    padding: 0.5rem 1rem !important;
+    min-height: 38px;
+  }
+
+  .modal-shell {
+    max-height: 95svh !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* SAFE AREA INSETS (iPhone notch, etc) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+
+  .simple-section {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* VIEWPORT UNITS OPTIMIZATION */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh; /* Nuevo viewport height */
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* FLEX Y GRID RESPONSIVE */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Por defecto en mobile: column */
+.flex-col-reverse { flex-direction: column-reverse; }
+.flex-col { flex-direction: column; }
+
+@media (min-width: 768px) {
+  /* En tablet+: row */
+  .md\:flex-row { flex-direction: row; }
+  .md\:flex-wrap { flex-wrap: wrap; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* VISIBILIDAD RESPONSIVE */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Hide on mobile */
+@media (max-width: 767px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
+/* Hide on desktop */
+@media (min-width: 768px) {
+  .hidden-desktop {
+    display: none !important;
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* CONTAINER QUERIES (Moderno) */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@supports (container-type: inline-size) {
+  .simple-card {
+    container-type: inline-size;
+  }
+
+  @container (max-width: 300px) {
+    .simple-card h3 {
+      font-size: 0.9rem;
+    }
+  }
+}

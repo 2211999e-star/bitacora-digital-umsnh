@@ -1,0 +1,70 @@
+/* Estados unificados: carga, vacio, error y exito */
+.state-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  border-radius: var(--ui-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--ui-color-border) 86%, transparent);
+  background: color-mix(in srgb, var(--ui-color-surface-soft) 80%, transparent);
+  padding: 2rem 1.2rem;
+}
+
+.state-screen .state-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.state-screen .state-title {
+  font-weight: 800;
+  color: var(--ui-color-text);
+}
+
+.state-screen .state-message {
+  font-size: 0.9rem;
+  color: var(--ui-color-text-muted);
+  max-width: 40ch;
+}
+
+.state-screen--loading .state-icon {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.state-screen--empty .state-icon {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.state-screen--error .state-icon {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.state-screen--success .state-icon {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+.dark .state-screen--loading .state-icon,
+.dark .state-screen--empty .state-icon {
+  color: #e2e8f0;
+  background: #1e293b;
+}
+
+.dark .state-screen--error .state-icon {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.45);
+}
+
+.dark .state-screen--success .state-icon {
+  color: #bbf7d0;
+  background: rgba(5, 150, 105, 0.25);
+}
