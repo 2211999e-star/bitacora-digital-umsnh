@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bitácora Digital - Actividades</title>
+  <meta name="theme-color" content="#111827" />
+  <link rel="stylesheet" href="./css/simple.css?v=4" />
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
+
+  <!-- Login simple (local) -->
+  <section class="login" id="login" hidden>
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="logo" aria-hidden="true">BD</div>
+        <div>
+          <div class="title">Bitácora Digital</div>
+          <div class="subtitle">Acceso rápido</div>
+        </div>
+      </div>
+
+      <form id="login-form" class="login-form">
+        <label class="field">
+          <span>Usuario</span>
+          <select id="login-user" required>
+            <option value="ivan">Iván</option>
+            <option value="kevin">Kevin</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Contraseña</span>
+          <input type="password" id="login-pass" placeholder="••••••••" required />
+        </label>
+        <button class="btn" type="submit">Entrar</button>
+        <p class="login-hint">Contraseña: <code>123456789</code></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">BD</div>
+        <div>
+          <div class="title">Bitácora Digital</div>
+          <div class="subtitle">Actividades (pendientes / realizadas)</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="userchip" id="userchip" hidden>
+          <span class="userchip-dot" aria-hidden="true"></span>
+          <span id="username">Usuario</span>
+        </div>
+        <button class="btn btn-ghost" type="button" id="btn-export">Excel</button>
+        <button class="btn btn-ghost" type="button" id="btn-print">Imprimir</button>
+        <button class="btn" type="button" id="btn-new">Nueva actividad</button>
+        <button class="btn btn-ghost" type="button" id="btn-logout" hidden>Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <section class="panel">
+        <div class="panel-head">
+          <div class="tabs" role="tablist" aria-label="Filtros por estado">
+            <button class="tab is-active" type="button" data-status="">
+              Todas <span class="tab-count" id="count-all">0</span>
+            </button>
+            <button class="tab" type="button" data-status="pendiente">
+              Pendientes <span class="tab-count" id="count-pend">0</span>
+            </button>
+            <button class="tab" type="button" data-status="completado">
+              Realizadas <span class="tab-count" id="count-done">0</span>
+            </button>
+          </div>
+
+          <div class="filters" aria-label="Filtros de fecha y búsqueda">
+            <label class="field">
+              <span>Mes</span>
+              <input type="month" id="filter-month" />
+            </label>
+            <label class="field">
+              <span>Inicio</span>
+              <input type="date" id="filter-start" />
+            </label>
+            <label class="field">
+              <span>Fin</span>
+              <input type="date" id="filter-end" />
+            </label>
+            <label class="field field-wide">
+              <span>Buscar</span>
+              <input type="search" id="filter-q" placeholder="Antena A4-12, laboratorio 2, Iván, Kevin, etc." />
+            </label>
+          </div>
+
+          <div class="filter-actions" aria-label="Acciones rápidas">
+            <button class="btn btn-ghost" type="button" id="btn-this-month">Este mes</button>
+            <button class="btn btn-ghost" type="button" id="btn-today">Hoy</button>
+            <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="table" id="table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Actividad</th>
+                <th>Ubicación</th>
+                <th>Área</th>
+                <th>Responsable(s)</th>
+                <th>Registró</th>
+                <th>Estado</th>
+                <th class="th-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td colspan="8" class="empty">Sin registros todavía.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal -->
+    <dialog class="modal" id="modal">
+      <form method="dialog" class="modal-card" id="form">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="modal-title">Nueva actividad</div>
+            <div class="modal-sub">Guarda, marca completado, exporta a Excel e imprime por día o mes.</div>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+        </div>
+
+        <input type="hidden" id="f-id" />
+
+        <div class="grid">
+          <label class="field">
+            <span>Fecha</span>
+            <input type="date" id="f-date" required />
+          </label>
+          <label class="field">
+            <span>Estado</span>
+            <select id="f-status">
+              <option value="pendiente">Pendiente</option>
+              <option value="completado">Realizada</option>
+            </select>
+          </label>
+          <label class="field field-wide">
+            <span>Actividad</span>
+            <textarea id="f-desc" rows="3" placeholder="Ej. Formateo del laboratorio 2 (edificio X). Computadora 6." required></textarea>
+          </label>
+          <label class="field">
+            <span>Ubicación</span>
+            <input type="text" id="f-location" placeholder="Ej. Edificio X · Laboratorio 2" />
+          </label>
+          <label class="field">
+            <span>Comisión Académica o Área</span>
+            <input type="text" id="f-area" placeholder="Ej. Servicios Informáticos" />
+          </label>
+          <label class="field field-wide">
+            <span>Responsable(s)</span>
+            <input type="text" id="f-assigned" placeholder="Ej. Yair / Luis, Gera y Miguel" />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" value="cancel" type="button" id="btn-cancel">Cancelar</button>
+          <button class="btn btn-danger" type="button" id="btn-delete" hidden>Eliminar</button>
+          <button class="btn" type="submit" id="btn-save">Guardar</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+  <script type="module" src="./js/simple.js?v=4"></script>
+
+  <script>
+    // Service Worker (opcional)
+    (function () {
+      try {
+        if (!('serviceWorker' in navigator)) return;
+        if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
+        navigator.serviceWorker.register('./sw.js?v=4').catch(() => {});
+      } catch {}
+    })();
+  </script>
+</body>
+</html>
