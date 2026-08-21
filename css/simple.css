@@ -213,17 +213,18 @@ code{
 .topbar-inner{
   width:min(1200px, calc(100% - 28px));
   margin:0 auto;
-  padding:12px 0;
-  display:flex;
+  padding:14px 0;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
   align-items:center;
-  justify-content:space-between;
-  gap:14px;
+  gap:18px;
 }
 .brand{
   display:flex;
   align-items:center;
   gap:12px;
   min-width:0;
+  max-width:520px;
 }
 .brand-logos--bar{display:flex;align-items:center;gap:10px}
 .brand-logo{height:var(--logo-h);width:auto;object-fit:contain;display:block;filter:drop-shadow(0 10px 24px rgba(0,0,0,.28))}
@@ -232,7 +233,18 @@ code{
 .brand-text{min-width:0}
 .title{font-weight:950;letter-spacing:.01em}
 .subtitle{margin-top:2px;color:var(--muted);font-size:12px}
-.profileline{margin-top:6px;color:var(--muted);font-size:12px;display:flex;gap:8px;flex-wrap:wrap}
+.profileline{
+  margin-top:8px;
+  color:rgba(229,231,235,.92);
+  font-size:12px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.14);
+}
 .profileline b{color:var(--text)}
 
 .top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
@@ -269,6 +281,39 @@ code{
   color:rgba(229,231,235,.98);
 }
 .navreports{position:relative;display:inline-flex;align-items:center}
+.navbtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  height:38px;
+  padding:0 12px;
+  border-radius:12px;
+  font-weight:950;
+  font-size:13px;
+  cursor:pointer;
+  transition:transform 120ms ease, filter 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  user-select:none;
+}
+.navbtn:active{transform:translateY(1px)}
+.navbtn-primary{
+  border:1px solid rgba(22,163,74,.40);
+  background:linear-gradient(180deg, rgba(22,163,74,.34), rgba(22,163,74,.18));
+  color:rgba(229,231,235,.98);
+  box-shadow:0 12px 26px rgba(0,0,0,.22);
+}
+.navbtn-primary:hover{
+  filter:brightness(1.05);
+  border-color:rgba(56,189,248,.22);
+  box-shadow:0 16px 34px rgba(0,0,0,.28);
+}
+.navbtn-ghost{
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:rgba(229,231,235,.92);
+  box-shadow:none;
+}
+.navbtn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
 .reports-menu{
   position:absolute;
   top:calc(100% + 10px);
@@ -632,12 +677,30 @@ code{
   @page{margin:12mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;color:#111}
-  .topbar,.filters,.filter-actions,.tabs,.row-actions,#btn-new,#btn-export,#btn-print,#btn-clear,#btn-today,#btn-this-month,.toast,.panel-events{display:none!important}
+  .topbar,.filters,.filter-actions,.tabs,.row-actions,#btn-new,#btn-export,#btn-print,#btn-clear,#btn-today,#btn-this-month,.toast,.panel-events,.summary,.pager{display:none!important}
   .panel{border:none;box-shadow:none;background:#fff}
   .container{width:auto;margin:0}
   .table-wrap{overflow:visible}
   .table{min-width:auto}
-  .table th{position:static;color:#111;background:#f2f2f2}
+  .print-header,.print-footer{display:block!important}
+  .print-header{margin:0 0 10mm 0}
+  .print-footer{margin:10mm 0 0 0}
+  .print-header-row{display:flex;justify-content:space-between;gap:10mm;align-items:flex-start}
+  .print-header-left{display:flex;gap:10px;align-items:flex-start}
+  .print-header-title{font-weight:800;font-size:13px;margin-bottom:2px}
+  .print-header-meta{font-size:10.5px;color:#222;line-height:1.35}
+  .print-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;max-width:70mm}
+  .tag{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid #cfcfcf;border-radius:999px;font-size:10px;background:#f6f6f6;color:#111}
+  .print-footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:8mm}
+  .sig{border:1px dashed #bdbdbd;border-radius:10px;padding:10px 12px}
+  .sig-line{margin-top:24px;border-top:2px solid #111;padding-top:6px;font-weight:700}
+  .sig-meta{margin-top:6px;font-size:10px;color:#222;line-height:1.35}
+
+  .table{border-collapse:collapse}
+  .table th,.table td{border:1px solid #d7d7d7}
+  .table th{position:static;color:#111;background:#f2f2f2;font-size:10px;padding:6px 8px;text-transform:uppercase;letter-spacing:.03em}
+  .table td{font-size:10.5px;padding:6px 8px;vertical-align:top}
+  .table tbody tr:nth-child(even){background:#fafafa}
   thead{display:table-header-group}
   tr{break-inside:avoid;page-break-inside:avoid}
 }
@@ -662,4 +725,6 @@ code{
   :root{--logo-h:30px}
   .top-actions .btn{height:38px;padding:8px 10px}
   .topnav{justify-content:flex-start;gap:10px}
+  .topbar-inner{display:flex;flex-direction:column;align-items:stretch}
+  .brand{max-width:none}
 }

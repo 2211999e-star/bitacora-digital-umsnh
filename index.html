@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=18" />
+  <link rel="stylesheet" href="./css/simple.css?v=19" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -85,9 +85,9 @@
           <button class="navlink is-active" type="button" id="btn-home">Dashboard</button>
           <button class="navlink" type="button" id="btn-profile">Perfil</button>
           <button class="navlink" type="button" id="btn-events">Eventos</button>
-          <button class="navlink" type="button" id="btn-new">Nueva Actividad</button>
+          <button class="navbtn navbtn-primary" type="button" id="btn-new">Nueva Actividad</button>
           <div class="navreports">
-            <button class="navlink" type="button" id="btn-reports" aria-haspopup="true" aria-expanded="false">
+            <button class="navbtn navbtn-ghost" type="button" id="btn-reports" aria-haspopup="true" aria-expanded="false">
               Reportes (Excel/Imprimir)
             </button>
             <div class="reports-menu" id="reports-menu" hidden>
@@ -331,7 +331,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=18"></script>
+  <script type="module" src="./js/simple.js?v=19"></script>
 
   <script>
     // Service Worker (opcional)
@@ -339,7 +339,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=18').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=19').catch(() => {});
       } catch {}
     })();
   </script>
