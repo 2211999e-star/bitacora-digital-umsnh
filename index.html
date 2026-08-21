@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=17" />
+  <link rel="stylesheet" href="./css/simple.css?v=18" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -75,14 +75,14 @@
             <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
           </div>
           <div class="brand-text">
-            <div class="title">Bitácora Digital</div>
-            <div class="subtitle">Actividades (pendientes / realizadas)</div>
+            <div class="title">Sistema de Bitácora Digital</div>
+            <div class="subtitle">UMSNH - Servicios Informáticos · FCCA</div>
             <div class="profileline" id="profileline" hidden></div>
           </div>
         </div>
 
         <nav class="topnav" aria-label="Navegación">
-          <button class="navlink is-active" type="button" id="btn-home">Inicio</button>
+          <button class="navlink is-active" type="button" id="btn-home">Dashboard</button>
           <button class="navlink" type="button" id="btn-profile">Perfil</button>
           <button class="navlink" type="button" id="btn-events">Eventos</button>
           <button class="navlink" type="button" id="btn-new">Nueva Actividad</button>
@@ -98,11 +98,18 @@
         </nav>
 
         <div class="top-actions">
-          <div class="userchip" id="userchip" hidden>
-            <span class="userchip-dot" aria-hidden="true"></span>
-            <span id="username">Usuario</span>
+          <div class="usermenu" id="usermenu" hidden>
+            <button class="userchip" type="button" id="userchip">
+              <span class="userchip-dot" aria-hidden="true"></span>
+              <span id="username">Usuario</span>
+              <span class="userchip-caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="usermenu-menu" id="usermenu-menu" hidden>
+              <div class="usermenu-title" id="usermenu-title">—</div>
+              <div class="usermenu-meta" id="usermenu-meta">—</div>
+              <button class="btn btn-ghost reports-item" type="button" id="btn-logout">Cerrar sesión</button>
+            </div>
           </div>
-          <button class="btn btn-ghost" type="button" id="btn-logout" hidden>Cerrar sesión</button>
         </div>
       </div>
     </header>
@@ -114,41 +121,43 @@
 
       <section class="panel">
         <div class="panel-head">
-          <div class="tabs" role="tablist" aria-label="Filtros por estado">
-            <button class="tab is-active" type="button" data-status="">
-              Todas <span class="tab-count" id="count-all">0</span>
-            </button>
-            <button class="tab" type="button" data-status="pendiente">
-              Pendientes <span class="tab-count" id="count-pend">0</span>
-            </button>
-            <button class="tab" type="button" data-status="completado">
-              Realizadas <span class="tab-count" id="count-done">0</span>
-            </button>
-          </div>
-
-          <div class="filters" aria-label="Filtros de fecha y búsqueda">
+          <div class="filters filters-compact" aria-label="Filtros de fecha y búsqueda">
             <label class="field">
-              <span>Mes</span>
+              <span>Período</span>
               <input type="month" id="filter-month" />
             </label>
             <label class="field">
-              <span>Inicio</span>
+              <span>Desde</span>
               <input type="date" id="filter-start" />
             </label>
             <label class="field">
-              <span>Fin</span>
+              <span>Hasta</span>
               <input type="date" id="filter-end" />
             </label>
             <label class="field field-wide">
               <span>Buscar</span>
-              <input type="search" id="filter-q" placeholder="Antena A4-12, laboratorio 2, Iván, Kevin, etc." />
+              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." />
             </label>
           </div>
 
-          <div class="filter-actions" aria-label="Acciones rápidas">
-            <button class="btn btn-ghost" type="button" id="btn-this-month">Este mes</button>
-            <button class="btn btn-ghost" type="button" id="btn-today">Hoy</button>
-            <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+          <div class="filter-row">
+            <div class="tabs" role="tablist" aria-label="Filtros por estado">
+              <button class="tab is-active" type="button" data-status="">
+                Todas <span class="tab-count" id="count-all">0</span>
+              </button>
+              <button class="tab" type="button" data-status="pendiente">
+                Pendientes <span class="tab-count" id="count-pend">0</span>
+              </button>
+              <button class="tab" type="button" data-status="completado">
+                Realizadas <span class="tab-count" id="count-done">0</span>
+              </button>
+            </div>
+
+            <div class="filter-actions" aria-label="Acciones rápidas">
+              <button class="btn btn-ghost" type="button" id="btn-this-month">Este mes</button>
+              <button class="btn btn-ghost" type="button" id="btn-today">Hoy</button>
+              <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+            </div>
           </div>
 
           <div class="summary" id="summary" aria-label="Resumen"></div>
@@ -173,6 +182,8 @@
             </tbody>
           </table>
         </div>
+
+        <div class="pager" id="pager" aria-label="Paginación"></div>
       </section>
 
       <section class="panel panel-events" aria-label="Próximos eventos">
@@ -320,7 +331,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=17"></script>
+  <script type="module" src="./js/simple.js?v=18"></script>
 
   <script>
     // Service Worker (opcional)
@@ -328,7 +339,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=17').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=18').catch(() => {});
       } catch {}
     })();
   </script>

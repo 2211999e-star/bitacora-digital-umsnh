@@ -255,7 +255,11 @@ const els = {
   loginPass: document.getElementById('login-pass'),
   loginShowPass: document.getElementById('login-show-pass'),
   loginNow: document.getElementById('login-now'),
+  usermenu: document.getElementById('usermenu'),
   userchip: document.getElementById('userchip'),
+  usermenuMenu: document.getElementById('usermenu-menu'),
+  usermenuTitle: document.getElementById('usermenu-title'),
+  usermenuMeta: document.getElementById('usermenu-meta'),
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
   profileLine: document.getElementById('profileline'),
@@ -281,6 +285,7 @@ const els = {
   btnDelete: document.getElementById('btn-delete'),
   printHeader: document.getElementById('print-header'),
   printFooter: document.getElementById('print-footer'),
+  pager: document.getElementById('pager'),
 
   tabButtons: Array.from(document.querySelectorAll('.tab')),
   countAll: document.getElementById('count-all'),
@@ -325,6 +330,8 @@ const els = {
 
 const uiState = {
   status: '',
+  page: 1,
+  pageSize: 10,
 };
 
 let __toastTimer = null;
@@ -413,21 +420,33 @@ function renderSummary(allRecords) {
   const periodo = month || (start ? safeStr(start).slice(0, 7) : end ? safeStr(end).slice(0, 7) : '—');
   const rangeLabel = start || end ? `${start || '—'} → ${end || '—'}` : 'Sin rango';
   const sessionName = safeStr(p.full_name) || safeStr(user?.name) || '—';
+  const donePct = s.all ? Math.round((s.done / s.all) * 100) : 0;
 
   els.summary.innerHTML = `
     <div class="summary-card">
-      <div class="summary-k">Resumen total</div>
-      <div class="summary-big">${s.all}</div>
-      <div class="summary-row">
-        <span class="mini"><span class="mini-dot"></span>${s.done} Realizadas</span>
-        <span class="mini"><span class="mini-dot warn"></span>${s.pend} Pendientes</span>
+      <div class="summary-k">Resumen Mensual (${escapeHtml(periodo)})</div>
+      <div class="donut-wrap">
+        <div class="donut" style="--done:${donePct}">
+          <div class="donut-center" aria-hidden="true"></div>
+        </div>
+        <div>
+          <div class="summary-big">${s.all}</div>
+          <div class="summary-row">
+            <span class="mini"><span class="mini-dot"></span>${s.done} Realizadas</span>
+            <span class="mini"><span class="mini-dot warn"></span>${s.pend} Pendientes</span>
+          </div>
+          <div class="summary-v small">Rango: ${escapeHtml(rangeLabel)}</div>
+        </div>
       </div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Período</div>
-      <div class="summary-big">${escapeHtml(periodo || '—')}</div>
-      <div class="summary-v small">Estado: <b>${escapeHtml(status || 'todas')}</b></div>
-      <div class="summary-v small">Rango: ${escapeHtml(rangeLabel)}</div>
+      <div class="summary-k">Análisis Teórico de Estados</div>
+      <div class="analysis">
+        <b>Definición de Pendiente:</b> Actividad programada sin confirmar.<br>
+        <b>Definición de Realizada:</b> Actividad confirmada con registro.<br>
+        <b>Completar:</b> Cambia el estado y registra fecha/hora.
+      </div>
+      <div class="summary-v small">Filtro actual: <b>${escapeHtml(status || 'todas')}</b></div>
     </div>
     <div class="summary-card">
       <div class="summary-k">Sesión</div>
@@ -438,13 +457,49 @@ function renderSummary(allRecords) {
   `;
 }
 
+function renderPager(totalItems) {
+  if (!els.pager) return;
+  const size = Number(uiState.pageSize) || 10;
+  const pages = Math.max(1, Math.ceil((totalItems || 0) / size));
+  uiState.page = Math.min(Math.max(1, uiState.page), pages);
+  const p = uiState.page;
+
+  if (pages <= 1) {
+    els.pager.innerHTML = '';
+    return;
+  }
+
+  const nums = [];
+  const start = Math.max(1, p - 2);
+  const end = Math.min(pages, p + 2);
+  for (let i = start; i <= end; i++) nums.push(i);
+
+  els.pager.innerHTML = `
+    <button class="pbtn" type="button" data-page="prev" ${p <= 1 ? 'disabled' : ''}>‹</button>
+    ${start > 1 ? `<button class="pbtn" type="button" data-page="1">1</button>` : ''}
+    ${start > 2 ? `<span style="opacity:.6;padding:8px 6px;">…</span>` : ''}
+    ${nums
+      .map((n) => `<button class="pbtn ${n === p ? 'is-active' : ''}" type="button" data-page="${n}">${n}</button>`)
+      .join('')}
+    ${end < pages - 1 ? `<span style="opacity:.6;padding:8px 6px;">…</span>` : ''}
+    ${end < pages ? `<button class="pbtn" type="button" data-page="${pages}">${pages}</button>` : ''}
+    <button class="pbtn" type="button" data-page="next" ${p >= pages ? 'disabled' : ''}>›</button>
+  `;
+}
+
 function render() {
   const all = loadRecords();
-  const list = filteredRecords(all);
+  const full = filteredRecords(all);
+  const size = Number(uiState.pageSize) || 10;
+  const pages = Math.max(1, Math.ceil(full.length / size));
+  uiState.page = Math.min(Math.max(1, uiState.page), pages);
+  const start = (uiState.page - 1) * size;
+  const list = full.slice(start, start + size);
   updateCounts(all);
   renderEvents();
   renderProfileLine();
   renderSummary(all);
+  renderPager(full.length);
 
   if (!els.rows) return;
   if (!list.length) {
@@ -1020,6 +1075,29 @@ function toggleReportsMenu() {
   els.btnReports.setAttribute('aria-expanded', nextHidden ? 'false' : 'true');
 }
 
+function closeUserMenu() {
+  if (!els.usermenuMenu) return;
+  els.usermenuMenu.hidden = true;
+}
+
+function toggleUserMenu() {
+  if (!els.usermenuMenu) return;
+  els.usermenuMenu.hidden = !els.usermenuMenu.hidden;
+}
+
+function renderUserMenuInfo() {
+  const user = getCurrentUser();
+  const p = loadProfile(user);
+  if (els.usermenuTitle) els.usermenuTitle.textContent = safeStr(p.full_name) || safeStr(user?.name) || '—';
+  if (els.usermenuMeta) {
+    const parts = [];
+    if (p.role) parts.push(`Rol: ${p.role}`);
+    if (p.email) parts.push(`Correo: ${p.email}`);
+    if (p.matricula) parts.push(`Matrícula: ${p.matricula}`);
+    els.usermenuMeta.textContent = parts.join(' · ') || '—';
+  }
+}
+
 els.btnHome?.addEventListener('click', () => {
   closeReportsMenu();
   setActiveNav('btn-home');
@@ -1039,7 +1117,23 @@ document.addEventListener('click', (e) => {
   if (!inside) closeReportsMenu();
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeReportsMenu();
+  if (e.key === 'Escape') {
+    closeReportsMenu();
+    closeUserMenu();
+  }
+});
+
+els.userchip?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  renderUserMenuInfo();
+  toggleUserMenu();
+});
+
+document.addEventListener('click', (e) => {
+  if (!els.usermenuMenu || els.usermenuMenu.hidden) return;
+  const inside = e.target?.closest?.('#usermenu-menu') || e.target?.closest?.('#userchip');
+  if (!inside) closeUserMenu();
 });
 
 els.btnNew.addEventListener('click', () => {
@@ -1072,6 +1166,7 @@ els.btnLogout?.addEventListener('click', () => {
 });
 els.btnClear.addEventListener('click', () => {
   uiState.status = '';
+  uiState.page = 1;
   els.tabButtons.forEach((b) => b.classList.toggle('is-active', b.dataset.status === ''));
   els.filterMonth.value = '';
   els.filterStart.value = '';
@@ -1081,6 +1176,7 @@ els.btnClear.addEventListener('click', () => {
 });
 els.btnToday?.addEventListener('click', () => {
   const t = todayISO();
+  uiState.page = 1;
   if (els.filterMonth) els.filterMonth.value = '';
   if (els.filterStart) els.filterStart.value = t;
   if (els.filterEnd) els.filterEnd.value = t;
@@ -1091,6 +1187,7 @@ els.btnThisMonth?.addEventListener('click', () => {
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const y = now.getFullYear();
   const month = `${y}-${m}`;
+  uiState.page = 1;
   if (els.filterMonth) els.filterMonth.value = month;
   const r = setMonthToRange(month);
   if (r) {
@@ -1104,6 +1201,7 @@ els.tabButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     const st = safeStr(btn.dataset.status);
     uiState.status = st;
+    uiState.page = 1;
     els.tabButtons.forEach((b) => b.classList.toggle('is-active', b === btn));
     render();
   });
@@ -1115,14 +1213,24 @@ els.filterMonth.addEventListener('change', () => {
     els.filterStart.value = r.start;
     els.filterEnd.value = r.end;
   }
+  uiState.page = 1;
   render();
 });
-els.filterStart.addEventListener('change', render);
-els.filterEnd.addEventListener('change', render);
+els.filterStart.addEventListener('change', () => {
+  uiState.page = 1;
+  render();
+});
+els.filterEnd.addEventListener('change', () => {
+  uiState.page = 1;
+  render();
+});
 els.filterQ.addEventListener('input', () => {
   // pequeña pausa para que se sienta suave
   window.clearTimeout(window.__bt_timer);
-  window.__bt_timer = window.setTimeout(render, 120);
+  window.__bt_timer = window.setTimeout(() => {
+    uiState.page = 1;
+    render();
+  }, 120);
 });
 
 els.form.addEventListener('submit', (e) => {
@@ -1150,9 +1258,23 @@ document.addEventListener('click', (e) => {
   if (action === 'edit') openModalForEdit(id);
   if (action === 'complete') {
     markCompleted(id);
+    uiState.page = 1;
     render();
     toast('Marcado como realizada.');
   }
+});
+
+els.pager?.addEventListener('click', (e) => {
+  const btn = e.target?.closest?.('button[data-page]');
+  if (!btn) return;
+  const v = btn.dataset.page;
+  const size = Number(uiState.pageSize) || 10;
+  const total = filteredRecords(loadRecords()).length;
+  const pages = Math.max(1, Math.ceil(total / size));
+  if (v === 'prev') uiState.page = Math.max(1, uiState.page - 1);
+  else if (v === 'next') uiState.page = Math.min(pages, uiState.page + 1);
+  else uiState.page = Math.min(Math.max(1, Number(v) || 1), pages);
+  render();
 });
 
 document.addEventListener('click', (e) => {
@@ -1190,7 +1312,7 @@ els.btnEventDelete?.addEventListener('click', () => {
 function showAppForUser(user) {
   if (els.login) els.login.hidden = true;
   if (els.app) els.app.hidden = false;
-  if (els.userchip) els.userchip.hidden = false;
+  if (els.usermenu) els.usermenu.hidden = false;
   if (els.username) els.username.textContent = user?.name || 'Usuario';
   if (els.btnLogout) els.btnLogout.hidden = false;
 
@@ -1214,7 +1336,8 @@ function showAppForUser(user) {
 function showLogin() {
   if (els.app) els.app.hidden = true;
   if (els.login) els.login.hidden = false;
-  if (els.userchip) els.userchip.hidden = true;
+  if (els.usermenu) els.usermenu.hidden = true;
+  if (els.usermenuMenu) els.usermenuMenu.hidden = true;
   if (els.btnLogout) els.btnLogout.hidden = true;
   if (els.loginShowPass) els.loginShowPass.checked = false;
   if (els.loginPass) els.loginPass.type = 'password';
