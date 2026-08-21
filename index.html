@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
-  <meta name="theme-color" content="#111827" />
-  <link rel="stylesheet" href="./css/simple.css?v=14" />
+  <meta name="theme-color" content="#166534" />
+  <link rel="stylesheet" href="./css/simple.css?v=15" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -44,6 +44,7 @@
               <option value="kevin">Kevin</option>
             </select>
           </label>
+
           <label class="field">
             <span>Contraseña</span>
             <input type="password" id="login-pass" placeholder="••••••••" required />
@@ -67,29 +68,31 @@
 
   <div id="app" hidden>
     <header class="topbar">
-      <div class="brand">
-        <div class="brand-logos brand-logos--bar" aria-hidden="true">
-          <img class="brand-logo brand-logo--umich" src="./assets/logo_umich.png" alt="" />
-          <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-logos--bar" aria-hidden="true">
+            <img class="brand-logo brand-logo--umich" src="./assets/logo_umich.png" alt="" />
+            <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
+          </div>
+          <div class="brand-text">
+            <div class="title">Bitácora Digital</div>
+            <div class="subtitle">Actividades (pendientes / realizadas)</div>
+            <div class="profileline" id="profileline" hidden></div>
+          </div>
         </div>
-        <div>
-          <div class="title">Bitácora Digital</div>
-          <div class="subtitle">Actividades (pendientes / realizadas)</div>
-          <div class="profileline" id="profileline" hidden></div>
-        </div>
-      </div>
 
-      <div class="top-actions">
-        <div class="userchip" id="userchip" hidden>
-          <span class="userchip-dot" aria-hidden="true"></span>
-          <span id="username">Usuario</span>
+        <div class="top-actions">
+          <div class="userchip" id="userchip" hidden>
+            <span class="userchip-dot" aria-hidden="true"></span>
+            <span id="username">Usuario</span>
+          </div>
+          <button class="btn btn-ghost" type="button" id="btn-profile">Perfil</button>
+          <button class="btn btn-ghost" type="button" id="btn-events">Eventos</button>
+          <button class="btn btn-ghost" type="button" id="btn-export">Excel</button>
+          <button class="btn btn-ghost" type="button" id="btn-print">Imprimir</button>
+          <button class="btn" type="button" id="btn-new">Nueva actividad</button>
+          <button class="btn btn-ghost" type="button" id="btn-logout" hidden>Cerrar sesión</button>
         </div>
-        <button class="btn btn-ghost" type="button" id="btn-profile">Perfil</button>
-        <button class="btn btn-ghost" type="button" id="btn-events">Eventos</button>
-        <button class="btn btn-ghost" type="button" id="btn-export">Excel</button>
-        <button class="btn btn-ghost" type="button" id="btn-print">Imprimir</button>
-        <button class="btn" type="button" id="btn-new">Nueva actividad</button>
-        <button class="btn btn-ghost" type="button" id="btn-logout" hidden>Cerrar sesión</button>
       </div>
     </header>
 
@@ -142,16 +145,6 @@
 
         <div class="table-wrap">
           <table class="table" id="table">
-            <colgroup>
-              <col class="col-date" />
-              <col class="col-activity" />
-              <col class="col-location" />
-              <col class="col-area" />
-              <col class="col-assigned" />
-              <col class="col-created" />
-              <col class="col-status" />
-              <col class="col-actions" />
-            </colgroup>
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -172,7 +165,7 @@
       </section>
 
       <section class="panel panel-events" aria-label="Próximos eventos">
-        <div class="panel-head panel-head-compact">
+        <div class="panel-head-compact">
           <div class="panel-title">Próximos eventos</div>
           <div class="panel-actions">
             <button class="btn btn-ghost" type="button" id="btn-event-new">Nuevo evento</button>
@@ -187,7 +180,7 @@
       </section>
     </main>
 
-    <!-- Modal -->
+    <!-- Modal actividad -->
     <dialog class="modal" id="modal">
       <form method="dialog" class="modal-card" id="form">
         <div class="modal-head">
@@ -316,7 +309,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=14"></script>
+  <script type="module" src="./js/simple.js?v=15"></script>
 
   <script>
     // Service Worker (opcional)
@@ -324,9 +317,10 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=14').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=15').catch(() => {});
       } catch {}
     })();
   </script>
 </body>
 </html>
+
