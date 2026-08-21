@@ -2,13 +2,15 @@
  * Cache básico para index + assets del modo simple.
  */
 
-const CACHE_VERSION = 'bitacora-simple-v5';
+const CACHE_VERSION = 'bitacora-simple-v6';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './css/simple.css',
   './js/simple.js',
+  './assets/logo_umich.png',
+  './assets/logo_fcca.png',
 ];
 
 self.addEventListener('install', (event) => {

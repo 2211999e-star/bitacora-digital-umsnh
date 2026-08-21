@@ -1,11 +1,31 @@
 const STORAGE_KEY = 'bitacora_simple_v1_records';
 const USER_KEY = 'bitacora_simple_v1_user';
-const PROFILE_KEY = 'bitacora_simple_v1_profile';
+const PROFILE_KEY_PREFIX = 'bitacora_simple_v1_profile_';
 const EVENTS_KEY = 'bitacora_simple_v1_events';
 
 const USERS = {
-  ivan: { id: 'ivan', name: 'Iván' },
-  kevin: { id: 'kevin', name: 'Kevin' },
+  ivan: {
+    id: 'ivan',
+    name: 'Iván',
+    role: 'Comisionista / Coordinador del área',
+    defaults: {
+      full_name: 'Iván Fernández Mandujano',
+      email: 'ivan.fernandez@umich.mx',
+      matricula: '',
+      area: 'UMSNH - Servicios Informáticos',
+    },
+  },
+  kevin: {
+    id: 'kevin',
+    name: 'Kevin',
+    role: 'Servicio en el área',
+    defaults: {
+      full_name: 'Kevin Contreras Gomez',
+      email: '2211999e@umich.mx',
+      matricula: '2211999e',
+      area: 'UMSNH - Servicios Informáticos',
+    },
+  },
 };
 
 function getCurrentUser() {
@@ -40,6 +60,11 @@ function safeStr(v) {
   return String(v ?? '').trim();
 }
 
+function profileKeyFor(userId) {
+  const id = safeStr(userId).toLowerCase() || 'anon';
+  return `${PROFILE_KEY_PREFIX}${id}`;
+}
+
 function loadRecords() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY) || '[]';
@@ -54,28 +79,56 @@ function saveRecords(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records || []));
 }
 
-function loadProfile() {
+function loadProfile(user) {
   try {
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if (!raw) return { full_name: '', matricula: '', area: '' };
+    const key = profileKeyFor(user?.id);
+    const raw = localStorage.getItem(key);
+    if (!raw) return { full_name: '', email: '', matricula: '', area: '', role: safeStr(user?.role) };
     const p = JSON.parse(raw);
     return {
       full_name: safeStr(p?.full_name),
+      email: safeStr(p?.email),
       matricula: safeStr(p?.matricula),
       area: safeStr(p?.area),
+      role: safeStr(p?.role) || safeStr(user?.role),
     };
   } catch {
-    return { full_name: '', matricula: '', area: '' };
+    return { full_name: '', email: '', matricula: '', area: '', role: safeStr(user?.role) };
   }
 }
 
-function saveProfile(profile) {
+function saveProfile(user, profile) {
   const next = {
     full_name: safeStr(profile?.full_name),
+    email: safeStr(profile?.email),
     matricula: safeStr(profile?.matricula),
     area: safeStr(profile?.area),
+    role: safeStr(profile?.role) || safeStr(user?.role),
   };
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+  const key = profileKeyFor(user?.id);
+  localStorage.setItem(key, JSON.stringify(next));
+}
+
+function ensureProfileDefaults(user) {
+  if (!user?.id) return;
+  const key = profileKeyFor(user.id);
+  const exists = localStorage.getItem(key);
+  if (exists) return;
+  // Migración simple desde una versión anterior (perfil único)
+  const legacyKey = 'bitacora_simple_v1_profile';
+  const legacy = localStorage.getItem(legacyKey);
+  if (legacy) {
+    try {
+      const p = JSON.parse(legacy);
+      saveProfile(user, { ...p, role: USERS[user.id]?.role || safeStr(p?.role) });
+      localStorage.removeItem(legacyKey);
+      return;
+    } catch {
+      // noop
+    }
+  }
+  const defaults = USERS[user.id]?.defaults || {};
+  saveProfile(user, { ...defaults, role: USERS[user.id]?.role || '' });
 }
 
 function loadEvents() {
@@ -139,6 +192,30 @@ function formatDateHuman(dateISO) {
   return d;
 }
 
+function downloadHTML(filename, html) {
+  const safeName = (filename || 'reporte').replace(/[\\/:*?"<>|]+/g, '_');
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeName.endsWith('.html') ? safeName : `${safeName}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function fetchAsDataUrl(path) {
+  const res = await fetch(path, { cache: 'no-cache' });
+  const blob = await res.blob();
+  return await new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ''));
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
 function matchesSearch(rec, q) {
   const query = safeStr(q).toLowerCase();
   if (!query) return true;
@@ -195,6 +272,7 @@ const els = {
   btnThisMonth: document.getElementById('btn-this-month'),
   btnCancel: document.getElementById('btn-cancel'),
   btnDelete: document.getElementById('btn-delete'),
+  printHeader: document.getElementById('print-header'),
 
   tabButtons: Array.from(document.querySelectorAll('.tab')),
   countAll: document.getElementById('count-all'),
@@ -217,8 +295,10 @@ const els = {
   profileModal: document.getElementById('profile-modal'),
   profileForm: document.getElementById('profile-form'),
   pFullname: document.getElementById('p-fullname'),
+  pEmail: document.getElementById('p-email'),
   pMatricula: document.getElementById('p-matricula'),
   pArea: document.getElementById('p-area'),
+  pRole: document.getElementById('p-role'),
   btnProfileCancel: document.getElementById('btn-profile-cancel'),
 
   // Eventos
@@ -379,7 +459,7 @@ function openModalForEdit(id) {
 
 function upsertFromForm() {
   const user = getCurrentUser();
-  const profile = loadProfile();
+  const profile = loadProfile(user);
   const id = safeStr(els.fId.value) || uid();
   const date = safeStr(els.fDate.value) || todayISO();
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
@@ -447,46 +527,129 @@ function markCompleted(id) {
   saveRecords(records);
 }
 
-function exportExcel() {
+async function exportExcel() {
   const user = getCurrentUser();
-  const profile = loadProfile();
+  const profile = loadProfile(user);
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
-  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}`;
-  const meta = [
-    ['Bitácora Digital'],
-    [
-      'Usuario sesión:',
-      user?.name || '—',
-      'Nombre:',
-      profile.full_name || '—',
-      'Matrícula:',
-      profile.matricula || '—',
-      'Área:',
-      profile.area || '—',
-    ],
-    ['Filtros:', `Estado=${status || 'todas'}`, `Inicio=${start || '—'}`, `Fin=${end || '—'}`],
-    [],
-  ];
-  const out = [
-    ...meta,
-    ['Fecha', 'Actividad', 'Ubicación', 'Área', 'Responsable(s)', 'Registró', 'Estado'],
-    ...list.map((r) => [
-      r.date || '',
-      r.desc || '',
-      r.location || '',
-      r.area || '',
-      r.assigned_to || '',
-      r.created_by || '',
-      r.status === 'completado' ? 'Realizada' : 'Pendiente',
-    ]),
-  ];
-  downloadCSV(file, out);
-  toast('Exportado a Excel (CSV).');
+  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel`;
+
+  try {
+    const [umich, fcca] = await Promise.all([
+      fetchAsDataUrl('./assets/logo_umich.png'),
+      fetchAsDataUrl('./assets/logo_fcca.png'),
+    ]);
+
+    const now = new Date();
+    const fechaGen = now.toISOString().slice(0, 19).replace('T', ' ');
+
+    const rows = list
+      .map((r) => {
+        const estado = r.status === 'completado' ? 'Realizada' : 'Pendiente';
+        return `
+          <tr>
+            <td>${escapeHtml(r.date || '')}</td>
+            <td>${escapeHtml(r.desc || '')}</td>
+            <td>${escapeHtml(r.location || '')}</td>
+            <td>${escapeHtml(r.area || '')}</td>
+            <td>${escapeHtml(r.assigned_to || '')}</td>
+            <td>${escapeHtml(r.created_by || '')}</td>
+            <td>${escapeHtml(estado)}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    const html = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte Bitácora</title>
+  <style>
+    body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
+    .logos{display:flex;align-items:center;gap:12px}
+    .logos img{height:44px;width:auto;object-fit:contain}
+    .h-title{font-weight:900;font-size:18px}
+    .h-sub{color:#444;margin-top:4px;font-size:12px}
+    .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .tag{border:1px solid #ddd;background:#f7f7f7;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left}
+    th{background:#f2f2f2;font-size:12px;color:#333}
+    .meta{margin-top:10px;font-size:12px;color:#333}
+    .meta b{color:#111}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logos">
+      <img src="${umich}" alt="UMSNH">
+      <img src="${fcca}" alt="FCCA">
+    </div>
+    <div style="flex:1;min-width:240px">
+      <div class="h-title">Bitácora Digital · Reporte</div>
+      <div class="h-sub">UMSNH - Servicios Informáticos · Generado: ${escapeHtml(fechaGen)}</div>
+      <div class="meta">
+        Usuario sesión: <b>${escapeHtml(user?.name || '—')}</b> ·
+        Nombre: <b>${escapeHtml(profile.full_name || '—')}</b> ·
+        Correo: <b>${escapeHtml(profile.email || '—')}</b> ·
+        Matrícula: <b>${escapeHtml(profile.matricula || '—')}</b> ·
+        Área: <b>${escapeHtml(profile.area || '—')}</b> ·
+        Rol: <b>${escapeHtml(profile.role || '—')}</b>
+      </div>
+    </div>
+    <div class="tags">
+      <div class="tag">Estado: ${escapeHtml(status || 'todas')}</div>
+      <div class="tag">Inicio: ${escapeHtml(start || '—')}</div>
+      <div class="tag">Fin: ${escapeHtml(end || '—')}</div>
+      <div class="tag">Registros: ${list.length}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Actividad</th>
+        <th>Ubicación</th>
+        <th>Área</th>
+        <th>Responsable(s)</th>
+        <th>Registró</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows || '<tr><td colspan=\"7\">Sin registros.</td></tr>'}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    downloadHTML(file, html);
+    toast('Reporte listo (ábrelo con Excel).');
+  } catch {
+    // fallback: CSV
+    const out = [
+      ['Fecha', 'Actividad', 'Ubicación', 'Área', 'Responsable(s)', 'Registró', 'Estado'],
+      ...list.map((r) => [
+        r.date || '',
+        r.desc || '',
+        r.location || '',
+        r.area || '',
+        r.assigned_to || '',
+        r.created_by || '',
+        r.status === 'completado' ? 'Realizada' : 'Pendiente',
+      ]),
+    ];
+    downloadCSV(file, out);
+    toast('Exportado a Excel (CSV).');
+  }
 }
 
 function printCurrent() {
-  // Solo imprime la bitácora (los eventos se ocultan en @media print)
+  preparePrintHeader();
   window.print();
 }
 
@@ -496,11 +659,13 @@ function printCurrent() {
 
 function renderProfileLine() {
   if (!els.profileLine) return;
-  const p = loadProfile();
+  const user = getCurrentUser();
+  const p = loadProfile(user);
   const parts = [];
   if (p.full_name) parts.push(`<b>${escapeHtml(p.full_name)}</b>`);
   if (p.matricula) parts.push(`Matrícula: <b>${escapeHtml(p.matricula)}</b>`);
   if (p.area) parts.push(`Área: <b>${escapeHtml(p.area)}</b>`);
+  if (p.role) parts.push(`Rol: <b>${escapeHtml(p.role)}</b>`);
   if (!parts.length) {
     els.profileLine.hidden = true;
     els.profileLine.innerHTML = '';
@@ -511,23 +676,64 @@ function renderProfileLine() {
 }
 
 function openProfile() {
-  const p = loadProfile();
+  const user = getCurrentUser();
+  const p = loadProfile(user);
   if (els.pFullname) els.pFullname.value = p.full_name || '';
+  if (els.pEmail) els.pEmail.value = p.email || '';
   if (els.pMatricula) els.pMatricula.value = p.matricula || '';
   if (els.pArea) els.pArea.value = p.area || '';
+  if (els.pRole) els.pRole.value = p.role || '';
   els.profileModal?.showModal();
   setTimeout(() => els.pFullname?.focus?.(), 50);
 }
 
 function saveProfileFromForm() {
+  const user = getCurrentUser();
   const next = {
     full_name: safeStr(els.pFullname?.value),
+    email: safeStr(els.pEmail?.value),
     matricula: safeStr(els.pMatricula?.value),
     area: safeStr(els.pArea?.value),
+    role: safeStr(els.pRole?.value) || safeStr(user?.role),
   };
-  saveProfile(next);
+  saveProfile(user, next);
   renderProfileLine();
   toast('Perfil guardado.');
+}
+
+function preparePrintHeader() {
+  if (!els.printHeader) return;
+  const user = getCurrentUser();
+  const p = loadProfile(user);
+  const { start, end, status } = getFilters();
+  const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+  els.printHeader.hidden = false;
+  els.printHeader.innerHTML = `
+    <div class="print-header-row">
+      <div class="print-header-left">
+        <div class="brand-logos" aria-hidden="true">
+          <img class="brand-logo" src="./assets/logo_umich.png" alt="" />
+          <img class="brand-logo" src="./assets/logo_fcca.png" alt="" />
+        </div>
+        <div>
+          <div class="print-header-title">Bitácora Digital · Reporte</div>
+          <div class="print-header-meta">${escapeHtml(p.area || 'UMSNH - Servicios Informáticos')} · ${escapeHtml(now)}</div>
+          <div class="print-header-meta">
+            ${escapeHtml(p.full_name || user?.name || '—')}
+            ${p.matricula ? ` · Matrícula: ${escapeHtml(p.matricula)}` : ''}
+            ${p.email ? ` · ${escapeHtml(p.email)}` : ''}
+            ${p.role ? ` · ${escapeHtml(p.role)}` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="print-tags">
+        <span class="tag">Estado: ${escapeHtml(status || 'todas')}</span>
+        <span class="tag">Inicio: ${escapeHtml(start || '—')}</span>
+        <span class="tag">Fin: ${escapeHtml(end || '—')}</span>
+      </div>
+    </div>
+  `;
 }
 
 // -----------------
@@ -639,7 +845,7 @@ function deleteEventFromForm() {
 // -----------------
 
 els.btnNew.addEventListener('click', openModalForNew);
-els.btnExport.addEventListener('click', exportExcel);
+els.btnExport.addEventListener('click', () => exportExcel());
 els.btnPrint.addEventListener('click', printCurrent);
 els.btnProfile?.addEventListener('click', openProfile);
 els.btnEvents?.addEventListener('click', () => {
@@ -773,6 +979,8 @@ function showAppForUser(user) {
   if (els.userchip) els.userchip.hidden = false;
   if (els.username) els.username.textContent = user?.name || 'Usuario';
   if (els.btnLogout) els.btnLogout.hidden = false;
+
+  ensureProfileDefaults(user);
 
   // Defaults: rango del mes actual
   const now = new Date();
