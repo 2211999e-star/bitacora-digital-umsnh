@@ -253,6 +253,7 @@ const els = {
   loginForm: document.getElementById('login-form'),
   loginUser: document.getElementById('login-user'),
   loginPass: document.getElementById('login-pass'),
+  loginShowPass: document.getElementById('login-show-pass'),
   loginNow: document.getElementById('login-now'),
   userchip: document.getElementById('userchip'),
   username: document.getElementById('username'),
@@ -1158,6 +1159,8 @@ function showLogin() {
   if (els.login) els.login.hidden = false;
   if (els.userchip) els.userchip.hidden = true;
   if (els.btnLogout) els.btnLogout.hidden = true;
+  if (els.loginShowPass) els.loginShowPass.checked = false;
+  if (els.loginPass) els.loginPass.type = 'password';
   renderLoginNow();
 }
 
@@ -1183,4 +1186,9 @@ els.loginForm?.addEventListener('submit', (e) => {
   const user = USERS[key] || USERS.kevin;
   setCurrentUser(user);
   showAppForUser(user);
+});
+
+els.loginShowPass?.addEventListener('change', () => {
+  if (!els.loginPass) return;
+  els.loginPass.type = els.loginShowPass.checked ? 'text' : 'password';
 });
