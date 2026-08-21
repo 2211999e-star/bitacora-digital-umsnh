@@ -399,13 +399,13 @@ function render() {
 
       return `
         <tr>
-          <td>${date || '—'}</td>
+          <td class="td-date">${date || '—'}</td>
           <td class="td-activity">${escapeHtml(desc) || '—'}</td>
-          <td>${escapeHtml(loc)}</td>
-          <td>${escapeHtml(area)}</td>
-          <td>${escapeHtml(assigned)}</td>
-          <td>${escapeHtml(createdBy)}</td>
-          <td>${statusBadge(st)}</td>
+          <td class="td-location">${escapeHtml(loc)}</td>
+          <td class="td-area">${escapeHtml(area)}</td>
+          <td class="td-assigned">${escapeHtml(assigned)}</td>
+          <td class="td-created">${escapeHtml(createdBy)}</td>
+          <td class="td-status">${statusBadge(st)}</td>
           <td class="td-actions">
             <div class="row-actions">
               ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${r.id}">Completar</button>` : ''}
@@ -590,6 +590,7 @@ async function exportExcel() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reporte Bitácora</title>
   <style>
+    @page{margin:12mm}
     body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
     .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
     .logos{display:flex;align-items:center;gap:12px}
@@ -598,10 +599,14 @@ async function exportExcel() {
     .h-sub{color:#444;margin-top:4px;font-size:12px}
     .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .tag{border:1px solid #ddd;background:#f7f7f7;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
-    table{width:100%;border-collapse:collapse;margin-top:14px}
-    th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left}
+    table{width:100%;border-collapse:collapse;margin-top:14px;table-layout:fixed}
+    th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
     th{background:#f2f2f2;font-size:12px;color:#333}
     tbody tr:nth-child(even){background:#fafafa}
+    thead{display:table-header-group}
+    tr{break-inside:avoid;page-break-inside:avoid}
+    td:nth-child(1),td:nth-child(7){white-space:nowrap}
+    td:nth-child(2){white-space:pre-wrap}
     .meta{margin-top:10px;font-size:12px;color:#333}
     .meta b{color:#111}
     .footer{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -637,6 +642,15 @@ async function exportExcel() {
   </div>
 
   <table>
+    <colgroup>
+      <col style="width:104px">
+      <col style="width:auto">
+      <col style="width:170px">
+      <col style="width:160px">
+      <col style="width:170px">
+      <col style="width:140px">
+      <col style="width:120px">
+    </colgroup>
     <thead>
       <tr>
         <th>Fecha</th>
@@ -748,6 +762,7 @@ function preparePrintHeader(folio) {
   const p = loadProfile(user);
   const { start, end, status } = getFilters();
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const count = filteredRecords(loadRecords()).length;
 
   els.printHeader.hidden = false;
   els.printHeader.innerHTML = `
@@ -772,6 +787,7 @@ function preparePrintHeader(folio) {
         <span class="tag">Estado: ${escapeHtml(status || 'todas')}</span>
         <span class="tag">Inicio: ${escapeHtml(start || '—')}</span>
         <span class="tag">Fin: ${escapeHtml(end || '—')}</span>
+        <span class="tag">Registros: ${count}</span>
       </div>
     </div>
   `;
