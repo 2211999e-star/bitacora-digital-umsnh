@@ -46,6 +46,7 @@
         <div>
           <div class="title">Bitácora Digital</div>
           <div class="subtitle">Actividades (pendientes / realizadas)</div>
+          <div class="profileline" id="profileline" hidden></div>
         </div>
       </div>
 
@@ -54,6 +55,8 @@
           <span class="userchip-dot" aria-hidden="true"></span>
           <span id="username">Usuario</span>
         </div>
+        <button class="btn btn-ghost" type="button" id="btn-profile">Perfil</button>
+        <button class="btn btn-ghost" type="button" id="btn-events">Eventos</button>
         <button class="btn btn-ghost" type="button" id="btn-export">Excel</button>
         <button class="btn btn-ghost" type="button" id="btn-print">Imprimir</button>
         <button class="btn" type="button" id="btn-new">Nueva actividad</button>
@@ -122,6 +125,21 @@
           </table>
         </div>
       </section>
+
+      <section class="panel panel-events" aria-label="Próximos eventos">
+        <div class="panel-head panel-head-compact">
+          <div class="panel-title">Próximos eventos</div>
+          <div class="panel-actions">
+            <button class="btn btn-ghost" type="button" id="btn-event-new">Nuevo evento</button>
+          </div>
+        </div>
+        <div class="events">
+          <div class="events-list" id="events-list">
+            <div class="events-empty">Sin eventos próximos.</div>
+          </div>
+          <div class="events-hint">Tip: úsalo para inspecciones programadas, entregas, juntas o mantenimientos.</div>
+        </div>
+      </section>
     </main>
 
     <!-- Modal -->
@@ -174,9 +192,78 @@
         </div>
       </form>
     </dialog>
+
+    <!-- Perfil -->
+    <dialog class="modal" id="profile-modal">
+      <form method="dialog" class="modal-card" id="profile-form">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Perfil</div>
+            <div class="modal-sub">Se guarda en este navegador (configuración rápida).</div>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="grid">
+          <label class="field field-wide">
+            <span>Nombre completo</span>
+            <input type="text" id="p-fullname" placeholder="Ej. Kevin Hernández García" />
+          </label>
+          <label class="field">
+            <span>Matrícula</span>
+            <input type="text" id="p-matricula" placeholder="Ej. 2211999E" />
+          </label>
+          <label class="field">
+            <span>Área / Dependencia</span>
+            <input type="text" id="p-area" placeholder="Ej. UMSNH · Servicios Informáticos" />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" value="cancel" type="button" id="btn-profile-cancel">Cancelar</button>
+          <button class="btn" type="submit" id="btn-profile-save">Guardar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- Evento -->
+    <dialog class="modal" id="event-modal">
+      <form method="dialog" class="modal-card" id="event-form">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="event-modal-title">Nuevo evento</div>
+            <div class="modal-sub">Eventos próximos (juntas, inspecciones, mantenimientos).</div>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+        </div>
+
+        <input type="hidden" id="e-id" />
+
+        <div class="grid">
+          <label class="field">
+            <span>Fecha</span>
+            <input type="date" id="e-date" required />
+          </label>
+          <label class="field field-wide">
+            <span>Título</span>
+            <input type="text" id="e-title" placeholder="Ej. Inspección de laboratorio 2" required />
+          </label>
+          <label class="field field-wide">
+            <span>Notas</span>
+            <textarea id="e-notes" rows="3" placeholder="Opcional"></textarea>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" value="cancel" type="button" id="btn-event-cancel">Cancelar</button>
+          <button class="btn btn-danger" type="button" id="btn-event-delete" hidden>Eliminar</button>
+          <button class="btn" type="submit" id="btn-event-save">Guardar</button>
+        </div>
+      </form>
+    </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=4"></script>
+  <script type="module" src="./js/simple.js?v=5"></script>
 
   <script>
     // Service Worker (opcional)
@@ -184,7 +271,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=4').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=5').catch(() => {});
       } catch {}
     })();
   </script>

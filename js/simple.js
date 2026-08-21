@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'bitacora_simple_v1_records';
 const USER_KEY = 'bitacora_simple_v1_user';
+const PROFILE_KEY = 'bitacora_simple_v1_profile';
+const EVENTS_KEY = 'bitacora_simple_v1_events';
 
 const USERS = {
   ivan: { id: 'ivan', name: 'Iván' },
@@ -52,6 +54,44 @@ function saveRecords(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records || []));
 }
 
+function loadProfile() {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (!raw) return { full_name: '', matricula: '', area: '' };
+    const p = JSON.parse(raw);
+    return {
+      full_name: safeStr(p?.full_name),
+      matricula: safeStr(p?.matricula),
+      area: safeStr(p?.area),
+    };
+  } catch {
+    return { full_name: '', matricula: '', area: '' };
+  }
+}
+
+function saveProfile(profile) {
+  const next = {
+    full_name: safeStr(profile?.full_name),
+    matricula: safeStr(profile?.matricula),
+    area: safeStr(profile?.area),
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+}
+
+function loadEvents() {
+  try {
+    const raw = localStorage.getItem(EVENTS_KEY) || '[]';
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveEvents(events) {
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(events || []));
+}
+
 function csvCell(value) {
   const v = value == null ? '' : String(value);
   const escaped = v.replaceAll('"', '""');
@@ -91,6 +131,12 @@ function inRange(dateISO, start, end) {
   if (start && d < start) return false;
   if (end && d > end) return false;
   return true;
+}
+
+function formatDateHuman(dateISO) {
+  const d = safeStr(dateISO).slice(0, 10);
+  if (!d) return '—';
+  return d;
 }
 
 function matchesSearch(rec, q) {
@@ -133,6 +179,9 @@ const els = {
   userchip: document.getElementById('userchip'),
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
+  profileLine: document.getElementById('profileline'),
+  btnProfile: document.getElementById('btn-profile'),
+  btnEvents: document.getElementById('btn-events'),
 
   rows: document.getElementById('rows'),
   modal: document.getElementById('modal'),
@@ -163,6 +212,27 @@ const els = {
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
   fAssigned: document.getElementById('f-assigned'),
+
+  // Perfil
+  profileModal: document.getElementById('profile-modal'),
+  profileForm: document.getElementById('profile-form'),
+  pFullname: document.getElementById('p-fullname'),
+  pMatricula: document.getElementById('p-matricula'),
+  pArea: document.getElementById('p-area'),
+  btnProfileCancel: document.getElementById('btn-profile-cancel'),
+
+  // Eventos
+  eventsList: document.getElementById('events-list'),
+  btnEventNew: document.getElementById('btn-event-new'),
+  eventModal: document.getElementById('event-modal'),
+  eventForm: document.getElementById('event-form'),
+  eventModalTitle: document.getElementById('event-modal-title'),
+  eId: document.getElementById('e-id'),
+  eDate: document.getElementById('e-date'),
+  eTitle: document.getElementById('e-title'),
+  eNotes: document.getElementById('e-notes'),
+  btnEventCancel: document.getElementById('btn-event-cancel'),
+  btnEventDelete: document.getElementById('btn-event-delete'),
 };
 
 const uiState = {
@@ -226,6 +296,8 @@ function render() {
   const all = loadRecords();
   const list = filteredRecords(all);
   updateCounts(all);
+  renderEvents();
+  renderProfileLine();
 
   if (!els.rows) return;
   if (!list.length) {
@@ -307,6 +379,7 @@ function openModalForEdit(id) {
 
 function upsertFromForm() {
   const user = getCurrentUser();
+  const profile = loadProfile();
   const id = safeStr(els.fId.value) || uid();
   const date = safeStr(els.fDate.value) || todayISO();
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
@@ -324,6 +397,11 @@ function upsertFromForm() {
   const now = new Date().toISOString();
   const idx = records.findIndex((r) => r.id === id);
   const base = idx >= 0 ? records[idx] : { id, created_at: now };
+  const displayName =
+    safeStr(profile.full_name) ||
+    safeStr(user?.name) ||
+    base.created_by ||
+    '—';
   const next = {
     ...base,
     id,
@@ -333,7 +411,7 @@ function upsertFromForm() {
     location,
     area,
     assigned_to,
-    created_by: base.created_by || user?.name || '—',
+    created_by: base.created_by || displayName,
     updated_by: user?.name || base.updated_by || null,
     completed_at: status === 'completado' ? (base.completed_at || now) : null,
     updated_at: now,
@@ -370,10 +448,28 @@ function markCompleted(id) {
 }
 
 function exportExcel() {
+  const user = getCurrentUser();
+  const profile = loadProfile();
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}`;
+  const meta = [
+    ['Bitácora Digital'],
+    [
+      'Usuario sesión:',
+      user?.name || '—',
+      'Nombre:',
+      profile.full_name || '—',
+      'Matrícula:',
+      profile.matricula || '—',
+      'Área:',
+      profile.area || '—',
+    ],
+    ['Filtros:', `Estado=${status || 'todas'}`, `Inicio=${start || '—'}`, `Fin=${end || '—'}`],
+    [],
+  ];
   const out = [
+    ...meta,
     ['Fecha', 'Actividad', 'Ubicación', 'Área', 'Responsable(s)', 'Registró', 'Estado'],
     ...list.map((r) => [
       r.date || '',
@@ -390,7 +486,152 @@ function exportExcel() {
 }
 
 function printCurrent() {
+  // Solo imprime la bitácora (los eventos se ocultan en @media print)
   window.print();
+}
+
+// -----------------
+// Perfil
+// -----------------
+
+function renderProfileLine() {
+  if (!els.profileLine) return;
+  const p = loadProfile();
+  const parts = [];
+  if (p.full_name) parts.push(`<b>${escapeHtml(p.full_name)}</b>`);
+  if (p.matricula) parts.push(`Matrícula: <b>${escapeHtml(p.matricula)}</b>`);
+  if (p.area) parts.push(`Área: <b>${escapeHtml(p.area)}</b>`);
+  if (!parts.length) {
+    els.profileLine.hidden = true;
+    els.profileLine.innerHTML = '';
+    return;
+  }
+  els.profileLine.hidden = false;
+  els.profileLine.innerHTML = parts.join(' · ');
+}
+
+function openProfile() {
+  const p = loadProfile();
+  if (els.pFullname) els.pFullname.value = p.full_name || '';
+  if (els.pMatricula) els.pMatricula.value = p.matricula || '';
+  if (els.pArea) els.pArea.value = p.area || '';
+  els.profileModal?.showModal();
+  setTimeout(() => els.pFullname?.focus?.(), 50);
+}
+
+function saveProfileFromForm() {
+  const next = {
+    full_name: safeStr(els.pFullname?.value),
+    matricula: safeStr(els.pMatricula?.value),
+    area: safeStr(els.pArea?.value),
+  };
+  saveProfile(next);
+  renderProfileLine();
+  toast('Perfil guardado.');
+}
+
+// -----------------
+// Eventos
+// -----------------
+
+function normalizeEvent(e) {
+  return {
+    id: safeStr(e?.id) || uid(),
+    date: safeStr(e?.date).slice(0, 10) || todayISO(),
+    title: safeStr(e?.title),
+    notes: safeStr(e?.notes),
+    created_at: safeStr(e?.created_at) || new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function upcomingEvents(all) {
+  const today = todayISO();
+  return (all || [])
+    .filter((e) => safeStr(e.date).slice(0, 10) >= today)
+    .sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)) || safeStr(a.updated_at).localeCompare(safeStr(b.updated_at)));
+}
+
+function renderEvents() {
+  if (!els.eventsList) return;
+  const list = upcomingEvents(loadEvents()).slice(0, 8);
+  if (!list.length) {
+    els.eventsList.innerHTML = `<div class="events-empty">Sin eventos próximos.</div>`;
+    return;
+  }
+  els.eventsList.innerHTML = list
+    .map((e) => {
+      const d = formatDateHuman(e.date);
+      const title = escapeHtml(e.title || '—');
+      const notes = safeStr(e.notes);
+      return `
+        <div class="event-item">
+          <div>
+            <div class="event-date">${d}</div>
+            <div class="event-meta">${e.date === todayISO() ? 'Hoy' : 'Próximo'}</div>
+          </div>
+          <div>
+            <div class="event-title">${title}</div>
+            ${notes ? `<div class="event-meta">${escapeHtml(notes)}</div>` : ''}
+          </div>
+          <div class="event-actions">
+            <button class="btn btn-ghost" type="button" data-ev-action="edit" data-ev-id="${e.id}">Editar</button>
+          </div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function openEventForNew() {
+  if (els.eventModalTitle) els.eventModalTitle.textContent = 'Nuevo evento';
+  if (els.eId) els.eId.value = '';
+  if (els.eDate) els.eDate.value = todayISO();
+  if (els.eTitle) els.eTitle.value = '';
+  if (els.eNotes) els.eNotes.value = '';
+  if (els.btnEventDelete) els.btnEventDelete.hidden = true;
+  els.eventModal?.showModal();
+  setTimeout(() => els.eTitle?.focus?.(), 50);
+}
+
+function openEventForEdit(id) {
+  const all = loadEvents();
+  const ev = all.find((x) => x.id === id);
+  if (!ev) return;
+  if (els.eventModalTitle) els.eventModalTitle.textContent = 'Editar evento';
+  if (els.eId) els.eId.value = ev.id;
+  if (els.eDate) els.eDate.value = ev.date || todayISO();
+  if (els.eTitle) els.eTitle.value = ev.title || '';
+  if (els.eNotes) els.eNotes.value = ev.notes || '';
+  if (els.btnEventDelete) els.btnEventDelete.hidden = false;
+  els.eventModal?.showModal();
+  setTimeout(() => els.eTitle?.focus?.(), 50);
+}
+
+function upsertEventFromForm() {
+  const id = safeStr(els.eId?.value) || uid();
+  const date = safeStr(els.eDate?.value).slice(0, 10) || todayISO();
+  const title = safeStr(els.eTitle?.value);
+  const notes = safeStr(els.eNotes?.value);
+  if (!title) {
+    els.eTitle?.focus?.();
+    return false;
+  }
+  const all = loadEvents();
+  const idx = all.findIndex((x) => x.id === id);
+  const base = idx >= 0 ? all[idx] : { id, created_at: new Date().toISOString() };
+  const next = normalizeEvent({ ...base, id, date, title, notes });
+  if (idx >= 0) all[idx] = next;
+  else all.push(next);
+  saveEvents(all);
+  return true;
+}
+
+function deleteEventFromForm() {
+  const id = safeStr(els.eId?.value);
+  if (!id) return;
+  const next = loadEvents().filter((x) => x.id !== id);
+  saveEvents(next);
 }
 
 // -----------------
@@ -400,6 +641,11 @@ function printCurrent() {
 els.btnNew.addEventListener('click', openModalForNew);
 els.btnExport.addEventListener('click', exportExcel);
 els.btnPrint.addEventListener('click', printCurrent);
+els.btnProfile?.addEventListener('click', openProfile);
+els.btnEvents?.addEventListener('click', () => {
+  // Solo baja a la sección de eventos (sin popup)
+  document.querySelector('.panel-events')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+});
 els.btnLogout?.addEventListener('click', () => {
   clearCurrentUser();
   location.reload();
@@ -487,6 +733,38 @@ document.addEventListener('click', (e) => {
     render();
     toast('Marcado como realizada.');
   }
+});
+
+document.addEventListener('click', (e) => {
+  const btn = e.target?.closest?.('button[data-ev-action][data-ev-id]');
+  if (!btn) return;
+  const action = btn.dataset.evAction;
+  const id = btn.dataset.evId;
+  if (action === 'edit') openEventForEdit(id);
+});
+
+els.profileForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  saveProfileFromForm();
+  els.profileModal?.close();
+});
+els.btnProfileCancel?.addEventListener('click', () => els.profileModal?.close());
+
+els.btnEventNew?.addEventListener('click', openEventForNew);
+els.eventForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!upsertEventFromForm()) return;
+  els.eventModal?.close();
+  renderEvents();
+  toast('Evento guardado.');
+});
+els.btnEventCancel?.addEventListener('click', () => els.eventModal?.close());
+els.btnEventDelete?.addEventListener('click', () => {
+  if (!confirm('¿Eliminar este evento?')) return;
+  deleteEventFromForm();
+  els.eventModal?.close();
+  renderEvents();
+  toast('Evento eliminado.');
 });
 
 function showAppForUser(user) {

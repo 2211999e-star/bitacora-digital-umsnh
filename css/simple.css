@@ -68,6 +68,15 @@ body {
 }
 .title { font-weight: 800; letter-spacing: 0.02em; }
 .subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.profileline {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.profileline b { color: var(--text); font-weight: 800; }
 
 .top-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
@@ -149,6 +158,15 @@ code {
   border-bottom: 1px solid var(--line);
   background: rgba(17, 28, 51, 0.4);
 }
+.panel-head-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.panel-title { font-weight: 900; }
+.panel-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
 .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
 .tab {
@@ -344,9 +362,46 @@ code {
   transform: translateX(-50%) translateY(-4px);
 }
 
+.panel-events { margin-top: 14px; }
+.events { padding: 12px 14px 14px; }
+.events-list {
+  display: grid;
+  gap: 10px;
+}
+.event-item {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+}
+.event-date {
+  font-weight: 900;
+  color: var(--text);
+}
+.event-meta {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.event-title { font-weight: 900; }
+.event-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.events-empty {
+  color: var(--muted);
+  font-size: 13px;
+  padding: 8px 2px;
+}
+.events-hint {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 @media print {
   body { background: #fff; color: #111; }
-  .topbar, .filters, .filter-actions, .tabs, .row-actions, #btn-new, #btn-export, #btn-print, #btn-clear, #btn-today, #btn-this-month, .toast { display: none !important; }
+  .topbar, .filters, .filter-actions, .tabs, .row-actions, #btn-new, #btn-export, #btn-print, #btn-clear, #btn-today, #btn-this-month, .toast, .panel-events { display: none !important; }
   .panel { border: none; box-shadow: none; background: #fff; }
   .table { min-width: auto; }
   .table th { color: #111; background: #f2f2f2; position: static; }
