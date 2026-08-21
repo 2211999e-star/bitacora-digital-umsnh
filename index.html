@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=19" />
+  <link rel="stylesheet" href="./css/simple.css?v=20" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -15,7 +15,7 @@
     <div class="login-card">
       <div class="login-side">
         <div class="login-title">Bitácora Digital</div>
-        <div class="login-subtitle">UMSNH · Servicios Informáticos</div>
+        <div class="login-subtitle">UMSNH · Comisión Académica de Servicios Informáticos</div>
         <div class="login-subnote">Inicio local (se guarda en este navegador).</div>
 
         <div class="login-chips" aria-label="Información rápida">
@@ -76,7 +76,7 @@
           </div>
           <div class="brand-text">
             <div class="title">Sistema de Bitácora Digital</div>
-            <div class="subtitle">UMSNH - Servicios Informáticos · FCCA</div>
+            <div class="subtitle">UMSNH - Comisión Académica de Servicios Informáticos · FCCA</div>
             <div class="profileline" id="profileline" hidden></div>
           </div>
         </div>
@@ -85,16 +85,6 @@
           <button class="navlink is-active" type="button" id="btn-home">Dashboard</button>
           <button class="navlink" type="button" id="btn-profile">Perfil</button>
           <button class="navlink" type="button" id="btn-events">Eventos</button>
-          <button class="navbtn navbtn-primary" type="button" id="btn-new">Nueva Actividad</button>
-          <div class="navreports">
-            <button class="navbtn navbtn-ghost" type="button" id="btn-reports" aria-haspopup="true" aria-expanded="false">
-              Reportes (Excel/Imprimir)
-            </button>
-            <div class="reports-menu" id="reports-menu" hidden>
-              <button class="btn btn-ghost reports-item" type="button" id="btn-export">Excel</button>
-              <button class="btn btn-ghost reports-item" type="button" id="btn-print">Imprimir</button>
-            </div>
-          </div>
         </nav>
 
         <div class="top-actions">
@@ -170,7 +160,7 @@
                 <th>Fecha</th>
                 <th>Actividad</th>
                 <th>Ubicación</th>
-                <th>Área</th>
+                <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
                 <th>Registró</th>
                 <th>Estado</th>
@@ -201,6 +191,22 @@
         </div>
       </section>
     </main>
+
+    <!-- Acciones rápidas (burbuja lateral fija) -->
+    <div class="fab" id="fab" aria-label="Acciones rápidas">
+      <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-expanded="false">
+        Acciones ▾
+      </button>
+      <div class="fab-menu" id="fab-menu" hidden>
+        <button class="fab-item fab-item-primary" type="button" id="btn-new">Nueva Actividad</button>
+        <div class="fab-sep" role="separator" aria-hidden="true"></div>
+        <div class="fab-group">Reportes</div>
+        <button class="fab-item" type="button" id="btn-export">Excel (Vertical)</button>
+        <button class="fab-item" type="button" id="btn-export-landscape">Excel (Horizontal)</button>
+        <button class="fab-item" type="button" id="btn-print">Imprimir (Vertical)</button>
+        <button class="fab-item" type="button" id="btn-print-landscape">Imprimir (Horizontal)</button>
+      </div>
+    </div>
 
     <!-- Modal actividad -->
     <dialog class="modal" id="modal">
@@ -236,8 +242,8 @@
             <input type="text" id="f-location" placeholder="Ej. Edificio X · Laboratorio 2" />
           </label>
           <label class="field">
-            <span>Comisión Académica o Área</span>
-            <input type="text" id="f-area" placeholder="Ej. Servicios Informáticos" />
+            <span>Comisión Académica</span>
+            <input type="text" id="f-area" placeholder="Ej. Comisión Académica de Servicios Informáticos" />
           </label>
           <label class="field field-wide">
             <span>Responsable(s)</span>
@@ -278,8 +284,8 @@
             <input type="text" id="p-matricula" placeholder="Ej. 2211999E" />
           </label>
           <label class="field">
-            <span>Área / Dependencia</span>
-            <input type="text" id="p-area" placeholder="Ej. UMSNH · Servicios Informáticos" />
+            <span>Comisión Académica / Dependencia</span>
+            <input type="text" id="p-area" placeholder="Ej. Comisión Académica de Servicios Informáticos" />
           </label>
           <label class="field field-wide">
             <span>Rol</span>
@@ -331,7 +337,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=19"></script>
+  <script type="module" src="./js/simple.js?v=20"></script>
 
   <script>
     // Service Worker (opcional)
@@ -339,7 +345,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=19').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=20').catch(() => {});
       } catch {}
     })();
   </script>

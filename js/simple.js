@@ -12,7 +12,7 @@ const USERS = {
       full_name: 'Iván Fernández Mandujano',
       email: 'ivan.fernandez@umich.mx',
       matricula: '',
-      area: 'UMSNH - Servicios Informáticos',
+      area: 'Comisión Académica de Servicios Informáticos',
     },
   },
   kevin: {
@@ -23,7 +23,7 @@ const USERS = {
       full_name: 'Kevin Contreras Gomez',
       email: '2211999e@umich.mx',
       matricula: '2211999e',
-      area: 'UMSNH - Servicios Informáticos',
+      area: 'Comisión Académica de Servicios Informáticos',
     },
   },
 };
@@ -277,7 +277,9 @@ const els = {
   modalTitle: document.getElementById('modal-title'),
   btnNew: document.getElementById('btn-new'),
   btnExport: document.getElementById('btn-export'),
+  btnExportLandscape: document.getElementById('btn-export-landscape'),
   btnPrint: document.getElementById('btn-print'),
+  btnPrintLandscape: document.getElementById('btn-print-landscape'),
   btnClear: document.getElementById('btn-clear'),
   btnToday: document.getElementById('btn-today'),
   btnThisMonth: document.getElementById('btn-this-month'),
@@ -286,6 +288,10 @@ const els = {
   printHeader: document.getElementById('print-header'),
   printFooter: document.getElementById('print-footer'),
   pager: document.getElementById('pager'),
+
+  // Burbuja lateral (acciones rápidas)
+  fabToggle: document.getElementById('fab-toggle'),
+  fabMenu: document.getElementById('fab-menu'),
 
   tabButtons: Array.from(document.querySelectorAll('.tab')),
   countAll: document.getElementById('count-all'),
@@ -670,13 +676,14 @@ function markCompleted(id) {
   saveRecords(records);
 }
 
-async function exportExcel() {
+async function exportExcel({ orientation = 'portrait' } = {}) {
   const user = getCurrentUser();
   const profile = loadProfile(user);
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
   const stats = summarizeRecords(list);
-  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel`;
+  const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
+  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}`;
 
   try {
     const [umich, fcca] = await Promise.all([
@@ -687,6 +694,32 @@ async function exportExcel() {
     const now = new Date();
     const fechaGen = now.toISOString().slice(0, 19).replace('T', ' ');
     const folio = makeFolio();
+
+    const pageCSS =
+      orientation === 'landscape'
+        ? '@page{size:A4 landscape;margin:10mm}'
+        : '@page{size:A4 portrait;margin:12mm}';
+
+    const colgroup =
+      orientation === 'landscape'
+        ? `
+          <col style="width:104px">
+          <col style="width:auto">
+          <col style="width:200px">
+          <col style="width:230px">
+          <col style="width:210px">
+          <col style="width:150px">
+          <col style="width:120px">
+        `
+        : `
+          <col style="width:104px">
+          <col style="width:auto">
+          <col style="width:170px">
+          <col style="width:190px">
+          <col style="width:180px">
+          <col style="width:140px">
+          <col style="width:120px">
+        `;
 
     const rows = list
       .map((r) => {
@@ -712,7 +745,7 @@ async function exportExcel() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Reporte Bitácora</title>
   <style>
-    @page{margin:12mm}
+    ${pageCSS}
     body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
     .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
     .logos{display:flex;align-items:center;gap:12px}
@@ -746,13 +779,13 @@ async function exportExcel() {
     </div>
     <div style="flex:1;min-width:240px">
       <div class="h-title">Bitácora Digital · Reporte</div>
-      <div class="h-sub">UMSNH - Servicios Informáticos · Generado: ${escapeHtml(fechaGen)} · Folio: ${escapeHtml(folio)}</div>
+      <div class="h-sub">UMSNH - Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(fechaGen)} · Folio: ${escapeHtml(folio)}</div>
       <div class="meta">
         Usuario sesión: <b>${escapeHtml(user?.name || '—')}</b> ·
         Nombre: <b>${escapeHtml(profile.full_name || '—')}</b> ·
         Correo: <b>${escapeHtml(profile.email || '—')}</b> ·
         Matrícula: <b>${escapeHtml(profile.matricula || '—')}</b> ·
-        Área: <b>${escapeHtml(profile.area || '—')}</b> ·
+        Comisión Académica: <b>${escapeHtml(profile.area || '—')}</b> ·
         Rol: <b>${escapeHtml(profile.role || '—')}</b>
       </div>
     </div>
@@ -768,20 +801,14 @@ async function exportExcel() {
 
   <table>
     <colgroup>
-      <col style="width:104px">
-      <col style="width:auto">
-      <col style="width:170px">
-      <col style="width:160px">
-      <col style="width:170px">
-      <col style="width:140px">
-      <col style="width:120px">
+      ${colgroup}
     </colgroup>
     <thead>
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
         <th>Ubicación</th>
-        <th>Área</th>
+        <th>Comisión Académica</th>
         <th>Responsable(s)</th>
         <th>Registró</th>
         <th>Estado</th>
@@ -810,7 +837,7 @@ async function exportExcel() {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', 'Ubicación', 'Área', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
         r.desc || '',
@@ -826,11 +853,34 @@ async function exportExcel() {
   }
 }
 
-function printCurrent() {
+function applyPrintOrientation(orientation) {
+  // Limpieza previa
+  document.body.classList.remove('print-landscape');
+  document.getElementById('print-orientation-style')?.remove();
+
+  if (orientation !== 'landscape') return () => {};
+
+  document.body.classList.add('print-landscape');
+  const style = document.createElement('style');
+  style.id = 'print-orientation-style';
+  style.textContent = '@page{size:A4 landscape;margin:12mm}';
+  document.head.appendChild(style);
+
+  return () => {
+    document.body.classList.remove('print-landscape');
+    document.getElementById('print-orientation-style')?.remove();
+  };
+}
+
+function printCurrent({ orientation = 'portrait' } = {}) {
   const folio = makeFolio();
   preparePrintHeader(folio);
   preparePrintFooter(folio);
+  const cleanup = applyPrintOrientation(orientation);
+  window.addEventListener('afterprint', cleanup, { once: true });
   window.print();
+  // Fallback (algunos navegadores no disparan afterprint)
+  window.setTimeout(cleanup, 1500);
 }
 
 // -----------------
@@ -844,7 +894,7 @@ function renderProfileLine() {
   const parts = [];
   if (p.full_name) parts.push(`<b>${escapeHtml(p.full_name)}</b>`);
   if (p.matricula) parts.push(`Matrícula: <b>${escapeHtml(p.matricula)}</b>`);
-  if (p.area) parts.push(`Área: <b>${escapeHtml(p.area)}</b>`);
+  if (p.area) parts.push(`Comisión Académica: <b>${escapeHtml(p.area)}</b>`);
   if (p.role) parts.push(`Rol: <b>${escapeHtml(p.role)}</b>`);
   if (!parts.length) {
     els.profileLine.hidden = true;
@@ -900,7 +950,7 @@ function preparePrintHeader(folio) {
         </div>
         <div>
           <div class="print-header-title">Bitácora Digital · Reporte</div>
-          <div class="print-header-meta">${escapeHtml(p.area || 'UMSNH - Servicios Informáticos')} · ${escapeHtml(now)} · Folio: ${escapeHtml(folio || '')}</div>
+          <div class="print-header-meta">${escapeHtml(p.area || 'Comisión Académica de Servicios Informáticos')} · ${escapeHtml(now)} · Folio: ${escapeHtml(folio || '')}</div>
           <div class="print-header-meta">
             ${escapeHtml(p.full_name || user?.name || '—')}
             ${p.matricula ? ` · Matrícula: ${escapeHtml(p.matricula)}` : ''}
@@ -1085,6 +1135,19 @@ function toggleUserMenu() {
   els.usermenuMenu.hidden = !els.usermenuMenu.hidden;
 }
 
+function closeFabMenu() {
+  if (!els.fabMenu || !els.fabToggle) return;
+  els.fabMenu.hidden = true;
+  els.fabToggle.setAttribute('aria-expanded', 'false');
+}
+
+function toggleFabMenu() {
+  if (!els.fabMenu || !els.fabToggle) return;
+  const nextHidden = !els.fabMenu.hidden ? true : false;
+  els.fabMenu.hidden = nextHidden;
+  els.fabToggle.setAttribute('aria-expanded', nextHidden ? 'false' : 'true');
+}
+
 function renderUserMenuInfo() {
   const user = getCurrentUser();
   const p = loadProfile(user);
@@ -1120,6 +1183,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeReportsMenu();
     closeUserMenu();
+    closeFabMenu();
   }
 });
 
@@ -1136,18 +1200,43 @@ document.addEventListener('click', (e) => {
   if (!inside) closeUserMenu();
 });
 
+els.fabToggle?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  toggleFabMenu();
+});
+
+document.addEventListener('click', (e) => {
+  if (!els.fabMenu || els.fabMenu.hidden) return;
+  const inside = e.target?.closest?.('#fab-menu') || e.target?.closest?.('#fab-toggle');
+  if (!inside) closeFabMenu();
+});
+
 els.btnNew.addEventListener('click', () => {
   closeReportsMenu();
+  closeFabMenu();
   setActiveNav('btn-new');
   openModalForNew();
 });
 els.btnExport.addEventListener('click', () => {
   closeReportsMenu();
-  exportExcel();
+  closeFabMenu();
+  exportExcel({ orientation: 'portrait' });
 });
 els.btnPrint.addEventListener('click', () => {
   closeReportsMenu();
-  printCurrent();
+  closeFabMenu();
+  printCurrent({ orientation: 'portrait' });
+});
+els.btnExportLandscape?.addEventListener('click', () => {
+  closeReportsMenu();
+  closeFabMenu();
+  exportExcel({ orientation: 'landscape' });
+});
+els.btnPrintLandscape?.addEventListener('click', () => {
+  closeReportsMenu();
+  closeFabMenu();
+  printCurrent({ orientation: 'landscape' });
 });
 els.btnProfile?.addEventListener('click', () => {
   closeReportsMenu();

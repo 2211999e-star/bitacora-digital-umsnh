@@ -364,6 +364,63 @@ code{
   box-shadow:0 0 0 4px rgba(22,163,74,.14);
 }
 
+/* -------- Burbuja lateral -------- */
+.fab{
+  position:fixed;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:40;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+}
+.fab-btn{
+  border:1px solid rgba(56,189,248,.22);
+  background:rgba(17,24,39,.88);
+  backdrop-filter: blur(12px);
+  color:rgba(229,231,235,.96);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:950;
+  cursor:pointer;
+  box-shadow:var(--shadow-sm);
+}
+.fab-btn:hover{background:rgba(17,24,39,.94)}
+.fab-menu{
+  width:260px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(17,24,39,.92);
+  box-shadow:var(--shadow);
+  padding:12px;
+  display:grid;
+  gap:10px;
+}
+.fab-item{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border-radius:12px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);
+  color:rgba(229,231,235,.92);
+  font-weight:950;
+  cursor:pointer;
+}
+.fab-item:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+.fab-item-primary{
+  border-color:rgba(22,163,74,.40);
+  background:linear-gradient(180deg, rgba(22,163,74,.34), rgba(22,163,74,.18));
+}
+.fab-item-primary:hover{filter:brightness(1.05);border-color:rgba(56,189,248,.22)}
+.fab-sep{height:1px;background:rgba(255,255,255,.10);margin:2px 0}
+.fab-group{color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.02em}
+
 .container{
   width:min(1200px, calc(100% - 28px));
   margin:16px auto 56px;
@@ -677,7 +734,7 @@ code{
   @page{margin:12mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;color:#111}
-  .topbar,.filters,.filter-actions,.tabs,.row-actions,#btn-new,#btn-export,#btn-print,#btn-clear,#btn-today,#btn-this-month,.toast,.panel-events,.summary,.pager{display:none!important}
+  .topbar,.filters,.filter-actions,.tabs,.row-actions,#btn-new,#btn-export,#btn-print,#btn-clear,#btn-today,#btn-this-month,.toast,.panel-events,.summary,.pager,.fab{display:none!important}
   .panel{border:none;box-shadow:none;background:#fff}
   .container{width:auto;margin:0}
   .table-wrap{overflow:visible}
@@ -703,6 +760,13 @@ code{
   .table tbody tr:nth-child(even){background:#fafafa}
   thead{display:table-header-group}
   tr{break-inside:avoid;page-break-inside:avoid}
+
+  /* Horizontal: un poco más compacto para que quepa bien */
+  body.print-landscape .print-header-row{gap:6mm}
+  body.print-landscape .print-tags{max-width:95mm}
+  body.print-landscape .tag{font-size:9.5px}
+  body.print-landscape .table th{font-size:9.5px}
+  body.print-landscape .table td{font-size:10px}
 }
 
 /* -------- Responsive -------- */
