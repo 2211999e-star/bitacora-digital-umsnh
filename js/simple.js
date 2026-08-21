@@ -253,6 +253,7 @@ const els = {
   loginForm: document.getElementById('login-form'),
   loginUser: document.getElementById('login-user'),
   loginPass: document.getElementById('login-pass'),
+  loginNow: document.getElementById('login-now'),
   userchip: document.getElementById('userchip'),
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
@@ -382,6 +383,21 @@ function summarizeRecords(list) {
   return { all, pend, done };
 }
 
+function nowHuman() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
+function renderLoginNow() {
+  if (!els.loginNow) return;
+  els.loginNow.textContent = `Hoy: ${nowHuman()}`;
+}
+
 function renderSummary(allRecords) {
   if (!els.summary) return;
   const { start, end, status } = getFilters();
@@ -389,6 +405,8 @@ function renderSummary(allRecords) {
   const s = summarizeRecords(list);
   const rangeLabel =
     start || end ? `${start || '—'} → ${end || '—'}` : 'Sin rango';
+  const user = getCurrentUser();
+  const p = loadProfile(user);
 
   els.summary.innerHTML = `
     <div class="summary-card">
@@ -408,9 +426,11 @@ function renderSummary(allRecords) {
       <div class="summary-v small">Mes: ${escapeHtml(safeStr(els.filterMonth?.value) || '—')}</div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Última actualización</div>
-      <div class="summary-v small">${escapeHtml(new Date().toISOString().slice(0, 19).replace('T', ' '))}</div>
-      <div class="summary-v small">Área: ${escapeHtml(loadProfile(getCurrentUser()).area || '—')}</div>
+      <div class="summary-k">Sesión / Perfil</div>
+      <div class="summary-v small">Usuario: <b>${escapeHtml(user?.name || '—')}</b></div>
+      <div class="summary-v small">Nombre: <b>${escapeHtml(p.full_name || '—')}</b></div>
+      <div class="summary-v small">Correo: ${escapeHtml(p.email || '—')}</div>
+      <div class="summary-v small">Matrícula: ${escapeHtml(p.matricula || '—')}</div>
     </div>
   `;
 }
@@ -1138,6 +1158,7 @@ function showLogin() {
   if (els.login) els.login.hidden = false;
   if (els.userchip) els.userchip.hidden = true;
   if (els.btnLogout) els.btnLogout.hidden = true;
+  renderLoginNow();
 }
 
 // Inicio
