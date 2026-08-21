@@ -273,6 +273,7 @@ const els = {
   btnCancel: document.getElementById('btn-cancel'),
   btnDelete: document.getElementById('btn-delete'),
   printHeader: document.getElementById('print-header'),
+  printFooter: document.getElementById('print-footer'),
 
   tabButtons: Array.from(document.querySelectorAll('.tab')),
   countAll: document.getElementById('count-all'),
@@ -399,13 +400,13 @@ function render() {
       return `
         <tr>
           <td>${date || '—'}</td>
-          <td>${escapeHtml(desc) || '—'}</td>
+          <td class="td-activity">${escapeHtml(desc) || '—'}</td>
           <td>${escapeHtml(loc)}</td>
           <td>${escapeHtml(area)}</td>
           <td>${escapeHtml(assigned)}</td>
           <td>${escapeHtml(createdBy)}</td>
           <td>${statusBadge(st)}</td>
-          <td>
+          <td class="td-actions">
             <div class="row-actions">
               ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${r.id}">Completar</button>` : ''}
               <button class="btn btn-ghost" type="button" data-action="edit" data-id="${r.id}">Editar</button>
@@ -415,6 +416,27 @@ function render() {
       `;
     })
     .join('');
+}
+
+function yyyyMMdd(date) {
+  const d = date instanceof Date ? date : new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}${m}${day}`;
+}
+
+function hhmm(date) {
+  const d = date instanceof Date ? date : new Date();
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  return `${h}${m}`;
+}
+
+function makeFolio() {
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const now = new Date();
+  return `BD-${yyyyMMdd(now)}-${hhmm(now)}-${rand}`;
 }
 
 function escapeHtml(text) {
@@ -542,6 +564,7 @@ async function exportExcel() {
 
     const now = new Date();
     const fechaGen = now.toISOString().slice(0, 19).replace('T', ' ');
+    const folio = makeFolio();
 
     const rows = list
       .map((r) => {
@@ -578,8 +601,13 @@ async function exportExcel() {
     table{width:100%;border-collapse:collapse;margin-top:14px}
     th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left}
     th{background:#f2f2f2;font-size:12px;color:#333}
+    tbody tr:nth-child(even){background:#fafafa}
     .meta{margin-top:10px;font-size:12px;color:#333}
     .meta b{color:#111}
+    .footer{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .sig{border:1px dashed #bbb;border-radius:12px;padding:12px}
+    .sig-line{margin-top:32px;border-top:2px solid #111;padding-top:8px;font-weight:900}
+    .sig-meta{font-size:12px;color:#333;margin-top:2px}
   </style>
 </head>
 <body>
@@ -590,7 +618,7 @@ async function exportExcel() {
     </div>
     <div style="flex:1;min-width:240px">
       <div class="h-title">Bitácora Digital · Reporte</div>
-      <div class="h-sub">UMSNH - Servicios Informáticos · Generado: ${escapeHtml(fechaGen)}</div>
+      <div class="h-sub">UMSNH - Servicios Informáticos · Generado: ${escapeHtml(fechaGen)} · Folio: ${escapeHtml(folio)}</div>
       <div class="meta">
         Usuario sesión: <b>${escapeHtml(user?.name || '—')}</b> ·
         Nombre: <b>${escapeHtml(profile.full_name || '—')}</b> ·
@@ -624,6 +652,17 @@ async function exportExcel() {
       ${rows || '<tr><td colspan=\"7\">Sin registros.</td></tr>'}
     </tbody>
   </table>
+
+  <div class="footer">
+    <div class="sig">
+      <div class="sig-line">${escapeHtml(USERS.ivan.defaults.full_name)}</div>
+      <div class="sig-meta">${escapeHtml(USERS.ivan.role)} · ${escapeHtml(USERS.ivan.defaults.email)}</div>
+    </div>
+    <div class="sig">
+      <div class="sig-line">${escapeHtml(USERS.kevin.defaults.full_name)}</div>
+      <div class="sig-meta">${escapeHtml(USERS.kevin.role)} · ${escapeHtml(USERS.kevin.defaults.email)} · Matrícula: ${escapeHtml(USERS.kevin.defaults.matricula)}</div>
+    </div>
+  </div>
 </body>
 </html>`;
 
@@ -649,7 +688,9 @@ async function exportExcel() {
 }
 
 function printCurrent() {
-  preparePrintHeader();
+  const folio = makeFolio();
+  preparePrintHeader(folio);
+  preparePrintFooter(folio);
   window.print();
 }
 
@@ -701,7 +742,7 @@ function saveProfileFromForm() {
   toast('Perfil guardado.');
 }
 
-function preparePrintHeader() {
+function preparePrintHeader(folio) {
   if (!els.printHeader) return;
   const user = getCurrentUser();
   const p = loadProfile(user);
@@ -718,7 +759,7 @@ function preparePrintHeader() {
         </div>
         <div>
           <div class="print-header-title">Bitácora Digital · Reporte</div>
-          <div class="print-header-meta">${escapeHtml(p.area || 'UMSNH - Servicios Informáticos')} · ${escapeHtml(now)}</div>
+          <div class="print-header-meta">${escapeHtml(p.area || 'UMSNH - Servicios Informáticos')} · ${escapeHtml(now)} · Folio: ${escapeHtml(folio || '')}</div>
           <div class="print-header-meta">
             ${escapeHtml(p.full_name || user?.name || '—')}
             ${p.matricula ? ` · Matrícula: ${escapeHtml(p.matricula)}` : ''}
@@ -731,6 +772,24 @@ function preparePrintHeader() {
         <span class="tag">Estado: ${escapeHtml(status || 'todas')}</span>
         <span class="tag">Inicio: ${escapeHtml(start || '—')}</span>
         <span class="tag">Fin: ${escapeHtml(end || '—')}</span>
+      </div>
+    </div>
+  `;
+}
+
+function preparePrintFooter(folio) {
+  if (!els.printFooter) return;
+  els.printFooter.hidden = false;
+  els.printFooter.innerHTML = `
+    <div class="print-header-meta">Folio: ${escapeHtml(folio || '')}</div>
+    <div class="print-footer-grid">
+      <div class="sig">
+        <div class="sig-line">${escapeHtml(USERS.ivan.defaults.full_name)}</div>
+        <div class="sig-meta">${escapeHtml(USERS.ivan.role)} · <b>${escapeHtml(USERS.ivan.defaults.email)}</b></div>
+      </div>
+      <div class="sig">
+        <div class="sig-line">${escapeHtml(USERS.kevin.defaults.full_name)}</div>
+        <div class="sig-meta">${escapeHtml(USERS.kevin.role)} · <b>${escapeHtml(USERS.kevin.defaults.email)}</b> · Matrícula: <b>${escapeHtml(USERS.kevin.defaults.matricula)}</b></div>
       </div>
     </div>
   `;

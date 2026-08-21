@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#111827" />
-  <link rel="stylesheet" href="./css/simple.css?v=6" />
+  <link rel="stylesheet" href="./css/simple.css?v=7" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -73,6 +73,7 @@
     <main id="main" class="container">
       <!-- Encabezado para impresión -->
       <section class="print-header" id="print-header" hidden aria-hidden="true"></section>
+      <section class="print-footer" id="print-footer" hidden aria-hidden="true"></section>
 
       <section class="panel">
         <div class="panel-head">
@@ -280,7 +281,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=6"></script>
+  <script type="module" src="./js/simple.js?v=7"></script>
 
   <script>
     // Service Worker (opcional)
@@ -288,7 +289,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=6').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=7').catch(() => {});
       } catch {}
     })();
   </script>
