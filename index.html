@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#111827" />
-  <link rel="stylesheet" href="./css/simple.css?v=11" />
+  <link rel="stylesheet" href="./css/simple.css?v=12" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -14,10 +14,9 @@
   <section class="login" id="login" hidden>
     <div class="login-card">
       <div class="login-brand">
-        <div>
-          <div class="title">Bitácora Digital</div>
-          <div class="subtitle">UMSNH · Servicios Informáticos</div>
-        </div>
+        <div class="login-title">Bitácora Digital</div>
+        <div class="login-subtitle">UMSNH · Servicios Informáticos</div>
+        <div class="login-subnote">Inicio local (se guarda en este navegador).</div>
       </div>
 
       <form id="login-form" class="login-form">
@@ -289,7 +288,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=11"></script>
+  <script type="module" src="./js/simple.js?v=12"></script>
 
   <script>
     // Service Worker (opcional)
@@ -297,7 +296,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=11').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=12').catch(() => {});
       } catch {}
     })();
   </script>
