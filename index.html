@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
-  <meta name="theme-color" content="#166534" />
-  <link rel="stylesheet" href="./css/simple.css?v=15" />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="stylesheet" href="./css/simple.css?v=16" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -309,7 +309,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=15"></script>
+  <script type="module" src="./js/simple.js?v=16"></script>
 
   <script>
     // Service Worker (opcional)
@@ -317,10 +317,9 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=15').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=16').catch(() => {});
       } catch {}
     })();
   </script>
 </body>
 </html>
-
