@@ -13,6 +13,8 @@
   --space-2: 12px;
   --space-3: 16px;
   --space-4: 22px;
+  --logo-h: 34px;
+  --logo-h-lg: 44px;
 }
 
 * { box-sizing: border-box; }
@@ -67,19 +69,20 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(255, 255, 255, 0.03);
 }
 .brand-logo {
-  height: 38px;
+  height: var(--logo-h);
   width: auto;
+  max-width: 140px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.28));
 }
-.brand-logo:last-child { height: 40px; }
+.brand-logo:last-child { height: var(--logo-h); }
 .title { font-weight: 800; letter-spacing: 0.02em; }
 .subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .profileline {
@@ -143,10 +146,12 @@ code {
   padding: 6px 6px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+.login .brand-logo { height: var(--logo-h-lg); max-width: 170px; }
 .login-form {
   display: grid;
   gap: 12px;
   padding: 12px 6px 6px;
+}
 }
 .login-hint {
   margin: 0;
@@ -441,8 +446,7 @@ code {
   .filter-actions .btn { flex: 1; }
   .grid { grid-template-columns: 1fr; }
   .table { min-width: 840px; }
-  .brand-logo { height: 34px; }
-  .brand-logo:last-child { height: 36px; }
+  :root { --logo-h: 30px; --logo-h-lg: 40px; }
   .print-footer-grid { grid-template-columns: 1fr; }
 }
 
@@ -452,6 +456,7 @@ code {
   .btn { padding: 9px 10px; font-size: 13px; }
   .userchip { padding: 8px 10px; }
   .container { width: min(1200px, 100% - 18px); margin: 14px auto 48px; }
+  :root { --logo-h: 28px; --logo-h-lg: 38px; }
 }
 
 .toast {
@@ -528,7 +533,7 @@ code {
   tr { break-inside: avoid; page-break-inside: avoid; }
 
   .print-header, .print-footer { border: 1px solid #ddd; background: #fff; box-shadow: none; }
-  .brand-logo { filter: none; }
+  .brand-logo { filter: none; height: 28px; max-width: 120px; }
   .badge { border: 1px solid #999; background: #fff; color: #111; }
   .brand-logos { border: 1px solid #ddd; background: #fff; }
   .tag { border: 1px solid #ddd; background: #f7f7f7; color: #111; }

@@ -594,7 +594,7 @@ async function exportExcel() {
     body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
     .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
     .logos{display:flex;align-items:center;gap:12px}
-    .logos img{height:44px;width:auto;object-fit:contain}
+    .logos img{height:38px;width:auto;max-width:160px;object-fit:contain}
     .h-title{font-weight:900;font-size:18px}
     .h-sub{color:#444;margin-top:4px;font-size:12px}
     .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
@@ -613,6 +613,7 @@ async function exportExcel() {
     .sig{border:1px dashed #bbb;border-radius:12px;padding:12px}
     .sig-line{margin-top:32px;border-top:2px solid #111;padding-top:8px;font-weight:900}
     .sig-meta{font-size:12px;color:#333;margin-top:2px}
+    @media print{body{margin:0}.logos img{height:32px;max-width:140px}}
   </style>
 </head>
 <body>
