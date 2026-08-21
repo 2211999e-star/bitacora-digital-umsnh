@@ -260,6 +260,8 @@ const els = {
   btnProfile: document.getElementById('btn-profile'),
   btnEvents: document.getElementById('btn-events'),
 
+  summary: document.getElementById('summary'),
+
   rows: document.getElementById('rows'),
   modal: document.getElementById('modal'),
   form: document.getElementById('form'),
@@ -373,12 +375,53 @@ function filteredRecords(records) {
     .sort(sortNewest);
 }
 
+function summarizeRecords(list) {
+  const all = (list || []).length;
+  const pend = (list || []).filter((r) => safeStr(r.status).toLowerCase() !== 'completado').length;
+  const done = (list || []).filter((r) => safeStr(r.status).toLowerCase() === 'completado').length;
+  return { all, pend, done };
+}
+
+function renderSummary(allRecords) {
+  if (!els.summary) return;
+  const { start, end, status } = getFilters();
+  const list = filteredRecords(allRecords || []);
+  const s = summarizeRecords(list);
+  const rangeLabel =
+    start || end ? `${start || '—'} → ${end || '—'}` : 'Sin rango';
+
+  els.summary.innerHTML = `
+    <div class="summary-card">
+      <div class="summary-k">Registros (filtro actual)</div>
+      <div class="summary-v">${s.all}</div>
+      <div class="summary-pill"><span class="summary-dot"></span>Realizadas: ${s.done}</div>
+      <div class="summary-pill"><span class="summary-dot warn"></span>Pendientes: ${s.pend}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-k">Estado</div>
+      <div class="summary-v">${escapeHtml(status || 'todas')}</div>
+      <div class="summary-v small">Orden: más nuevo primero</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-k">Rango</div>
+      <div class="summary-v small">${escapeHtml(rangeLabel)}</div>
+      <div class="summary-v small">Mes: ${escapeHtml(safeStr(els.filterMonth?.value) || '—')}</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-k">Última actualización</div>
+      <div class="summary-v small">${escapeHtml(new Date().toISOString().slice(0, 19).replace('T', ' '))}</div>
+      <div class="summary-v small">Área: ${escapeHtml(loadProfile(getCurrentUser()).area || '—')}</div>
+    </div>
+  `;
+}
+
 function render() {
   const all = loadRecords();
   const list = filteredRecords(all);
   updateCounts(all);
   renderEvents();
   renderProfileLine();
+  renderSummary(all);
 
   if (!els.rows) return;
   if (!list.length) {
@@ -554,6 +597,7 @@ async function exportExcel() {
   const profile = loadProfile(user);
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
+  const stats = summarizeRecords(list);
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel`;
 
   try {
@@ -639,6 +683,8 @@ async function exportExcel() {
       <div class="tag">Inicio: ${escapeHtml(start || '—')}</div>
       <div class="tag">Fin: ${escapeHtml(end || '—')}</div>
       <div class="tag">Registros: ${list.length}</div>
+      <div class="tag">Pend: ${stats.pend}</div>
+      <div class="tag">Real: ${stats.done}</div>
     </div>
   </div>
 
@@ -764,6 +810,7 @@ function preparePrintHeader(folio) {
   const { start, end, status } = getFilters();
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const count = filteredRecords(loadRecords()).length;
+  const stats = summarizeRecords(filteredRecords(loadRecords()));
 
   els.printHeader.hidden = false;
   els.printHeader.innerHTML = `
@@ -789,6 +836,8 @@ function preparePrintHeader(folio) {
         <span class="tag">Inicio: ${escapeHtml(start || '—')}</span>
         <span class="tag">Fin: ${escapeHtml(end || '—')}</span>
         <span class="tag">Registros: ${count}</span>
+        <span class="tag">Pend: ${stats.pend}</span>
+        <span class="tag">Real: ${stats.done}</span>
       </div>
     </div>
   `;
@@ -836,7 +885,8 @@ function upcomingEvents(all) {
 
 function renderEvents() {
   if (!els.eventsList) return;
-  const list = upcomingEvents(loadEvents()).slice(0, 8);
+  const all = upcomingEvents(loadEvents());
+  const list = all.slice(0, 8);
   if (!list.length) {
     els.eventsList.innerHTML = `<div class="events-empty">Sin eventos próximos.</div>`;
     return;
@@ -863,6 +913,16 @@ function renderEvents() {
       `;
     })
     .join('');
+
+  // Extra info en el apartado de eventos
+  const container = document.querySelector('.panel-events .panel-title');
+  if (container) {
+    const next = all[0];
+    const nextLabel = next?.date ? `${formatDateHuman(next.date)} · ${safeStr(next.title) || '—'}` : '—';
+    container.textContent = `Próximos eventos (${all.length})`;
+    const hint = document.querySelector('.events-hint');
+    if (hint) hint.textContent = `Siguiente: ${nextLabel}`;
+  }
 }
 
 function openEventForNew() {

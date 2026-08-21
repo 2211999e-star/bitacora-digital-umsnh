@@ -156,13 +156,13 @@ code {
   padding: 6px 6px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.login .brand-logo { height: var(--logo-h-lg); max-width: 190px; }
-.login .brand-logo--umich { max-width: 120px; }
-.login .brand-logo--fcca { max-width: 190px; }
+.login-brand .title { font-size: 18px; letter-spacing: 0.01em; }
+.login-brand .subtitle { font-size: 12px; }
 .login-form {
   display: grid;
   gap: 12px;
   padding: 12px 6px 6px;
+}
 }
 }
 .login-hint {
@@ -353,6 +353,37 @@ code {
   flex-wrap: wrap;
 }
 
+.summary {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.summary-card {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.summary-k { font-size: 12px; color: var(--muted); }
+.summary-v { margin-top: 6px; font-size: 18px; font-weight: 950; letter-spacing: 0.01em; }
+.summary-v.small { font-size: 13px; font-weight: 800; color: rgba(229, 231, 235, 0.92); }
+.summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.12);
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 6px;
+  white-space: nowrap;
+}
+.summary-dot { width: 10px; height: 10px; border-radius: 999px; background: rgba(34, 197, 94, 0.95); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14); }
+.summary-dot.warn { background: rgba(251, 191, 36, 0.95); box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.14); }
+
 .table-wrap { overflow: auto; }
 .table { width: 100%; border-collapse: collapse; min-width: 980px; table-layout: fixed; }
 .col-date { width: 104px; }
@@ -458,6 +489,7 @@ code {
   .filter-actions .btn { flex: 1; }
   .grid { grid-template-columns: 1fr; }
   .table { min-width: 840px; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   :root { --logo-h: 30px; --logo-h-lg: 40px; }
   .print-footer-grid { grid-template-columns: 1fr; }
 }
@@ -468,6 +500,7 @@ code {
   .btn { padding: 9px 10px; font-size: 13px; }
   .userchip { padding: 8px 10px; }
   .container { width: min(1200px, 100% - 18px); margin: 14px auto 48px; }
+  .summary { grid-template-columns: 1fr; }
   :root { --logo-h: 28px; --logo-h-lg: 38px; }
 }
 
