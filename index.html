@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=16" />
+  <link rel="stylesheet" href="./css/simple.css?v=17" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -81,16 +81,27 @@
           </div>
         </div>
 
+        <nav class="topnav" aria-label="Navegación">
+          <button class="navlink is-active" type="button" id="btn-home">Inicio</button>
+          <button class="navlink" type="button" id="btn-profile">Perfil</button>
+          <button class="navlink" type="button" id="btn-events">Eventos</button>
+          <button class="navlink" type="button" id="btn-new">Nueva Actividad</button>
+          <div class="navreports">
+            <button class="navlink" type="button" id="btn-reports" aria-haspopup="true" aria-expanded="false">
+              Reportes (Excel/Imprimir)
+            </button>
+            <div class="reports-menu" id="reports-menu" hidden>
+              <button class="btn btn-ghost reports-item" type="button" id="btn-export">Excel</button>
+              <button class="btn btn-ghost reports-item" type="button" id="btn-print">Imprimir</button>
+            </div>
+          </div>
+        </nav>
+
         <div class="top-actions">
           <div class="userchip" id="userchip" hidden>
             <span class="userchip-dot" aria-hidden="true"></span>
             <span id="username">Usuario</span>
           </div>
-          <button class="btn btn-ghost" type="button" id="btn-profile">Perfil</button>
-          <button class="btn btn-ghost" type="button" id="btn-events">Eventos</button>
-          <button class="btn btn-ghost" type="button" id="btn-export">Excel</button>
-          <button class="btn btn-ghost" type="button" id="btn-print">Imprimir</button>
-          <button class="btn" type="button" id="btn-new">Nueva actividad</button>
           <button class="btn btn-ghost" type="button" id="btn-logout" hidden>Cerrar sesión</button>
         </div>
       </div>
@@ -309,7 +320,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=16"></script>
+  <script type="module" src="./js/simple.js?v=17"></script>
 
   <script>
     // Service Worker (opcional)
@@ -317,7 +328,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=16').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=17').catch(() => {});
       } catch {}
     })();
   </script>

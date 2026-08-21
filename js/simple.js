@@ -259,6 +259,9 @@ const els = {
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
   profileLine: document.getElementById('profileline'),
+  btnHome: document.getElementById('btn-home'),
+  btnReports: document.getElementById('btn-reports'),
+  reportsMenu: document.getElementById('reports-menu'),
   btnProfile: document.getElementById('btn-profile'),
   btnEvents: document.getElementById('btn-events'),
 
@@ -404,32 +407,31 @@ function renderSummary(allRecords) {
   const { start, end, status } = getFilters();
   const list = filteredRecords(allRecords || []);
   const s = summarizeRecords(list);
-  const rangeLabel =
-    start || end ? `${start || '—'} → ${end || '—'}` : 'Sin rango';
   const user = getCurrentUser();
   const p = loadProfile(user);
+  const month = safeStr(els.filterMonth?.value);
+  const periodo = month || (start ? safeStr(start).slice(0, 7) : end ? safeStr(end).slice(0, 7) : '—');
+  const rangeLabel = start || end ? `${start || '—'} → ${end || '—'}` : 'Sin rango';
+  const sessionName = safeStr(p.full_name) || safeStr(user?.name) || '—';
 
   els.summary.innerHTML = `
     <div class="summary-card">
-      <div class="summary-k">Registros (filtro actual)</div>
-      <div class="summary-v">${s.all}</div>
-      <div class="summary-pill"><span class="summary-dot"></span>Realizadas: ${s.done}</div>
-      <div class="summary-pill"><span class="summary-dot warn"></span>Pendientes: ${s.pend}</div>
+      <div class="summary-k">Resumen total</div>
+      <div class="summary-big">${s.all}</div>
+      <div class="summary-row">
+        <span class="mini"><span class="mini-dot"></span>${s.done} Realizadas</span>
+        <span class="mini"><span class="mini-dot warn"></span>${s.pend} Pendientes</span>
+      </div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Estado</div>
-      <div class="summary-v">${escapeHtml(status || 'todas')}</div>
-      <div class="summary-v small">Orden: más nuevo primero</div>
+      <div class="summary-k">Período</div>
+      <div class="summary-big">${escapeHtml(periodo || '—')}</div>
+      <div class="summary-v small">Estado: <b>${escapeHtml(status || 'todas')}</b></div>
+      <div class="summary-v small">Rango: ${escapeHtml(rangeLabel)}</div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Rango</div>
-      <div class="summary-v small">${escapeHtml(rangeLabel)}</div>
-      <div class="summary-v small">Mes: ${escapeHtml(safeStr(els.filterMonth?.value) || '—')}</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-k">Sesión / Perfil</div>
-      <div class="summary-v small">Usuario: <b>${escapeHtml(user?.name || '—')}</b></div>
-      <div class="summary-v small">Nombre: <b>${escapeHtml(p.full_name || '—')}</b></div>
+      <div class="summary-k">Sesión</div>
+      <div class="summary-v">${escapeHtml(sessionName)}</div>
       <div class="summary-v small">Correo: ${escapeHtml(p.email || '—')}</div>
       <div class="summary-v small">Matrícula: ${escapeHtml(p.matricula || '—')}</div>
     </div>
@@ -1001,11 +1003,66 @@ function deleteEventFromForm() {
 // Wiring
 // -----------------
 
-els.btnNew.addEventListener('click', openModalForNew);
-els.btnExport.addEventListener('click', () => exportExcel());
-els.btnPrint.addEventListener('click', printCurrent);
-els.btnProfile?.addEventListener('click', openProfile);
+function setActiveNav(activeId) {
+  document.querySelectorAll('.topnav .navlink').forEach((b) => b.classList.toggle('is-active', b.id === activeId));
+}
+
+function closeReportsMenu() {
+  if (!els.reportsMenu || !els.btnReports) return;
+  els.reportsMenu.hidden = true;
+  els.btnReports.setAttribute('aria-expanded', 'false');
+}
+
+function toggleReportsMenu() {
+  if (!els.reportsMenu || !els.btnReports) return;
+  const nextHidden = !els.reportsMenu.hidden ? true : false;
+  els.reportsMenu.hidden = nextHidden;
+  els.btnReports.setAttribute('aria-expanded', nextHidden ? 'false' : 'true');
+}
+
+els.btnHome?.addEventListener('click', () => {
+  closeReportsMenu();
+  setActiveNav('btn-home');
+  document.getElementById('main')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+});
+
+els.btnReports?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setActiveNav('btn-reports');
+  toggleReportsMenu();
+});
+
+document.addEventListener('click', (e) => {
+  if (!els.reportsMenu || els.reportsMenu.hidden) return;
+  const inside = e.target?.closest?.('#reports-menu') || e.target?.closest?.('#btn-reports');
+  if (!inside) closeReportsMenu();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeReportsMenu();
+});
+
+els.btnNew.addEventListener('click', () => {
+  closeReportsMenu();
+  setActiveNav('btn-new');
+  openModalForNew();
+});
+els.btnExport.addEventListener('click', () => {
+  closeReportsMenu();
+  exportExcel();
+});
+els.btnPrint.addEventListener('click', () => {
+  closeReportsMenu();
+  printCurrent();
+});
+els.btnProfile?.addEventListener('click', () => {
+  closeReportsMenu();
+  setActiveNav('btn-profile');
+  openProfile();
+});
 els.btnEvents?.addEventListener('click', () => {
+  closeReportsMenu();
+  setActiveNav('btn-events');
   // Solo baja a la sección de eventos (sin popup)
   document.querySelector('.panel-events')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
 });
