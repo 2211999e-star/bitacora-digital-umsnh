@@ -769,9 +769,9 @@ function preparePrintHeader(folio) {
   els.printHeader.innerHTML = `
     <div class="print-header-row">
       <div class="print-header-left">
-        <div class="brand-logos" aria-hidden="true">
-          <img class="brand-logo" src="./assets/logo_umich.png" alt="" />
-          <img class="brand-logo" src="./assets/logo_fcca.png" alt="" />
+        <div class="brand-logos brand-logos--bar" aria-hidden="true">
+          <img class="brand-logo brand-logo--umich" src="./assets/logo_umich.png" alt="" />
+          <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
         </div>
         <div>
           <div class="print-header-title">Bitácora Digital · Reporte</div>

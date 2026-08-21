@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
   <meta name="theme-color" content="#111827" />
-  <link rel="stylesheet" href="./css/simple.css?v=9" />
+  <link rel="stylesheet" href="./css/simple.css?v=10" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -15,8 +15,8 @@
     <div class="login-card">
       <div class="login-brand">
         <div class="brand-logos" aria-hidden="true">
-          <img class="brand-logo" src="./assets/logo_umich.png" alt="" />
-          <img class="brand-logo" src="./assets/logo_fcca.png" alt="" />
+          <img class="brand-logo brand-logo--umich" src="./assets/logo_umich.png" alt="" />
+          <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
         </div>
         <div>
           <div class="title">Bitácora Digital</div>
@@ -45,9 +45,9 @@
   <div id="app" hidden>
     <header class="topbar">
       <div class="brand">
-        <div class="brand-logos" aria-hidden="true">
-          <img class="brand-logo" src="./assets/logo_umich.png" alt="" />
-          <img class="brand-logo" src="./assets/logo_fcca.png" alt="" />
+        <div class="brand-logos brand-logos--bar" aria-hidden="true">
+          <img class="brand-logo brand-logo--umich" src="./assets/logo_umich.png" alt="" />
+          <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
         </div>
         <div>
           <div class="title">Bitácora Digital</div>
@@ -291,7 +291,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=9"></script>
+  <script type="module" src="./js/simple.js?v=10"></script>
 
   <script>
     // Service Worker (opcional)
@@ -299,7 +299,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=9').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=10').catch(() => {});
       } catch {}
     })();
   </script>

@@ -74,6 +74,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(255, 255, 255, 0.03);
 }
+.brand-logos--bar {
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  gap: 10px;
+}
+.brand-logos--bar .brand-logo { filter: none; }
 .brand-logo {
   height: var(--logo-h);
   width: auto;
@@ -83,6 +91,8 @@ body {
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.28));
 }
 .brand-logo:last-child { height: var(--logo-h); }
+.brand-logo--umich { max-width: 96px; }
+.brand-logo--fcca { max-width: 130px; }
 .title { font-weight: 800; letter-spacing: 0.02em; }
 .subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .profileline {
@@ -146,7 +156,9 @@ code {
   padding: 6px 6px 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.login .brand-logo { height: var(--logo-h-lg); max-width: 170px; }
+.login .brand-logo { height: var(--logo-h-lg); max-width: 190px; }
+.login .brand-logo--umich { max-width: 120px; }
+.login .brand-logo--fcca { max-width: 190px; }
 .login-form {
   display: grid;
   gap: 12px;
