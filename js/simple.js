@@ -890,9 +890,12 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
 function applyPrintOrientation(orientation) {
   // Limpieza previa
   document.body.classList.remove('print-landscape');
+  document.body.classList.remove('print-without-equipment');
   document.getElementById('print-orientation-style')?.remove();
 
-  if (orientation !== 'landscape') return () => {};
+  if (orientation !== 'landscape') {
+    return () => document.body.classList.remove('print-without-equipment');
+  }
 
   document.body.classList.add('print-landscape');
   const style = document.createElement('style');
@@ -902,6 +905,7 @@ function applyPrintOrientation(orientation) {
 
   return () => {
     document.body.classList.remove('print-landscape');
+    document.body.classList.remove('print-without-equipment');
     document.getElementById('print-orientation-style')?.remove();
   };
 }
@@ -911,6 +915,12 @@ function printCurrent({ orientation = 'portrait' } = {}) {
   preparePrintHeader(folio);
   preparePrintFooter(folio);
   const cleanup = applyPrintOrientation(orientation);
+  const hasEquipment = filteredRecords(loadRecords()).some((record) =>
+    [record.equipment_type, record.inventory_number, record.maintenance_type, record.serial_number]
+      .map(safeStr)
+      .some(Boolean),
+  );
+  document.body.classList.toggle('print-without-equipment', !hasEquipment);
   window.addEventListener('afterprint', cleanup, { once: true });
   window.print();
   // Fallback (algunos navegadores no disparan afterprint)

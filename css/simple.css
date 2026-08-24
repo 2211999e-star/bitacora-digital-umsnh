@@ -761,6 +761,8 @@ code{
   .table tbody tr:nth-child(even){background:#fafafa}
   thead{display:table-header-group}
   tr{break-inside:avoid;page-break-inside:avoid}
+  body.print-without-equipment .table th:nth-child(3),
+  body.print-without-equipment .table td:nth-child(3){display:none}
 
   /* Horizontal: un poco más compacto para que quepa bien */
   body.print-landscape .print-header-row{gap:6mm}
