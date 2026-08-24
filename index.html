@@ -111,6 +111,13 @@
 
       <section class="panel">
         <div class="panel-head">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">Control de mantenimiento</div>
+              <h1 class="section-title">Actividades registradas</h1>
+            </div>
+            <div class="section-note">Filtra, consulta y prepara tus reportes</div>
+          </div>
           <div class="filters filters-compact" aria-label="Filtros de fecha y búsqueda">
             <label class="field">
               <span>Período</span>
@@ -169,7 +176,7 @@
               </tr>
             </thead>
             <tbody id="rows">
-              <tr><td colspan="8" class="empty">Sin registros todavía.</td></tr>
+              <tr><td colspan="9" class="empty">Sin registros todavía.</td></tr>
             </tbody>
           </table>
         </div>
@@ -223,6 +230,7 @@
         <input type="hidden" id="f-id" />
 
         <div class="grid">
+          <div class="form-section-label field-wide">Actividad</div>
           <label class="field">
             <span>Fecha</span>
             <input type="date" id="f-date" required />
@@ -237,6 +245,10 @@
           <label class="field field-wide">
             <span>Qué se va a hacer</span>
             <textarea id="f-desc" rows="3" placeholder="Ej. Formatear, instalar software o reparar el equipo." required></textarea>
+          </label>
+          <label class="field field-wide">
+            <span>Detalle específico del arreglo (opcional)</span>
+            <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
           </label>
           <div class="field field-wide form-section-label">Datos del equipo (opcionales)</div>
           <label class="field">
@@ -271,6 +283,7 @@
             <span>Número de serie</span>
             <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
           </label>
+          <div class="field field-wide form-section-label">Ubicación y responsables</div>
           <label class="field">
             <span>Ubicación</span>
             <input type="text" id="f-location" placeholder="Ej. Edificio X · Laboratorio 2" />

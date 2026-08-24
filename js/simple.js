@@ -221,6 +221,7 @@ function matchesSearch(rec, q) {
   if (!query) return true;
   const hay = [
     rec.desc,
+    rec.action_detail,
     rec.location,
     rec.area,
     rec.assigned_to,
@@ -310,6 +311,7 @@ const els = {
   fDate: document.getElementById('f-date'),
   fStatus: document.getElementById('f-status'),
   fDesc: document.getElementById('f-desc'),
+  fActionDetail: document.getElementById('f-action-detail'),
   fEquipmentType: document.getElementById('f-equipment-type'),
   fInventoryNumber: document.getElementById('f-inventory-number'),
   fMaintenanceType: document.getElementById('f-maintenance-type'),
@@ -525,6 +527,7 @@ function render() {
     .map((r) => {
       const date = safeStr(r.date);
       const desc = safeStr(r.desc);
+      const actionDetail = safeStr(r.action_detail);
       const loc = safeStr(r.location) || '—';
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
@@ -539,7 +542,7 @@ function render() {
       return `
         <tr>
           <td class="td-date">${date || '—'}</td>
-          <td class="td-activity">${escapeHtml(desc) || '—'}</td>
+          <td class="td-activity">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
           <td class="td-equipment">${escapeHtml(equipment)}</td>
           <td class="td-location">${escapeHtml(loc)}</td>
           <td class="td-area">${escapeHtml(area)}</td>
@@ -594,6 +597,7 @@ function openModalForNew() {
   els.fDate.value = todayISO();
   els.fStatus.value = 'pendiente';
   els.fDesc.value = '';
+  els.fActionDetail.value = '';
   els.fEquipmentType.value = '';
   els.fInventoryNumber.value = '';
   els.fMaintenanceType.value = '';
@@ -615,6 +619,7 @@ function openModalForEdit(id) {
   els.fDate.value = rec.date || todayISO();
   els.fStatus.value = rec.status || 'pendiente';
   els.fDesc.value = rec.desc || '';
+  els.fActionDetail.value = rec.action_detail || '';
   els.fEquipmentType.value = rec.equipment_type || '';
   els.fInventoryNumber.value = rec.inventory_number || '';
   els.fMaintenanceType.value = rec.maintenance_type || '';
@@ -634,6 +639,7 @@ function upsertFromForm() {
   const date = safeStr(els.fDate.value) || todayISO();
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
   const desc = safeStr(els.fDesc.value);
+  const action_detail = safeStr(els.fActionDetail.value);
   const equipment_type = safeStr(els.fEquipmentType.value);
   const inventory_number = safeStr(els.fInventoryNumber.value);
   const maintenance_type = safeStr(els.fMaintenanceType.value);
@@ -662,6 +668,7 @@ function upsertFromForm() {
     date,
     status,
     desc,
+    action_detail,
     equipment_type,
     inventory_number,
     maintenance_type,
@@ -758,7 +765,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         return `
           <tr>
             <td>${escapeHtml(r.date || '')}</td>
-            <td>${escapeHtml(r.desc || '')}</td>
+            <td>${escapeHtml(r.desc || '')}${r.action_detail ? `<br><small>Detalle: ${escapeHtml(r.action_detail)}</small>` : ''}</td>
             <td>${escapeHtml([r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '))}</td>
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
@@ -873,7 +880,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       ['Fecha', 'Actividad', 'Equipo', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
-        r.desc || '',
+                r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
         [r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '),
         r.location || '',
         r.area || '',
