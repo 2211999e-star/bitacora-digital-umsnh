@@ -250,20 +250,20 @@
             <span>Detalle específico del arreglo (opcional)</span>
             <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
           </label>
-          <div class="field field-wide form-section-label">Datos del equipo (opcionales)</div>
           <label class="field">
-            <span>Tipo de equipo</span>
+            <span>Tipo de actividad</span>
             <select id="f-equipment-type">
-              <option value="">No especificado</option>
+              <option value="Normal">Actividad normal</option>
               <option value="Computadora">Computadora</option>
               <option value="Impresora">Impresora</option>
             </select>
           </label>
-          <label class="field">
+          <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
+          <label class="field equipment-field" hidden>
             <span>Número de patrimonio</span>
             <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
           </label>
-          <label class="field">
+          <label class="field equipment-field" hidden>
             <span>Tipo de mantenimiento o arreglo</span>
             <select id="f-maintenance-type">
               <option value="">No especificado</option>
@@ -279,9 +279,13 @@
               <option value="Otro arreglo">Otro arreglo</option>
             </select>
           </label>
-          <label class="field">
+          <label class="field equipment-field" hidden>
             <span>Número de serie</span>
             <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
+          </label>
+          <label class="field field-wide equipment-field" hidden>
+            <span>Especificar otro arreglo (opcional)</span>
+            <input type="text" id="f-maintenance-detail" placeholder="Ej. Cambiar rodillo, ajustar bandeja o reemplazar memoria." />
           </label>
           <div class="field field-wide form-section-label">Ubicación y responsables</div>
           <label class="field">

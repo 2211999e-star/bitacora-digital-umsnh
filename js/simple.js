@@ -228,6 +228,7 @@ function matchesSearch(rec, q) {
     rec.equipment_type,
     rec.inventory_number,
     rec.maintenance_type,
+    rec.maintenance_detail,
     rec.serial_number,
     rec.created_by,
     rec.status,
@@ -315,6 +316,7 @@ const els = {
   fEquipmentType: document.getElementById('f-equipment-type'),
   fInventoryNumber: document.getElementById('f-inventory-number'),
   fMaintenanceType: document.getElementById('f-maintenance-type'),
+  fMaintenanceDetail: document.getElementById('f-maintenance-detail'),
   fSerialNumber: document.getElementById('f-serial-number'),
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
@@ -531,7 +533,7 @@ function render() {
       const loc = safeStr(r.location) || '—';
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
-      const equipment = [r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number]
+      const equipment = [r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number]
         .map(safeStr)
         .filter(Boolean)
         .join(' · ') || '—';
@@ -591,6 +593,19 @@ function escapeHtml(text) {
     .replaceAll("'", '&#039;');
 }
 
+function updateEquipmentFields() {
+  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
+  document.querySelectorAll('.equipment-field').forEach((field) => {
+    field.hidden = !isEquipment;
+  });
+}
+
+function updateMaintenanceDetailField() {
+  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
+  const isOther = isEquipment && safeStr(els.fMaintenanceType.value) === 'Otro arreglo';
+  if (els.fMaintenanceDetail) els.fMaintenanceDetail.closest('.field').hidden = !isOther;
+}
+
 function openModalForNew() {
   els.modalTitle.textContent = 'Nueva actividad';
   els.fId.value = '';
@@ -598,14 +613,17 @@ function openModalForNew() {
   els.fStatus.value = 'pendiente';
   els.fDesc.value = '';
   els.fActionDetail.value = '';
-  els.fEquipmentType.value = '';
+  els.fEquipmentType.value = 'Normal';
   els.fInventoryNumber.value = '';
   els.fMaintenanceType.value = '';
+  els.fMaintenanceDetail.value = '';
   els.fSerialNumber.value = '';
   els.fLocation.value = '';
   els.fArea.value = '';
   els.fAssigned.value = '';
   els.btnDelete.hidden = true;
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
 }
@@ -620,14 +638,17 @@ function openModalForEdit(id) {
   els.fStatus.value = rec.status || 'pendiente';
   els.fDesc.value = rec.desc || '';
   els.fActionDetail.value = rec.action_detail || '';
-  els.fEquipmentType.value = rec.equipment_type || '';
+  els.fEquipmentType.value = rec.equipment_type || 'Normal';
   els.fInventoryNumber.value = rec.inventory_number || '';
   els.fMaintenanceType.value = rec.maintenance_type || '';
+  els.fMaintenanceDetail.value = rec.maintenance_detail || '';
   els.fSerialNumber.value = rec.serial_number || '';
   els.fLocation.value = rec.location || '';
   els.fArea.value = rec.area || '';
   els.fAssigned.value = rec.assigned_to || '';
   els.btnDelete.hidden = false;
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
 }
@@ -640,10 +661,12 @@ function upsertFromForm() {
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
   const desc = safeStr(els.fDesc.value);
   const action_detail = safeStr(els.fActionDetail.value);
-  const equipment_type = safeStr(els.fEquipmentType.value);
-  const inventory_number = safeStr(els.fInventoryNumber.value);
-  const maintenance_type = safeStr(els.fMaintenanceType.value);
-  const serial_number = safeStr(els.fSerialNumber.value);
+  const selectedType = safeStr(els.fEquipmentType.value);
+  const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
+  const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
+  const maintenance_type = equipment_type ? safeStr(els.fMaintenanceType.value) : '';
+  const maintenance_detail = maintenance_type === 'Otro arreglo' ? safeStr(els.fMaintenanceDetail.value) : '';
+  const serial_number = equipment_type ? safeStr(els.fSerialNumber.value) : '';
   const location = safeStr(els.fLocation.value);
   const area = safeStr(els.fArea.value);
   const assigned_to = safeStr(els.fAssigned.value);
@@ -672,6 +695,7 @@ function upsertFromForm() {
     equipment_type,
     inventory_number,
     maintenance_type,
+    maintenance_detail,
     serial_number,
     location,
     area,
@@ -718,6 +742,11 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
   const stats = summarizeRecords(list);
+  const hasEquipment = list.some((record) =>
+    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
+      .map(safeStr)
+      .some(Boolean),
+  );
   const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}`;
 
@@ -741,7 +770,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         ? `
           <col style="width:104px">
           <col style="width:auto">
-          <col style="width:230px">
+          ${hasEquipment ? '<col style="width:230px">' : ''}
           <col style="width:200px">
           <col style="width:230px">
           <col style="width:210px">
@@ -751,7 +780,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         : `
           <col style="width:104px">
           <col style="width:auto">
-          <col style="width:190px">
+          ${hasEquipment ? '<col style="width:190px">' : ''}
           <col style="width:170px">
           <col style="width:190px">
           <col style="width:180px">
@@ -766,7 +795,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
           <tr>
             <td>${escapeHtml(r.date || '')}</td>
             <td>${escapeHtml(r.desc || '')}${r.action_detail ? `<br><small>Detalle: ${escapeHtml(r.action_detail)}</small>` : ''}</td>
-            <td>${escapeHtml([r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '))}</td>
+            ${hasEquipment ? `<td>${escapeHtml([r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number].map(safeStr).filter(Boolean).join(' · '))}</td>` : ''}
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
             <td>${escapeHtml(r.assigned_to || '')}</td>
@@ -846,7 +875,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
-        <th>Equipo</th>
+        ${hasEquipment ? '<th>Equipo</th>' : ''}
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -855,7 +884,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       </tr>
     </thead>
     <tbody>
-      ${rows || '<tr><td colspan=\"8\">Sin registros.</td></tr>'}
+      ${rows || `<tr><td colspan=\"${hasEquipment ? 8 : 7}\">Sin registros.</td></tr>`}
     </tbody>
   </table>
 
@@ -877,11 +906,11 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', 'Equipo', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
-                r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
-        [r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '),
+        r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
+        ...(hasEquipment ? [[r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number].map(safeStr).filter(Boolean).join(' · ')] : []),
         r.location || '',
         r.area || '',
         r.assigned_to || '',
@@ -1372,6 +1401,12 @@ els.filterQ.addEventListener('input', () => {
     render();
   }, 120);
 });
+
+els.fEquipmentType.addEventListener('change', () => {
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
+});
+els.fMaintenanceType.addEventListener('change', updateMaintenanceDetailField);
 
 els.form.addEventListener('submit', (e) => {
   e.preventDefault();
