@@ -4,6 +4,7 @@ Sistema **ultra simple** para registrar actividades de mantenimiento/soporte com
 
 ## Qué hace
 - Guardar actividades como **Pendiente** o **Realizada**
+- Registrar opcionalmente computadoras e impresoras con número de patrimonio, tipo de mantenimiento y número de serie
 - Marcar una actividad como **completada**
 - Filtrar por **mes** o por **rango de fechas**
 - Buscar por texto (equipo, lugar, persona, etc.)

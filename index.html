@@ -159,6 +159,7 @@
               <tr>
                 <th>Fecha</th>
                 <th>Actividad</th>
+                <th>Equipo</th>
                 <th>Ubicación</th>
                 <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
@@ -234,8 +235,41 @@
             </select>
           </label>
           <label class="field field-wide">
-            <span>Actividad</span>
-            <textarea id="f-desc" rows="3" placeholder="Ej. Formateo del laboratorio 2 (edificio X). Computadora 6." required></textarea>
+            <span>Qué se va a hacer</span>
+            <textarea id="f-desc" rows="3" placeholder="Ej. Formatear, instalar software o reparar el equipo." required></textarea>
+          </label>
+          <div class="field field-wide form-section-label">Datos del equipo (opcionales)</div>
+          <label class="field">
+            <span>Tipo de equipo</span>
+            <select id="f-equipment-type">
+              <option value="">No especificado</option>
+              <option value="Computadora">Computadora</option>
+              <option value="Impresora">Impresora</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Número de patrimonio</span>
+            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
+          </label>
+          <label class="field">
+            <span>Tipo de mantenimiento o arreglo</span>
+            <select id="f-maintenance-type">
+              <option value="">No especificado</option>
+              <option value="Preventivo">Preventivo</option>
+              <option value="Correctivo">Correctivo</option>
+              <option value="Formateo">Formateo</option>
+              <option value="Reparación">Reparación</option>
+              <option value="Limpieza interna">Limpieza interna</option>
+              <option value="Instalación">Instalación</option>
+              <option value="Configuración">Configuración</option>
+              <option value="Cambio de componente">Cambio de componente</option>
+              <option value="Diagnóstico">Diagnóstico</option>
+              <option value="Otro arreglo">Otro arreglo</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Número de serie</span>
+            <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
           </label>
           <label class="field">
             <span>Ubicación</span>

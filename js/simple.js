@@ -224,6 +224,10 @@ function matchesSearch(rec, q) {
     rec.location,
     rec.area,
     rec.assigned_to,
+    rec.equipment_type,
+    rec.inventory_number,
+    rec.maintenance_type,
+    rec.serial_number,
     rec.created_by,
     rec.status,
     rec.date,
@@ -306,6 +310,10 @@ const els = {
   fDate: document.getElementById('f-date'),
   fStatus: document.getElementById('f-status'),
   fDesc: document.getElementById('f-desc'),
+  fEquipmentType: document.getElementById('f-equipment-type'),
+  fInventoryNumber: document.getElementById('f-inventory-number'),
+  fMaintenanceType: document.getElementById('f-maintenance-type'),
+  fSerialNumber: document.getElementById('f-serial-number'),
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
   fAssigned: document.getElementById('f-assigned'),
@@ -509,7 +517,7 @@ function render() {
 
   if (!els.rows) return;
   if (!list.length) {
-    els.rows.innerHTML = `<tr><td colspan="8" class="empty">Sin registros con esos filtros.</td></tr>`;
+    els.rows.innerHTML = `<tr><td colspan="9" class="empty">Sin registros con esos filtros.</td></tr>`;
     return;
   }
 
@@ -520,6 +528,10 @@ function render() {
       const loc = safeStr(r.location) || '—';
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
+      const equipment = [r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number]
+        .map(safeStr)
+        .filter(Boolean)
+        .join(' · ') || '—';
       const createdBy = safeStr(r.created_by) || '—';
       const st = safeStr(r.status).toLowerCase();
       const canComplete = st !== 'completado';
@@ -528,6 +540,7 @@ function render() {
         <tr>
           <td class="td-date">${date || '—'}</td>
           <td class="td-activity">${escapeHtml(desc) || '—'}</td>
+          <td class="td-equipment">${escapeHtml(equipment)}</td>
           <td class="td-location">${escapeHtml(loc)}</td>
           <td class="td-area">${escapeHtml(area)}</td>
           <td class="td-assigned">${escapeHtml(assigned)}</td>
@@ -581,6 +594,10 @@ function openModalForNew() {
   els.fDate.value = todayISO();
   els.fStatus.value = 'pendiente';
   els.fDesc.value = '';
+  els.fEquipmentType.value = '';
+  els.fInventoryNumber.value = '';
+  els.fMaintenanceType.value = '';
+  els.fSerialNumber.value = '';
   els.fLocation.value = '';
   els.fArea.value = '';
   els.fAssigned.value = '';
@@ -598,6 +615,10 @@ function openModalForEdit(id) {
   els.fDate.value = rec.date || todayISO();
   els.fStatus.value = rec.status || 'pendiente';
   els.fDesc.value = rec.desc || '';
+  els.fEquipmentType.value = rec.equipment_type || '';
+  els.fInventoryNumber.value = rec.inventory_number || '';
+  els.fMaintenanceType.value = rec.maintenance_type || '';
+  els.fSerialNumber.value = rec.serial_number || '';
   els.fLocation.value = rec.location || '';
   els.fArea.value = rec.area || '';
   els.fAssigned.value = rec.assigned_to || '';
@@ -613,6 +634,10 @@ function upsertFromForm() {
   const date = safeStr(els.fDate.value) || todayISO();
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
   const desc = safeStr(els.fDesc.value);
+  const equipment_type = safeStr(els.fEquipmentType.value);
+  const inventory_number = safeStr(els.fInventoryNumber.value);
+  const maintenance_type = safeStr(els.fMaintenanceType.value);
+  const serial_number = safeStr(els.fSerialNumber.value);
   const location = safeStr(els.fLocation.value);
   const area = safeStr(els.fArea.value);
   const assigned_to = safeStr(els.fAssigned.value);
@@ -637,6 +662,10 @@ function upsertFromForm() {
     date,
     status,
     desc,
+    equipment_type,
+    inventory_number,
+    maintenance_type,
+    serial_number,
     location,
     area,
     assigned_to,
@@ -705,6 +734,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         ? `
           <col style="width:104px">
           <col style="width:auto">
+          <col style="width:230px">
           <col style="width:200px">
           <col style="width:230px">
           <col style="width:210px">
@@ -714,6 +744,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         : `
           <col style="width:104px">
           <col style="width:auto">
+          <col style="width:190px">
           <col style="width:170px">
           <col style="width:190px">
           <col style="width:180px">
@@ -728,6 +759,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
           <tr>
             <td>${escapeHtml(r.date || '')}</td>
             <td>${escapeHtml(r.desc || '')}</td>
+            <td>${escapeHtml([r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '))}</td>
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
             <td>${escapeHtml(r.assigned_to || '')}</td>
@@ -807,6 +839,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
+        <th>Equipo</th>
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -815,7 +848,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       </tr>
     </thead>
     <tbody>
-      ${rows || '<tr><td colspan=\"7\">Sin registros.</td></tr>'}
+      ${rows || '<tr><td colspan=\"8\">Sin registros.</td></tr>'}
     </tbody>
   </table>
 
@@ -837,10 +870,11 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', 'Equipo', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
         r.desc || '',
+        [r.equipment_type, r.inventory_number, r.maintenance_type, r.serial_number].map(safeStr).filter(Boolean).join(' · '),
         r.location || '',
         r.area || '',
         r.assigned_to || '',

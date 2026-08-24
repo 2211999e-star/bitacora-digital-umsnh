@@ -131,6 +131,7 @@ code{
 
 /* -------- Fields / Buttons -------- */
 .field{display:grid;gap:7px;font-size:12px;color:rgba(229,231,235,.80)}
+.form-section-label{padding-top:4px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.04em}
 .field-wide{grid-column:span 2}
 .field input,.field select,.field textarea{
   font-size:14px;
