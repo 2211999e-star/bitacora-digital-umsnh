@@ -533,10 +533,16 @@ function render() {
       const loc = safeStr(r.location) || '—';
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
-      const equipment = [r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number]
-        .map(safeStr)
-        .filter(Boolean)
-        .join(' · ') || '—';
+      const equipmentParts = [
+        ['Tipo', r.equipment_type],
+        ['Patrimonio', r.inventory_number],
+        ['Mantenimiento', r.maintenance_type],
+        ['Detalle', r.maintenance_detail],
+        ['Serie', r.serial_number],
+      ].filter(([, value]) => safeStr(value));
+      const equipment = equipmentParts.length
+        ? equipmentParts.map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · ')
+        : '—';
       const createdBy = safeStr(r.created_by) || '—';
       const st = safeStr(r.status).toLowerCase();
       const canComplete = st !== 'completado';
@@ -795,7 +801,13 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
           <tr>
             <td>${escapeHtml(r.date || '')}</td>
             <td>${escapeHtml(r.desc || '')}${r.action_detail ? `<br><small>Detalle: ${escapeHtml(r.action_detail)}</small>` : ''}</td>
-            ${hasEquipment ? `<td>${escapeHtml([r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number].map(safeStr).filter(Boolean).join(' · '))}</td>` : ''}
+            ${hasEquipment ? `<td>${escapeHtml([
+              ['Tipo', r.equipment_type],
+              ['Patrimonio', r.inventory_number],
+              ['Mantenimiento', r.maintenance_type],
+              ['Detalle', r.maintenance_detail],
+              ['Serie', r.serial_number],
+            ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '))}</td>` : ''}
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
             <td>${escapeHtml(r.assigned_to || '')}</td>
@@ -952,7 +964,7 @@ function printCurrent({ orientation = 'portrait' } = {}) {
   preparePrintFooter(folio);
   const cleanup = applyPrintOrientation(orientation);
   const hasEquipment = filteredRecords(loadRecords()).some((record) =>
-    [record.equipment_type, record.inventory_number, record.maintenance_type, record.serial_number]
+    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
       .map(safeStr)
       .some(Boolean),
   );
