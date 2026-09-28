@@ -53,7 +53,11 @@ function uid() {
 }
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function safeStr(v) {
@@ -146,7 +150,9 @@ function saveEvents(events) {
 }
 
 function csvCell(value) {
-  const v = value == null ? '' : String(value);
+  let v = value == null ? '' : String(value);
+  // Evita que Excel interprete contenido de usuario como fórmulas.
+  if (/^[\s\u0000-\u001f]*[=+@-]/.test(v)) v = `'${v}`;
   const escaped = v.replaceAll('"', '""');
   if (/[",\n]/.test(escaped)) return `"${escaped}"`;
   return escaped;
@@ -166,6 +172,63 @@ function downloadCSV(filename, rows) {
   URL.revokeObjectURL(url);
 }
 
+function downloadBackup() {
+  const backup = {
+    app: 'bitacora-digital-umsnh',
+    version: 1,
+    exported_at: new Date().toISOString(),
+    records: loadRecords(),
+    events: loadEvents(),
+    profiles: Object.fromEntries(Object.values(USERS).map((user) => [user.id, loadProfile(user)])),
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `respaldo_bitacora_${todayISO()}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  toast('Respaldo descargado. Guárdalo en un lugar seguro.');
+}
+
+async function restoreBackup(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    alert('El archivo supera el límite de 10 MB.');
+    return;
+  }
+  try {
+    const backup = JSON.parse(await file.text());
+    const validRecords = Array.isArray(backup?.records) && backup.records.every((record) =>
+      record && typeof record === 'object' && typeof record.id === 'string' && typeof record.desc === 'string',
+    );
+    const validEvents = Array.isArray(backup?.events) && backup.events.every((event) =>
+      event && typeof event === 'object' && typeof event.id === 'string' && typeof event.title === 'string',
+    );
+    if (backup?.app !== 'bitacora-digital-umsnh' || backup?.version !== 1 || !validRecords || !validEvents) {
+      throw new Error('Formato de respaldo no válido.');
+    }
+    if (!confirm(`El respaldo contiene ${backup.records.length} actividades y ${backup.events.length} eventos. Se reemplazarán los datos actuales. ¿Continuar?`)) return;
+
+    saveRecords(backup.records);
+    saveEvents(backup.events);
+    Object.entries(backup.profiles || {}).forEach(([id, profile]) => {
+      if (!USERS[id] || !profile || typeof profile !== 'object') return;
+      saveProfile(USERS[id], profile);
+    });
+    uiState.page = 1;
+    render();
+    toast('Respaldo restaurado correctamente.');
+  } catch (error) {
+    console.error('No se pudo restaurar el respaldo:', error);
+    alert('No se pudo restaurar. Verifica que seleccionaste un respaldo válido de esta aplicación.');
+  } finally {
+    if (els.backupFile) els.backupFile.value = '';
+  }
+}
+
 function setMonthToRange(month) {
   const value = safeStr(month);
   if (!value) return null;
@@ -173,8 +236,9 @@ function setMonthToRange(month) {
   const y = Number(yRaw);
   const m = Number(mRaw);
   if (!y || !m) return null;
-  const first = new Date(y, m - 1, 1).toISOString().slice(0, 10);
-  const last = new Date(y, m, 0).toISOString().slice(0, 10);
+  const first = `${y}-${String(m).padStart(2, '0')}-01`;
+  const finalDay = new Date(y, m, 0).getDate();
+  const last = `${y}-${String(m).padStart(2, '0')}-${String(finalDay).padStart(2, '0')}`;
   return { start: first, end: last };
 }
 
@@ -189,7 +253,8 @@ function inRange(dateISO, start, end) {
 function formatDateHuman(dateISO) {
   const d = safeStr(dateISO).slice(0, 10);
   if (!d) return '—';
-  return d;
+  const [year, month, day] = d.split('-');
+  return year && month && day ? `${day}/${month}/${year}` : d;
 }
 
 function downloadHTML(filename, html) {
@@ -294,6 +359,11 @@ const els = {
   printHeader: document.getElementById('print-header'),
   printFooter: document.getElementById('print-footer'),
   pager: document.getElementById('pager'),
+  pageSize: document.getElementById('page-size'),
+  resultsLabel: document.getElementById('results-label'),
+  backupFile: document.getElementById('backup-file'),
+  btnBackup: document.getElementById('btn-backup'),
+  btnRestore: document.getElementById('btn-restore'),
 
   // Burbuja lateral (acciones rápidas)
   fabToggle: document.getElementById('fab-toggle'),
@@ -458,13 +528,11 @@ function renderSummary(allRecords) {
       </div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Análisis Teórico de Estados</div>
-      <div class="analysis">
-        <b>Definición de Pendiente:</b> Actividad programada sin confirmar.<br>
-        <b>Definición de Realizada:</b> Actividad confirmada con registro.<br>
-        <b>Completar:</b> Cambia el estado y registra fecha/hora.
-      </div>
-      <div class="summary-v small">Filtro actual: <b>${escapeHtml(status || 'todas')}</b></div>
+      <div class="summary-k">Avance del período</div>
+      <div class="summary-big">${donePct}%</div>
+      <div class="summary-v small">${s.done} de ${s.all} actividades realizadas</div>
+      <div class="summary-v small">${s.pend ? `${s.pend} pendiente${s.pend === 1 ? '' : 's'} por atender` : 'Sin pendientes por atender'}</div>
+      <div class="summary-v small">Vista: <b>${escapeHtml(status || 'todas')}</b></div>
     </div>
     <div class="summary-card">
       <div class="summary-k">Sesión</div>
@@ -518,6 +586,11 @@ function render() {
   renderProfileLine();
   renderSummary(all);
   renderPager(full.length);
+  if (els.resultsLabel) {
+    const first = full.length ? start + 1 : 0;
+    const last = Math.min(start + list.length, full.length);
+    els.resultsLabel.textContent = `Mostrando ${first}–${last} de ${full.length} actividades`;
+  }
 
   if (!els.rows) return;
   if (!list.length) {
@@ -549,18 +622,18 @@ function render() {
 
       return `
         <tr>
-          <td class="td-date">${date || '—'}</td>
-          <td class="td-activity">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
-          <td class="td-equipment">${escapeHtml(equipment)}</td>
-          <td class="td-location">${escapeHtml(loc)}</td>
-          <td class="td-area">${escapeHtml(area)}</td>
-          <td class="td-assigned">${escapeHtml(assigned)}</td>
-          <td class="td-created">${escapeHtml(createdBy)}</td>
-          <td class="td-status">${statusBadge(st)}</td>
-          <td class="td-actions">
+          <td class="td-date" data-label="Fecha">${escapeHtml(formatDateHuman(date))}</td>
+          <td class="td-activity" data-label="Actividad">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
+          <td class="td-equipment" data-label="Equipo">${escapeHtml(equipment)}</td>
+          <td class="td-location" data-label="Ubicación">${escapeHtml(loc)}</td>
+          <td class="td-area" data-label="Comisión Académica">${escapeHtml(area)}</td>
+          <td class="td-assigned" data-label="Responsable(s)">${escapeHtml(assigned)}</td>
+          <td class="td-created" data-label="Registró">${escapeHtml(createdBy)}</td>
+          <td class="td-status" data-label="Estado">${statusBadge(st)}</td>
+          <td class="td-actions" data-label="Acciones">
             <div class="row-actions">
-              ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${r.id}">Completar</button>` : ''}
-              <button class="btn btn-ghost" type="button" data-action="edit" data-id="${r.id}">Editar</button>
+              ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${escapeHtml(r.id)}">Completar</button>` : ''}
+              <button class="btn btn-ghost" type="button" data-action="edit" data-id="${escapeHtml(r.id)}">Editar</button>
             </div>
           </td>
         </tr>
@@ -1119,7 +1192,7 @@ function renderEvents() {
       return `
         <div class="event-item">
           <div>
-            <div class="event-date">${d}</div>
+            <div class="event-date">${escapeHtml(d)}</div>
             <div class="event-meta">${e.date === todayISO() ? 'Hoy' : 'Próximo'}</div>
           </div>
           <div>
@@ -1127,7 +1200,7 @@ function renderEvents() {
             ${notes ? `<div class="event-meta">${escapeHtml(notes)}</div>` : ''}
           </div>
           <div class="event-actions">
-            <button class="btn btn-ghost" type="button" data-ev-action="edit" data-ev-id="${e.id}">Editar</button>
+            <button class="btn btn-ghost" type="button" data-ev-action="edit" data-ev-id="${escapeHtml(e.id)}">Editar</button>
           </div>
         </div>
       `;
@@ -1220,11 +1293,13 @@ function toggleReportsMenu() {
 function closeUserMenu() {
   if (!els.usermenuMenu) return;
   els.usermenuMenu.hidden = true;
+  els.userchip?.setAttribute('aria-expanded', 'false');
 }
 
 function toggleUserMenu() {
   if (!els.usermenuMenu) return;
   els.usermenuMenu.hidden = !els.usermenuMenu.hidden;
+  els.userchip?.setAttribute('aria-expanded', String(!els.usermenuMenu.hidden));
 }
 
 function closeFabMenu() {
@@ -1276,6 +1351,16 @@ document.addEventListener('keydown', (e) => {
     closeReportsMenu();
     closeUserMenu();
     closeFabMenu();
+  }
+  if (els.app?.hidden || e.defaultPrevented) return;
+  const target = e.target;
+  const typing = target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    els.filterQ?.focus();
+  } else if (e.altKey && e.key.toLowerCase() === 'n' && !typing && !els.modal?.open && !els.eventModal?.open && !els.profileModal?.open) {
+    e.preventDefault();
+    openModalForNew();
   }
 });
 
@@ -1330,6 +1415,15 @@ els.btnPrintLandscape?.addEventListener('click', () => {
   closeFabMenu();
   printCurrent({ orientation: 'landscape' });
 });
+els.btnBackup?.addEventListener('click', () => {
+  closeFabMenu();
+  downloadBackup();
+});
+els.btnRestore?.addEventListener('click', () => {
+  closeFabMenu();
+  els.backupFile?.click();
+});
+els.backupFile?.addEventListener('change', () => restoreBackup(els.backupFile.files?.[0]));
 els.btnProfile?.addEventListener('click', () => {
   closeReportsMenu();
   setActiveNav('btn-profile');
@@ -1398,10 +1492,12 @@ els.filterMonth.addEventListener('change', () => {
   render();
 });
 els.filterStart.addEventListener('change', () => {
+  els.filterMonth.value = '';
   uiState.page = 1;
   render();
 });
 els.filterEnd.addEventListener('change', () => {
+  els.filterMonth.value = '';
   uiState.page = 1;
   render();
 });
@@ -1461,6 +1557,11 @@ els.pager?.addEventListener('click', (e) => {
   if (v === 'prev') uiState.page = Math.max(1, uiState.page - 1);
   else if (v === 'next') uiState.page = Math.min(pages, uiState.page + 1);
   else uiState.page = Math.min(Math.max(1, Number(v) || 1), pages);
+  render();
+});
+els.pageSize?.addEventListener('change', () => {
+  uiState.pageSize = Number(els.pageSize.value) || 10;
+  uiState.page = 1;
   render();
 });
 

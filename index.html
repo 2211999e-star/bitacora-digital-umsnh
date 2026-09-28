@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bitácora Digital - Actividades</title>
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=21" />
+  <title>Bitácora Digital | Mantenimiento UMSNH</title>
+  <meta name="theme-color" content="#123f46" />
+  <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
+  <link rel="stylesheet" href="./css/simple.css?v=26" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -16,7 +17,7 @@
       <div class="login-side">
         <div class="login-title">Bitácora Digital</div>
         <div class="login-subtitle">UMSNH · Comisión Académica de Servicios Informáticos</div>
-        <div class="login-subnote">Inicio local (se guarda en este navegador).</div>
+        <div class="login-subnote">Acceso local de demostración; no protege los datos como una autenticación real.</div>
 
         <div class="login-chips" aria-label="Información rápida">
           <span class="chip">Iván: Coordinador</span>
@@ -89,7 +90,7 @@
 
         <div class="top-actions">
           <div class="usermenu" id="usermenu" hidden>
-            <button class="userchip" type="button" id="userchip">
+            <button class="userchip" type="button" id="userchip" aria-haspopup="true" aria-expanded="false">
               <span class="userchip-dot" aria-hidden="true"></span>
               <span id="username">Usuario</span>
               <span class="userchip-caret" aria-hidden="true">▾</span>
@@ -133,7 +134,7 @@
             </label>
             <label class="field field-wide">
               <span>Buscar</span>
-              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." />
+              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." title="Atajo: Ctrl/Cmd + K" />
             </label>
           </div>
 
@@ -181,7 +182,18 @@
           </table>
         </div>
 
-        <div class="pager" id="pager" aria-label="Paginación"></div>
+        <div class="table-footer">
+          <span class="results-label" id="results-label" aria-live="polite">0 actividades</span>
+          <label class="page-size-control" for="page-size">Mostrar
+            <select id="page-size" aria-label="Actividades por página">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            por página
+          </label>
+          <div class="pager" id="pager" aria-label="Paginación"></div>
+        </div>
       </section>
 
       <section class="panel panel-events" aria-label="Próximos eventos">
@@ -213,8 +225,13 @@
         <button class="fab-item" type="button" id="btn-export-landscape">Excel (Horizontal)</button>
         <button class="fab-item" type="button" id="btn-print">Imprimir (Vertical)</button>
         <button class="fab-item" type="button" id="btn-print-landscape">Imprimir (Horizontal)</button>
+        <div class="fab-sep" role="separator" aria-hidden="true"></div>
+        <div class="fab-group">Respaldo de datos</div>
+        <button class="fab-item" type="button" id="btn-backup">Descargar respaldo</button>
+        <button class="fab-item" type="button" id="btn-restore">Restaurar respaldo</button>
       </div>
     </div>
+    <input type="file" id="backup-file" accept="application/json,.json" hidden />
 
     <!-- Modal actividad -->
     <dialog class="modal" id="modal">
@@ -388,7 +405,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=21"></script>
+  <script type="module" src="./js/simple.js?v=26"></script>
 
   <script>
     // Service Worker (opcional)
@@ -396,7 +413,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=21').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=26').catch(() => {});
       } catch {}
     })();
   </script>
