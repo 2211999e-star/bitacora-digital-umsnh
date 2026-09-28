@@ -397,8 +397,10 @@ const els = {
   btnBulk: document.getElementById('btn-bulk'),
   btnExport: document.getElementById('btn-export'),
   btnExportLandscape: document.getElementById('btn-export-landscape'),
+  btnExportEvents: document.getElementById('btn-export-events'),
   btnPrint: document.getElementById('btn-print'),
   btnPrintLandscape: document.getElementById('btn-print-landscape'),
+  btnPrintEvents: document.getElementById('btn-print-events'),
   btnClear: document.getElementById('btn-clear'),
   btnToday: document.getElementById('btn-today'),
   btnThisMonth: document.getElementById('btn-this-month'),
@@ -1117,6 +1119,44 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   }
 }
 
+function exportEventsExcel() {
+  const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
+  const rows = [
+    ['Fecha', 'Evento', 'Notas', 'Registrado'],
+    ...events.map((event) => [
+      event.date || '',
+      event.title || '',
+      event.notes || '',
+      event.created_at ? formatDateHuman(event.created_at) : '',
+    ]),
+  ];
+  downloadCSV(`bitacora_eventos_${todayISO()}`, rows);
+  toast('Eventos exportados por separado.');
+}
+
+function printEvents() {
+  const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
+  const popup = window.open('', '_blank', 'noopener,noreferrer');
+  if (!popup) {
+    alert('Permite las ventanas emergentes para imprimir los eventos.');
+    return;
+  }
+  const rows = events.map((event) => `
+    <tr>
+      <td>${escapeHtml(formatDateHuman(event.date))}</td>
+      <td>${escapeHtml(event.title || '—')}</td>
+      <td>${escapeHtml(event.notes || '—')}</td>
+    </tr>
+  `).join('');
+  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte de eventos</title>
+    <style>body{font-family:Segoe UI,Arial,sans-serif;color:#203239;margin:28px}h1{margin:0 0 5px;font-size:22px}p{color:#647980;font-size:12px;margin:0 0 18px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border:1px solid #d9e3e6;text-align:left;vertical-align:top}th{background:#edf4f4;font-size:11px;text-transform:uppercase;letter-spacing:.05em}td{font-size:12px}@media print{body{margin:0}}</style>
+    </head><body><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p>
+    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
 function applyPrintOrientation(orientation) {
   // Limpieza previa
   document.body.classList.remove('print-landscape');
@@ -1523,10 +1563,18 @@ els.btnExportLandscape?.addEventListener('click', () => {
   closeFabMenu();
   exportExcel({ orientation: 'landscape' });
 });
+els.btnExportEvents?.addEventListener('click', () => {
+  closeFabMenu();
+  exportEventsExcel();
+});
 els.btnPrintLandscape?.addEventListener('click', () => {
   closeReportsMenu();
   closeFabMenu();
   printCurrent({ orientation: 'landscape' });
+});
+els.btnPrintEvents?.addEventListener('click', () => {
+  closeFabMenu();
+  printEvents();
 });
 els.btnBackup?.addEventListener('click', () => {
   closeFabMenu();

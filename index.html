@@ -6,7 +6,7 @@
   <title>Bitácora Digital | Mantenimiento UMSNH</title>
   <meta name="theme-color" content="#123f46" />
   <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
-  <link rel="stylesheet" href="./css/simple.css?v=31" />
+  <link rel="stylesheet" href="./css/simple.css?v=32" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -224,10 +224,12 @@
         <button class="fab-item" type="button" id="btn-bulk">Captura rápida</button>
         <div class="fab-sep" role="separator" aria-hidden="true"></div>
         <div class="fab-group">Reportes</div>
-        <button class="fab-item" type="button" id="btn-export">Excel (Vertical)</button>
-        <button class="fab-item" type="button" id="btn-export-landscape">Excel (Horizontal)</button>
-        <button class="fab-item" type="button" id="btn-print">Imprimir (Vertical)</button>
-        <button class="fab-item" type="button" id="btn-print-landscape">Imprimir (Horizontal)</button>
+        <button class="fab-item" type="button" id="btn-export">Excel · Actividades</button>
+        <button class="fab-item" type="button" id="btn-export-landscape">Excel · Actividades horizontal</button>
+        <button class="fab-item" type="button" id="btn-export-events">Excel · Eventos</button>
+        <button class="fab-item" type="button" id="btn-print">Imprimir · Actividades</button>
+        <button class="fab-item" type="button" id="btn-print-landscape">Imprimir · Actividades horizontal</button>
+        <button class="fab-item" type="button" id="btn-print-events">Imprimir · Eventos</button>
         <div class="fab-sep" role="separator" aria-hidden="true"></div>
         <div class="fab-group">Respaldo de datos</div>
         <button class="fab-item" type="button" id="btn-backup">Descargar respaldo</button>
@@ -445,7 +447,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=31"></script>
+  <script type="module" src="./js/simple.js?v=32"></script>
 
   <script>
     // Service Worker (opcional)
@@ -453,7 +455,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=31').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=32').catch(() => {});
       } catch {}
     })();
   </script>
