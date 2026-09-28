@@ -347,6 +347,7 @@ const els = {
   form: document.getElementById('form'),
   modalTitle: document.getElementById('modal-title'),
   btnNew: document.getElementById('btn-new'),
+  btnBulk: document.getElementById('btn-bulk'),
   btnExport: document.getElementById('btn-export'),
   btnExportLandscape: document.getElementById('btn-export-landscape'),
   btnPrint: document.getElementById('btn-print'),
@@ -414,6 +415,12 @@ const els = {
   eNotes: document.getElementById('e-notes'),
   btnEventCancel: document.getElementById('btn-event-cancel'),
   btnEventDelete: document.getElementById('btn-event-delete'),
+  bulkModal: document.getElementById('bulk-modal'),
+  bulkForm: document.getElementById('bulk-form'),
+  bulkMonth: document.getElementById('bulk-month'),
+  bulkStatus: document.getElementById('bulk-status'),
+  bulkText: document.getElementById('bulk-text'),
+  btnBulkCancel: document.getElementById('btn-bulk-cancel'),
 };
 
 const uiState = {
@@ -705,6 +712,61 @@ function openModalForNew() {
   updateMaintenanceDetailField();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
+}
+
+function openBulkModal() {
+  const now = new Date();
+  if (els.bulkMonth) els.bulkMonth.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (els.bulkStatus) els.bulkStatus.value = 'pendiente';
+  if (els.bulkText) els.bulkText.value = '';
+  els.bulkModal?.showModal();
+  setTimeout(() => els.bulkText?.focus(), 50);
+}
+
+function addBulkRecords() {
+  const user = getCurrentUser();
+  const profile = loadProfile(user);
+  const month = safeStr(els.bulkMonth?.value);
+  const range = setMonthToRange(month);
+  const lines = safeStr(els.bulkText?.value)
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').trim())
+    .filter(Boolean);
+  if (!range || !lines.length) return false;
+
+  const status = safeStr(els.bulkStatus?.value) === 'completado' ? 'completado' : 'pendiente';
+  const now = new Date().toISOString();
+  const records = loadRecords();
+  lines.forEach((rawDesc, index) => {
+    const isDone = /\blisto\b/i.test(rawDesc);
+    const desc = rawDesc.replace(/\blisto\b/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || rawDesc;
+    const lineStatus = isDone ? 'completado' : status;
+    records.push({
+      id: `${uid()}_${index}`,
+      created_at: now,
+      updated_at: now,
+      updated_by: user?.name || null,
+      created_by: safeStr(profile.full_name) || safeStr(user?.name) || '—',
+      date: range.start,
+      status: lineStatus,
+      desc,
+      action_detail: '',
+      equipment_type: '',
+      inventory_number: '',
+      maintenance_type: '',
+      maintenance_detail: '',
+      serial_number: '',
+      location: '',
+      area: safeStr(profile.area),
+      assigned_to: '',
+      completed_at: lineStatus === 'completado' ? now : null,
+    });
+  });
+  saveRecords(records);
+  uiState.page = 1;
+  render();
+  toast(`${lines.length} actividades agregadas.`);
+  return true;
 }
 
 function openModalForEdit(id) {
@@ -1395,6 +1457,10 @@ els.btnNew.addEventListener('click', () => {
   setActiveNav('btn-new');
   openModalForNew();
 });
+els.btnBulk?.addEventListener('click', () => {
+  closeFabMenu();
+  openBulkModal();
+});
 els.btnExport.addEventListener('click', () => {
   closeReportsMenu();
   closeFabMenu();
@@ -1596,6 +1662,13 @@ els.btnEventDelete?.addEventListener('click', () => {
   renderEvents();
   toast('Evento eliminado.');
 });
+
+els.bulkForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!addBulkRecords()) return;
+  els.bulkModal?.close();
+});
+els.btnBulkCancel?.addEventListener('click', () => els.bulkModal?.close());
 
 function showAppForUser(user) {
   if (els.login) els.login.hidden = true;

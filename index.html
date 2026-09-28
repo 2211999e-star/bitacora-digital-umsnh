@@ -6,7 +6,7 @@
   <title>Bitácora Digital | Mantenimiento UMSNH</title>
   <meta name="theme-color" content="#123f46" />
   <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
-  <link rel="stylesheet" href="./css/simple.css?v=27" />
+  <link rel="stylesheet" href="./css/simple.css?v=29" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -221,6 +221,7 @@
       </button>
       <div class="fab-menu" id="fab-menu" hidden>
         <button class="fab-item fab-item-primary" type="button" id="btn-new">Nueva Actividad</button>
+        <button class="fab-item" type="button" id="btn-bulk">Captura rápida</button>
         <div class="fab-sep" role="separator" aria-hidden="true"></div>
         <div class="fab-group">Reportes</div>
         <button class="fab-item" type="button" id="btn-export">Excel (Vertical)</button>
@@ -405,9 +406,46 @@
         </div>
       </form>
     </dialog>
+
+    <!-- Captura masiva desde notas del pizarrón -->
+    <dialog class="modal" id="bulk-modal">
+      <form method="dialog" class="modal-card" id="bulk-form">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Captura rápida</div>
+            <div class="modal-sub">Pega una actividad por línea. El texto se conserva tal como fue escrito.</div>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="grid">
+          <label class="field">
+            <span>Mes de registro</span>
+            <input type="month" id="bulk-month" required />
+          </label>
+          <label class="field">
+            <span>Estado inicial</span>
+            <select id="bulk-status">
+              <option value="pendiente">Pendiente</option>
+              <option value="completado">Realizada</option>
+            </select>
+          </label>
+          <label class="field field-wide">
+            <span>Actividades</span>
+            <textarea id="bulk-text" rows="10" placeholder="Laptop Dell: formateo\nCPU Lenovo: formateo y limpieza\nAntena del AIV 12: revisión" required></textarea>
+            <small class="field-help">Las líneas que incluyan “listo” se guardarán como Realizadas automáticamente.</small>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" value="cancel" type="button" id="btn-bulk-cancel">Cancelar</button>
+          <button class="btn" type="submit">Agregar actividades</button>
+        </div>
+      </form>
+    </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=27"></script>
+  <script type="module" src="./js/simple.js?v=29"></script>
 
   <script>
     // Service Worker (opcional)
@@ -415,7 +453,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=27').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=29').catch(() => {});
       } catch {}
     })();
   </script>

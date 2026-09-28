@@ -1191,6 +1191,8 @@ body{
 .modal-card{border-radius:12px;box-shadow:var(--shadow)}
 .modal-head{padding:16px 18px}
 .modal-actions{padding:12px 18px}
+.bulk-modal-note{color:var(--muted)}
+.field-help{color:var(--muted);font-size:11px;line-height:1.4}
 .login-card{border-radius:14px;box-shadow:var(--shadow)}
 .login-side{padding:38px;background:linear-gradient(145deg,#164f50,#1c6d67)}
 .login-kicker,.login-main-kicker{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
