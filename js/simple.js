@@ -2,6 +2,26 @@ const STORAGE_KEY = 'bitacora_simple_v1_records';
 const USER_KEY = 'bitacora_simple_v1_user';
 const PROFILE_KEY_PREFIX = 'bitacora_simple_v1_profile_';
 const EVENTS_KEY = 'bitacora_simple_v1_events';
+const SEED_KEY = 'bitacora_simple_v1_julio_seed';
+
+const JULY_NOTES = [
+  ['Laptop Dell: formateo', 'completado'],
+  ['CPU Lenovo: formateo y limpieza', 'completado'],
+  ['Antena del AIV 12', 'completado'],
+  ['Antenas de posgrado', 'completado'],
+  ['Traer antenas de cómputo A4', 'completado'],
+  ['Instalar CPU', 'completado'],
+  ['Cambio de base, salón 10', 'completado'],
+  ['2 monitores: van Miguel y Benja', 'pendiente'],
+  ['Antenas 15 y 16 A.V.: urgente, Kevin y Yair', 'pendiente'],
+  ['Antena del Z15', 'pendiente'],
+  ['Cañón: configurar A4 del salón 2', 'pendiente'],
+  ['Instalación de CPU, salón 10 A4', 'pendiente'],
+  ['Asignación de IP, edificio Y', 'pendiente'],
+  ['Formateo de laboratorio 6, edificio Y: Luis, Miguel, Gerardo, Miguel y Benja', 'pendiente'],
+  ['Formateo de laboratorio 2: Yair', 'pendiente'],
+  ['Bitácora: urgente, Kevin', 'pendiente'],
+];
 
 const USERS = {
   ivan: {
@@ -46,6 +66,33 @@ function setCurrentUser(user) {
 
 function clearCurrentUser() {
   localStorage.removeItem(USER_KEY);
+}
+
+function seedJulyNotes() {
+  if (localStorage.getItem(SEED_KEY) || localStorage.getItem(STORAGE_KEY)) return;
+  const now = new Date().toISOString();
+  const records = JULY_NOTES.map(([desc, status], index) => ({
+    id: `julio-2026-${String(index + 1).padStart(2, '0')}`,
+    created_at: now,
+    updated_at: now,
+    updated_by: 'Iván',
+    created_by: 'Iván Fernández Mandujano',
+    date: '2026-07-01',
+    status,
+    desc,
+    action_detail: 'Nota inicial del pizarrón de mantenimiento de julio.',
+    equipment_type: '',
+    inventory_number: '',
+    maintenance_type: '',
+    maintenance_detail: '',
+    serial_number: '',
+    location: '',
+    area: 'Comisión Académica de Servicios Informáticos',
+    assigned_to: '',
+    completed_at: status === 'completado' ? now : null,
+  }));
+  saveRecords(records);
+  localStorage.setItem(SEED_KEY, '1');
 }
 
 function uid() {
@@ -1527,7 +1574,15 @@ els.btnThisMonth?.addEventListener('click', () => {
   const now = new Date();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const y = now.getFullYear();
-  const month = `${y}-${m}`;
+  const currentMonth = `${y}-${m}`;
+  const records = loadRecords();
+  const hasCurrentRecords = records.some((record) => safeStr(record.date).slice(0, 7) === currentMonth);
+  const latestMonth = records
+    .map((record) => safeStr(record.date).slice(0, 7))
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  const month = hasCurrentRecords ? currentMonth : (latestMonth || currentMonth);
   uiState.page = 1;
   if (els.filterMonth) els.filterMonth.value = month;
   const r = setMonthToRange(month);
@@ -1707,6 +1762,7 @@ function showLogin() {
 
 // Inicio
 (() => {
+  seedJulyNotes();
   // La sesión es deliberadamente temporal: cada carga vuelve a pedir acceso.
   clearCurrentUser();
   showLogin();
