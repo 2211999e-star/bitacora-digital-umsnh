@@ -1634,11 +1634,8 @@ function showLogin() {
 
 // Inicio
 (() => {
-  const user = getCurrentUser();
-  if (user) {
-    showAppForUser(user);
-    return;
-  }
+  // La sesión es deliberadamente temporal: cada carga vuelve a pedir acceso.
+  clearCurrentUser();
   showLogin();
 })();
 

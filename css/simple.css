@@ -1145,6 +1145,7 @@ body{
 .topbar-inner{min-height:72px;padding:9px 0}
 .brand{gap:13px}
 .brand-logos--bar{padding-right:12px}
+.brand-kicker{margin-bottom:2px;color:var(--accent);font-size:9px;font-weight:800;letter-spacing:.14em}
 .brand-text .title{font-size:15px;letter-spacing:0}
 .brand-text .subtitle{margin-top:3px;font-size:10px}
 .navlink{border-radius:8px;font-weight:800}
@@ -1191,11 +1192,29 @@ body{
 .modal-head{padding:16px 18px}
 .modal-actions{padding:12px 18px}
 .login-card{border-radius:14px;box-shadow:var(--shadow)}
-.login-side{padding:36px;background:linear-gradient(145deg,#164f50,#1c6d67)}
-.login-main{padding:36px}
+.login-side{padding:38px;background:linear-gradient(145deg,#164f50,#1c6d67)}
+.login-kicker,.login-main-kicker{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.login-kicker{color:rgba(255,255,255,.7)}
+.login-title{margin-top:8px;font-size:27px;letter-spacing:-.02em}
+.login-subtitle{line-height:1.45}
+.login-subnote{max-width:360px;line-height:1.5}
+.login-bullets{list-style:none;padding:0;margin-top:24px}
+.login-bullets li{display:grid;gap:2px;margin:0;padding:12px 0;border-top:1px solid rgba(255,255,255,.16)}
+.login-bullets li:last-child{border-bottom:1px solid rgba(255,255,255,.16)}
+.login-bullets strong{font-size:12px;color:#fff}
+.login-bullets span{font-size:11px;color:rgba(255,255,255,.68)}
+.login-main{padding:38px}
+.login-main-kicker{color:var(--accent);margin-bottom:8px}
+.login-main-title{font-size:25px;letter-spacing:-.03em}
+.login-main-sub{max-width:290px;line-height:1.5}
+.login-form{margin-top:24px}
+.login-form .btn{margin-top:4px}
+.login-hint{border-radius:8px}
 @media(max-width:560px){
   .panel-head{padding:16px 14px}
   .section-title{font-size:22px}
   .summary-card{min-height:100px}
   .fab{right:12px;bottom:12px}
+  .login-side,.login-main{padding:28px 24px}
+  .login-title{font-size:24px}
 }

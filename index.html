@@ -6,7 +6,7 @@
   <title>Bitácora Digital | Mantenimiento UMSNH</title>
   <meta name="theme-color" content="#123f46" />
   <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
-  <link rel="stylesheet" href="./css/simple.css?v=26" />
+  <link rel="stylesheet" href="./css/simple.css?v=27" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -15,9 +15,10 @@
   <section class="login" id="login" hidden>
     <div class="login-card">
       <div class="login-side">
+        <div class="login-kicker">PLATAFORMA INSTITUCIONAL</div>
         <div class="login-title">Bitácora Digital</div>
         <div class="login-subtitle">UMSNH · Comisión Académica de Servicios Informáticos</div>
-        <div class="login-subnote">Acceso local de demostración; no protege los datos como una autenticación real.</div>
+        <div class="login-subnote">Registro y seguimiento de actividades de mantenimiento.</div>
 
         <div class="login-chips" aria-label="Información rápida">
           <span class="chip">Iván: Coordinador</span>
@@ -25,17 +26,17 @@
           <span class="chip chip-muted" id="login-now">—</span>
         </div>
 
-        <ul class="login-bullets" aria-label="Funciones">
-          <li>Guardar actividades</li>
-          <li>Marcar realizadas</li>
-          <li>Exportar a Excel</li>
-          <li>Imprimir por rango</li>
+        <ul class="login-bullets" aria-label="Funciones principales">
+          <li><strong>Registro centralizado</strong><span>Actividades, responsables y ubicaciones.</span></li>
+          <li><strong>Seguimiento claro</strong><span>Estados pendientes y realizadas.</span></li>
+          <li><strong>Reportes listos</strong><span>Exportación e impresión por período.</span></li>
         </ul>
       </div>
 
       <div class="login-main">
-        <div class="login-main-title">Iniciar sesión</div>
-        <div class="login-main-sub">Elige tu usuario y entra.</div>
+        <div class="login-main-kicker">Acceso al sistema</div>
+        <div class="login-main-title">Inicia sesión</div>
+        <div class="login-main-sub">Selecciona tu usuario para continuar con la bitácora.</div>
 
         <form id="login-form" class="login-form">
           <label class="field">
@@ -59,7 +60,7 @@
           <button class="btn" type="submit">Entrar</button>
 
           <details class="login-hint">
-            <summary>Ver contraseña</summary>
+            <summary>Acceso de demostración</summary>
             <div>Contraseña: <code>123456789</code></div>
           </details>
         </form>
@@ -76,6 +77,7 @@
             <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
           </div>
           <div class="brand-text">
+            <div class="brand-kicker">PLATAFORMA DE SERVICIOS</div>
             <div class="title">Sistema de Bitácora Digital</div>
             <div class="subtitle">UMSNH - Comisión Académica de Servicios Informáticos · FCCA</div>
             <div class="profileline" id="profileline" hidden></div>
@@ -405,7 +407,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=26"></script>
+  <script type="module" src="./js/simple.js?v=27"></script>
 
   <script>
     // Service Worker (opcional)
@@ -413,7 +415,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=26').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=27').catch(() => {});
       } catch {}
     })();
   </script>
