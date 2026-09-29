@@ -1173,11 +1173,12 @@ function exportEventsExcel() {
 
 function printEvents() {
   const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
-  const popup = window.open('', '_blank', 'noopener,noreferrer');
+  const popup = window.open('', '_blank');
   if (!popup) {
     alert('Permite las ventanas emergentes para imprimir los eventos.');
     return;
   }
+  popup.opener = null;
   const rows = events.map((event) => `
     <tr>
       <td>${escapeHtml(formatDateHuman(event.date))}</td>
