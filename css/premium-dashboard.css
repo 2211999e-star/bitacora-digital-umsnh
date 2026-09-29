@@ -17,19 +17,22 @@
 
 #app{background:var(--premium-bg);color:var(--premium-ink)}
 #app .topbar{background:#f8f3ee;border-bottom:1px solid var(--premium-line);box-shadow:none}
-#app .topbar-inner{width:min(1400px,calc(100% - 46px));min-height:84px;padding:12px 0}
-#app .brand{background:linear-gradient(135deg,#2b473f 0%,#1d312d 100%);border:1px solid rgba(255,255,255,.14);box-shadow:var(--premium-shadow)}
+#app .topbar-inner{width:min(1400px,calc(100% - 46px));min-height:84px;padding:12px 0;gap:18px}
+#app .brand{background:linear-gradient(135deg,#2b473f 0%,#1d312d 100%);border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 28px rgba(23,36,34,.16);position:relative;overflow:hidden}
+#app .brand::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,var(--premium-gold),var(--premium-coral))}
 #app .brand::after{display:none}
 #app .brand-logo--umich,#app .brand-logo--fcca{filter:drop-shadow(0 3px 6px rgba(0,0,0,.12))}
 #app .brand-kicker{color:#d9c592;font-size:8px;letter-spacing:.18em}
 #app .brand-text .title{color:#fff;font-size:15px;letter-spacing:-.015em}
 #app .brand-text .subtitle{color:rgba(255,255,255,.72);font-size:10px}
 #app .topnav{background:#f1ede7;border-color:#e2d9cf;border-radius:12px;padding:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
-#app .navlink{border-radius:10px;padding:10px 14px;font-weight:800;color:#5f6a67}
+#app .navlink{border-radius:10px;padding:10px 14px;font-weight:800;color:#5f6a67;transition:transform .12s ease,box-shadow .12s ease,background-color .12s ease}
+#app .navlink:hover{transform:translateY(-1px)}
 #app .navlink.is-active{background:linear-gradient(135deg,#2d584c 0%,#3d6f5f 100%);color:#fff;box-shadow:0 8px 18px rgba(45,88,76,.16)}
 #app .navlink.is-active .nav-icon{background:rgba(255,255,255,.18);color:#fff}
-#app .nav-icon{background:#f7f2ee;color:#35564f}
-#app .userchip{background:#fff;border-color:#e6dccd;border-radius:11px;color:#364a4a;box-shadow:0 4px 10px rgba(29,42,45,.04)}
+#app .nav-icon{background:#f7f2ee;color:#35564f;border-radius:7px}
+#app .userchip{background:#fff;border-color:#e6dccd;border-radius:11px;color:#364a4a;box-shadow:0 4px 10px rgba(29,42,45,.04);padding:8px 12px;min-height:40px}
+#app .userchip:hover{box-shadow:0 6px 14px rgba(29,42,45,.08)}
 #app .userchip-dot{background:#4a6d5a}
 #app .container{width:min(1400px,calc(100% - 42px));margin:28px auto 72px}
 #app main>.panel .panel-head{background:linear-gradient(135deg,#f9f3ee 0%,#f3eee7 100%);border:1px solid var(--premium-line);border-radius:14px 14px 0 0;color:var(--premium-ink);box-shadow:none}
