@@ -6,7 +6,7 @@
   <title>Bitácora Digital | Mantenimiento UMSNH</title>
   <meta name="theme-color" content="#123f46" />
   <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
-  <link rel="stylesheet" href="./css/simple.css?v=47" />
+  <link rel="stylesheet" href="./css/simple.css?v=48" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -85,9 +85,9 @@
         </div>
 
         <nav class="topnav" aria-label="Navegación">
-          <button class="navlink is-active" type="button" id="btn-home">Dashboard</button>
-          <button class="navlink" type="button" id="btn-profile">Perfil</button>
-          <button class="navlink" type="button" id="btn-events">Eventos</button>
+          <button class="navlink is-active" type="button" id="btn-home"><span class="nav-icon" aria-hidden="true">▦</span><span>Dashboard</span></button>
+          <button class="navlink" type="button" id="btn-profile"><span class="nav-icon" aria-hidden="true">◉</span><span>Perfil</span></button>
+          <button class="navlink" type="button" id="btn-events"><span class="nav-icon" aria-hidden="true">◷</span><span>Eventos</span></button>
         </nav>
 
         <div class="top-actions">
@@ -226,11 +226,16 @@
           <summary>Reportes</summary>
           <div class="fab-section-items">
             <button class="fab-item" type="button" id="btn-export">Excel · actividades</button>
-            <button class="fab-item" type="button" id="btn-export-landscape">Excel · actividades horizontal</button>
             <button class="fab-item" type="button" id="btn-export-events">Excel · eventos</button>
             <button class="fab-item" type="button" id="btn-print">Imprimir · actividades</button>
-            <button class="fab-item" type="button" id="btn-print-landscape">Imprimir · actividades horizontal</button>
             <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
+          </div>
+        </details>
+        <details class="fab-section">
+          <summary>Más formatos</summary>
+          <div class="fab-section-items">
+            <button class="fab-item" type="button" id="btn-export-landscape">Excel · horizontal</button>
+            <button class="fab-item" type="button" id="btn-print-landscape">Imprimir · horizontal</button>
           </div>
         </details>
         <details class="fab-section">
@@ -453,7 +458,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=47"></script>
+  <script type="module" src="./js/simple.js?v=48"></script>
 
   <script>
     // Service Worker (opcional)
@@ -461,7 +466,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=47').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=48').catch(() => {});
       } catch {}
     })();
   </script>

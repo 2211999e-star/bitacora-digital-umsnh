@@ -1674,6 +1674,31 @@ body{
   #app .fab-menu{width:min(320px,calc(100vw - 24px))}
 }
 
+/* -------- Navegacion expresiva y acciones por intencion -------- */
+#app .topnav{gap:5px;padding:6px;background:#fff;border:1px solid #dce5e1;border-radius:11px;box-shadow:0 5px 14px rgba(31,48,53,.06)}
+#app .navlink{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:7px 13px;border-radius:7px;font-weight:850;transition:transform .16s ease,background-color .16s ease,color .16s ease,box-shadow .16s ease}
+#app .navlink:hover{transform:translateY(-1px);background:#f1f7f3}
+#app .navlink.is-active{background:#e4f1eb;color:#145d50;border-color:#c4ded3;box-shadow:0 3px 8px rgba(25,116,100,.1)}
+#app .nav-icon{display:grid;place-items:center;width:23px;height:23px;border-radius:7px;background:#edf4f0;color:#197464;font-size:16px;line-height:1}
+#app .navlink.is-active .nav-icon{color:#fff;background:#197464}
+#app #btn-profile .nav-icon{color:#d26f50;background:#fff0eb}
+#app #btn-profile.is-active{color:#a95840;background:#fff0eb;border-color:#efc9bd}
+#app #btn-profile.is-active .nav-icon{color:#fff;background:#d26f50}
+#app #btn-events .nav-icon{color:#5877a1;background:#edf2fa}
+#app #btn-events.is-active{color:#41658d;background:#edf2fa;border-color:#cbd8ea}
+#app #btn-events.is-active .nav-icon{color:#fff;background:#5877a1}
+#app .summary-card{transition:transform .18s ease,box-shadow .18s ease}
+#app .summary-card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(31,48,53,.08)}
+#app .fab-btn{letter-spacing:.02em}
+#app .fab-section summary{transition:background-color .16s ease,color .16s ease;border-radius:5px}
+#app .fab-section summary:hover{background:#eaf3ef;color:#145d50}
+#app .fab-section-items .fab-item{transition:transform .14s ease,background-color .14s ease,border-color .14s ease}
+#app .fab-section-items .fab-item:hover{transform:translateX(3px)}
+@media(max-width:640px){
+  #app .navlink{gap:5px;padding:7px 8px;font-size:12px}
+  #app .nav-icon{width:21px;height:21px;font-size:14px}
+}
+
 /* -------- Legibilidad y claridad -------- */
 #app{font-size:14px}
 #app .brand-text .title{font-size:16px;line-height:1.25}
