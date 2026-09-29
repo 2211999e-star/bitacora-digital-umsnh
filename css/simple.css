@@ -1757,21 +1757,21 @@ body{
 /* -------- Presencia visual del dashboard -------- */
 .login-side{background-color:#213f40;background-image:linear-gradient(135deg,rgba(255,255,255,.08) 0 1px,transparent 1px 100%),linear-gradient(45deg,rgba(210,111,80,.12),transparent 55%);background-size:22px 22px,100% 100%}
 .login-side::before{content:"";position:absolute;right:-70px;top:28px;width:220px;height:220px;border:1px solid rgba(255,255,255,.12);border-radius:50%;box-shadow:0 0 0 22px rgba(255,255,255,.035),0 0 0 44px rgba(255,255,255,.025)}
-#app main>.panel:first-of-type .panel-head{padding:30px 30px 26px;color:#fff;background:linear-gradient(135deg,#213f40 0%,#286c60 100%);border-radius:4px 4px 0 0;position:relative;overflow:hidden}
-#app main>.panel:first-of-type .panel-head::after{content:"BITÁCORA";position:absolute;right:28px;top:20px;color:rgba(255,255,255,.08);font-size:40px;font-weight:900;letter-spacing:.08em;pointer-events:none}
-#app main>.panel:first-of-type .section-heading{position:relative;z-index:1}
-#app main>.panel:first-of-type .section-heading>div:first-child::before{background:#f0a078}
-#app main>.panel:first-of-type .eyebrow{color:#a8dfc9}
-#app main>.panel:first-of-type .section-title{color:#fff;font-size:31px}
-#app main>.panel:first-of-type .section-note{color:rgba(255,255,255,.72)}
-#app main>.panel:first-of-type .filters-compact{position:relative;z-index:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px)}
-#app main>.panel:first-of-type .field{color:rgba(255,255,255,.78)}
-#app main>.panel:first-of-type .field input,#app main>.panel:first-of-type .field select,#app main>.panel:first-of-type .field textarea{border-color:rgba(255,255,255,.32);background:rgba(255,255,255,.96)}
-#app main>.panel:first-of-type .filter-row{border-top-color:rgba(255,255,255,.18)}
-#app main>.panel:first-of-type .tab{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.3)}
-#app main>.panel:first-of-type .tab.is-active{color:#145d50;background:#dff0e8;border-color:#b6dace}
-#app main>.panel:first-of-type .filter-actions .btn-ghost{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
-#app main>.panel:first-of-type .filter-actions .btn-ghost:hover{background:rgba(255,255,255,.2);color:#fff}
+#app main>.panel .panel-head{padding:30px 30px 26px;color:#fff;background:linear-gradient(135deg,#213f40 0%,#286c60 100%);border-radius:4px 4px 0 0;position:relative;overflow:hidden}
+#app main>.panel .panel-head::after{content:"BITÁCORA";position:absolute;right:28px;top:20px;color:rgba(255,255,255,.08);font-size:40px;font-weight:900;letter-spacing:.08em;pointer-events:none}
+#app main>.panel .section-heading{position:relative;z-index:1}
+#app main>.panel .section-heading>div:first-child::before{background:#f0a078}
+#app main>.panel .eyebrow{color:#a8dfc9}
+#app main>.panel .section-title{color:#fff;font-size:31px}
+#app main>.panel .section-note{color:rgba(255,255,255,.72)}
+#app main>.panel .filters-compact{position:relative;z-index:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(8px)}
+#app main>.panel .field{color:rgba(255,255,255,.78)}
+#app main>.panel .field input,#app main>.panel .field select,#app main>.panel .field textarea{border-color:rgba(255,255,255,.32);background:rgba(255,255,255,.96)}
+#app main>.panel .filter-row{border-top-color:rgba(255,255,255,.18)}
+#app main>.panel .tab{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.3)}
+#app main>.panel .tab.is-active{color:#145d50;background:#dff0e8;border-color:#b6dace}
+#app main>.panel .filter-actions .btn-ghost{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25)}
+#app main>.panel .filter-actions .btn-ghost:hover{background:rgba(255,255,255,.2);color:#fff}
 #app .summary-card{background:linear-gradient(145deg,#fff 0%,#f7faf8 100%)}
 #app .summary-card:first-child{background:linear-gradient(145deg,#fff 0%,#edf8f2 100%)}
 #app .summary-card:nth-child(2){background:linear-gradient(145deg,#fff 0%,#fff4ef 100%)}
@@ -1780,9 +1780,9 @@ body{
 #app .panel-events .panel-head-compact{padding-left:0;padding-right:0}
 #app .panel-events .events{padding-left:0;padding-right:0}
 @media(max-width:640px){
-  #app main>.panel:first-of-type .panel-head{padding:24px 18px 20px}
-  #app main>.panel:first-of-type .section-title{font-size:26px}
-  #app main>.panel:first-of-type .panel-head::after{right:12px;font-size:26px}
+  #app main>.panel .panel-head{padding:24px 18px 20px}
+  #app main>.panel .section-title{font-size:26px}
+  #app main>.panel .panel-head::after{right:12px;font-size:26px}
   #app .panel-events{padding:0 14px}
 }
 #app .panel-head{position:relative}
