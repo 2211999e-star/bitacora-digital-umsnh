@@ -1360,3 +1360,50 @@ body{
   #app .section-title{font-size:23px}
   #app .fab-menu{width:min(286px,calc(100vw - 24px))}
 }
+
+/* -------- Composicion final del dashboard -------- */
+#app .topbar-inner{grid-template-columns:minmax(360px,1fr) auto auto;min-height:64px;padding:7px 0;gap:24px}
+#app .brand-text{max-width:430px}
+#app .brand-text .subtitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#app .profileline{display:none!important}
+#app .topnav{justify-content:center}
+#app .top-actions{min-width:92px}
+#app .container{margin-top:18px}
+#app .panel-head{padding:18px 20px 16px}
+#app .section-heading{margin-bottom:14px;align-items:center}
+#app .section-title{font-size:24px}
+#app .filters{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+#app .filters .field-wide{grid-column:span 1}
+#app .filters-compact{padding:11px}
+#app .filter-row{margin-top:11px}
+#app .summary{margin-top:13px;gap:9px}
+#app .summary-card{min-height:104px;padding:12px}
+#app .summary-big{font-size:31px}
+#app .summary-v{margin-top:4px;font-size:14px}
+#app .summary-row{margin-top:7px;gap:6px}
+#app .mini{padding:5px 8px;font-size:11px}
+#app .donut-wrap{gap:10px;margin-top:6px}
+#app .donut{width:58px;height:58px}
+#app .donut-center{width:36px;height:36px}
+#app .table th{padding:10px 12px}
+#app .table td{padding:12px}
+#app .fab{right:24px;bottom:20px}
+#app .fab-btn{padding:10px 14px;font-size:12px}
+@media(max-width:1080px){
+  #app .topbar-inner{grid-template-columns:1fr auto;gap:14px}
+  #app .topnav{grid-column:1/-1;grid-row:2;justify-content:flex-start}
+  #app .filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #app .filters .field-wide{grid-column:span 2}
+}
+@media(max-width:640px){
+  #app .topbar-inner{display:flex;min-height:0;padding:10px 0;gap:9px}
+  #app .brand-text .subtitle{white-space:normal;line-height:1.25}
+  #app .top-actions{position:absolute;top:11px;right:10px}
+  #app .topnav{order:3;width:100%;gap:3px}
+  #app .navlink{padding:7px 9px}
+  #app .section-heading{align-items:flex-start}
+  #app .filters{grid-template-columns:1fr 1fr}
+  #app .filters .field-wide{grid-column:1/-1}
+  #app .filter-actions{width:100%}
+  #app .fab{right:12px;bottom:12px}
+}
