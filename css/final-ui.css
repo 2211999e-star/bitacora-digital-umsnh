@@ -118,3 +118,39 @@ button,input,select,textarea{font-family:inherit}
   #app .panel-events{padding:0 14px}
   #app .fab{right:14px;bottom:14px}
 }
+
+/* App only: refinamiento final. El login queda fuera de este bloque. */
+#app .topbar-inner{align-items:center}
+#app .brand{position:relative;overflow:hidden}
+#app .brand::after{content:"";position:absolute;right:-32px;bottom:-42px;width:105px;height:105px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 14px rgba(255,255,255,.035)}
+#app .top-actions{position:relative;z-index:2}
+#app .userchip{font-weight:850}
+#app .container{max-width:1340px}
+#app main>.panel .panel-head{padding-top:32px;padding-bottom:28px}
+#app main>.panel .section-title{max-width:520px}
+#app main>.panel .filters-compact{margin-top:4px}
+#app .summary-card{display:flex;flex-direction:column;justify-content:space-between}
+#app .summary-card .summary-row{margin-top:auto}
+#app .summary-card:nth-child(2) .summary-big{color:#bd6044}
+#app .summary-card:nth-child(3) .summary-v{font-weight:800}
+#app .table-wrap{position:relative}
+#app .table-wrap::before{content:"ACTIVIDADES";position:absolute;left:18px;top:-28px;color:#718187;font-size:9px;font-weight:900;letter-spacing:.14em}
+#app .table{border-spacing:0}
+#app .table td:first-child{font-weight:800;color:#315b58}
+#app .table td:nth-child(2){font-weight:650;color:#2b4549}
+#app .table .row-actions .btn{border-radius:5px}
+#app .panel-events .panel-title{font-weight:900}
+#app .panel-events .events-list{gap:8px}
+#app .event-item{padding:14px 16px;background:#fbfdfc}
+#app .event-actions .btn{min-height:32px;padding:6px 10px}
+#app .fab-btn{font-weight:900}
+#app .fab-menu{padding:12px}
+#app .fab-item-primary{box-shadow:0 5px 12px rgba(33,128,106,.15)}
+#app .modal-card{box-shadow:0 22px 54px rgba(29,48,54,.2)}
+#app .modal-head{border-bottom:0}
+#app .modal-actions{padding-top:16px;padding-bottom:16px}
+@media(max-width:640px){
+  #app .table-wrap::before{left:12px;top:-24px}
+  #app main>.panel .panel-head{padding-top:24px}
+  #app .brand::after{display:none}
+}
