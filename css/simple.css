@@ -1582,3 +1582,45 @@ body{
   #app .panel-head{padding:18px 15px}
   #app .section-title{font-size:24px}
 }
+
+/* -------- Acabado final de interfaz -------- */
+.login{background-color:#edf3f0;background-image:linear-gradient(rgba(23,45,50,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(23,45,50,.035) 1px,transparent 1px);background-size:28px 28px}
+.login-card{overflow:hidden;position:relative}
+.login-card::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:#83c8b0;z-index:1}
+.login-side{position:relative}
+.login-side::after{content:"UMSNH";position:absolute;right:28px;bottom:20px;color:rgba(255,255,255,.08);font-size:42px;font-weight:900;letter-spacing:.08em}
+.login-main{position:relative}
+.login-main::before{content:"";position:absolute;left:48px;right:48px;top:0;height:1px;background:#e1ebe7}
+.login-form .field span{color:#536b70;font-size:11px;font-weight:800}
+.login-form .check{color:#647a7e;font-size:11px}
+#app .topbar{position:sticky;top:0;z-index:20}
+#app .brand-text .title{line-height:1.15}
+#app .brand-text .subtitle{line-height:1.35}
+#app .container{position:relative}
+#app .panel-head{position:relative}
+#app .section-heading>div:first-child{position:relative;padding-left:14px}
+#app .section-heading>div:first-child::before{content:"";position:absolute;left:0;top:2px;bottom:0;width:4px;border-radius:3px;background:var(--app-green)}
+#app .filters-compact{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+#app .field input::placeholder,#app .field textarea::placeholder{color:#98a9aa}
+#app .filter-actions .btn,#app .tabs .tab{transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+#app .filter-actions .btn:hover,#app .tabs .tab:hover{transform:translateY(-1px)}
+#app .summary-card{position:relative;overflow:hidden}
+#app .summary-card::after{content:"";position:absolute;right:-18px;bottom:-24px;width:78px;height:78px;border:1px solid rgba(25,115,94,.08);border-radius:50%}
+#app .summary-card:nth-child(2)::after{border-color:rgba(201,111,85,.1)}
+#app .table th:first-child{border-radius:6px 0 0 0}
+#app .table th:last-child{border-radius:0 6px 0 0}
+#app .table td.td-actions .btn{min-height:32px}
+#app .empty{padding:38px 16px;background:#fbfdfc;color:#7a8c8f}
+#app .event-item{position:relative}
+#app .event-item::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:3px;background:#c96f55}
+#app .modal-head{padding:20px 22px}
+#app .modal-title{font-size:19px}
+#app .grid{padding:20px 22px}
+#app .icon-btn{border-radius:8px}
+#app .toast{border-radius:8px;background:#172d32}
+@media(max-width:640px){
+  .login-main::before{left:24px;right:24px}
+  #app .section-heading>div:first-child{padding-left:11px}
+  #app .panel-head{padding-top:18px}
+  #app .grid{padding:16px}
+}
