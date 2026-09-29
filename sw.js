@@ -2,7 +2,7 @@
  * Cache básico para index + assets del modo simple.
  */
 
-const CACHE_VERSION = 'bitacora-simple-v40';
+const CACHE_VERSION = 'bitacora-simple-v41';
 
 const PRECACHE_URLS = [
   './',

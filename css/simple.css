@@ -1531,3 +1531,54 @@ body{
   #app .summary-card{min-height:112px}
   #app .fab{right:14px;bottom:14px}
 }
+
+/* -------- Pase de diseño: menos ruido, mas jerarquia -------- */
+.login{padding:32px;background:#edf3f0}
+.login-card{width:min(1040px,100%);border:1px solid #d5e2de;border-radius:16px;box-shadow:0 20px 50px rgba(23,45,50,.14);grid-template-columns:1.08fr .92fr}
+.login-side{padding:52px;background:#172d32}
+.login-kicker{color:#8ed0b7;font-size:9px;letter-spacing:.2em}
+.login-title{font-size:31px;letter-spacing:-.04em}
+.login-subtitle{max-width:350px;color:rgba(255,255,255,.72);font-size:12px}
+.login-subnote{max-width:330px;color:rgba(255,255,255,.58);font-size:12px}
+.login-chips{gap:7px;margin-top:24px}
+.login-side .chip{padding:6px 9px;border-radius:6px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);font-size:10px}
+.login-bullets{margin-top:28px}
+.login-bullets li{padding:13px 0;border-color:rgba(255,255,255,.14)}
+.login-main{padding:52px 48px;background:#fff}
+.login-main-kicker{color:#19735e;font-size:9px;letter-spacing:.18em}
+.login-main-title{font-size:27px;letter-spacing:-.04em}
+.login-main-sub{color:#718187;font-size:12px}
+.login-form{gap:14px}
+.login-form .field input,.login-form .field select{min-height:44px;border-radius:8px}
+.login-form .btn{min-height:44px;border-radius:8px}
+.login-hint{border-color:#dce7e3;background:#f5f8f6}
+#app .topbar{background:#172d32;border-bottom:0}
+#app .topbar-inner{min-height:74px}
+#app .container{margin-top:30px}
+#app .panel{border-radius:12px;box-shadow:0 8px 24px rgba(23,45,50,.06)}
+#app .panel-head{padding:24px 26px 20px}
+#app .section-title{font-size:28px}
+#app .section-note{max-width:210px}
+#app .filters-compact{padding:14px;border-radius:9px}
+#app .filter-row{margin-top:14px}
+#app .summary{margin-top:16px}
+#app .summary-card{min-height:124px;border-radius:9px}
+#app .table th{padding:12px 13px}
+#app .table td{padding:14px 13px}
+#app .panel-events{margin-top:20px}
+#app .panel-head-compact{padding:17px 21px}
+#app .events{padding:16px 21px 19px}
+#app .fab{right:26px;bottom:22px}
+@media(max-width:920px){
+  .login-card{grid-template-columns:1fr}
+  .login-side{padding:36px}
+  .login-main{padding:36px}
+}
+@media(max-width:560px){
+  .login{padding:12px}
+  .login-side,.login-main{padding:28px 24px}
+  .login-title{font-size:26px}
+  #app .container{margin-top:16px}
+  #app .panel-head{padding:18px 15px}
+  #app .section-title{font-size:24px}
+}
