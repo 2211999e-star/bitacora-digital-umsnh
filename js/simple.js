@@ -1812,17 +1812,10 @@ function showAppForUser(user) {
 
   ensureProfileDefaults(user);
 
-  // Defaults: rango del mes actual
-  const now = new Date();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const y = now.getFullYear();
-  const month = `${y}-${m}`;
-  if (els.filterMonth) els.filterMonth.value = month;
-  const r = setMonthToRange(month);
-  if (r) {
-    if (els.filterStart) els.filterStart.value = r.start;
-    if (els.filterEnd) els.filterEnd.value = r.end;
-  }
+  // Inicio sin filtros: todo lo cargado queda visible desde el primer acceso.
+  if (els.filterMonth) els.filterMonth.value = '';
+  if (els.filterStart) els.filterStart.value = '';
+  if (els.filterEnd) els.filterEnd.value = '';
 
   render();
 }
