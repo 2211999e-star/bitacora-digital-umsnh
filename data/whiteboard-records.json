@@ -1,0 +1,156 @@
+{
+  "source": "pizarron-2026-09-29",
+  "source_images": ["mantenimiento-julio-1", "mantenimiento-julio-2"],
+  "records": [
+    {
+      "id": "julio-2026-01",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "Laptop Dell: formateo",
+      "action_detail": "Mantenimiento de julio",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-02",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "CPU Lenovo 00211940: formateo y limpieza",
+      "action_detail": "Mantenimiento de julio",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-03",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "Antena AIV 12",
+      "action_detail": "Mantenimiento de julio",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-04",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Antenas de posgrado: Gera y Luis",
+      "action_detail": "Urgente",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-05",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "Traer base de antenas de salon 12, instalar antena de computo A4 e instalar CPU",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-06",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "Cambio de cable, salon 10",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-07",
+      "date": "2026-07-01",
+      "status": "completado",
+      "desc": "2 monitores: Miguel y Benja",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-08",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Antenas 15 y 16, antena Z15",
+      "action_detail": "Urgente. Kevin y Yair",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-09",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Configurar canon A4-2, salon 2",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "julio-2026-10",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Instalacion de CPU, salon 10 A4",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "pendiente-2026-07-bitacora",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Bitacora",
+      "action_detail": "Urgente. Kevin",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "pendiente-2026-07-lab-2",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Formateo de laboratorio 2",
+      "assigned_to": "Yair",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "pendiente-2026-07-lab-6",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Formateo de laboratorio 6, edificio Y",
+      "assigned_to": "Luis, Gera, Miguel y Benja",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "pendiente-2026-07-ip-edificio-y",
+      "date": "2026-07-01",
+      "status": "pendiente",
+      "desc": "Asignacion de IP, edificio Y",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "tablero-2026-04-13-impresora-chulada",
+      "date": "2026-04-13",
+      "status": "completado",
+      "desc": "Impresora Chulada",
+      "action_detail": "Mantenimiento",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "tablero-2026-04-16-impresora-hp",
+      "date": "2026-04-16",
+      "status": "completado",
+      "desc": "Impresora HP de la academia",
+      "action_detail": "Mantenimiento y fallas",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "tablero-2026-06-15-cpu-hp",
+      "date": "2026-06-15",
+      "status": "completado",
+      "desc": "CPU HP MXJ9460832",
+      "action_detail": "Cambio de disco y mantenimiento. Coordinacion de Mercadotecnia",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "tablero-2026-09-02-servicio-social",
+      "date": "2026-09-02",
+      "status": "pendiente",
+      "desc": "Servicio social",
+      "action_detail": "Python y teclado",
+      "source": "pizarron-2026-09-29"
+    },
+    {
+      "id": "tablero-2026-09-bitacora-correctivo",
+      "date": "2026-09-29",
+      "status": "completado",
+      "desc": "Creacion de bitacora de mantenimiento preventivo y correctivo",
+      "assigned_to": "Kevin",
+      "source": "pizarron-2026-09-29"
+    }
+  ],
+  "needs_review": [
+    "Falla de Ubuntu y la fecha exacta no se distinguen completamente en la fotografia.",
+    "Los nombres de algunos laboratorios y modelos de impresora requieren confirmacion visual."
+  ]
+}

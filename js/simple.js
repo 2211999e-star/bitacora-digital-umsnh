@@ -2,7 +2,7 @@ const STORAGE_KEY = 'bitacora_simple_v1_records';
 const USER_KEY = 'bitacora_simple_v1_user';
 const PROFILE_KEY_PREFIX = 'bitacora_simple_v1_profile_';
 const EVENTS_KEY = 'bitacora_simple_v1_events';
-const SEED_KEY = 'bitacora_simple_v1_julio_seed';
+const SEED_KEY = 'bitacora_simple_v1_whiteboard_seed_v2';
 
 const JULY_NOTES = [
   ['Laptop Dell: formateo', 'completado'],
@@ -21,6 +21,14 @@ const JULY_NOTES = [
   ['Formateo de laboratorio 6, edificio Y: Luis, Miguel, Gerardo, Miguel y Benja', 'pendiente'],
   ['Formateo de laboratorio 2: Yair', 'pendiente'],
   ['Bitácora: urgente, Kevin', 'pendiente'],
+];
+
+const ARCHIVE_NOTES = [
+  ['tablero-2026-04-13-impresora-chulada', '2026-04-13', 'Impresora Chulada', 'Mantenimiento', 'completado'],
+  ['tablero-2026-04-16-impresora-hp', '2026-04-16', 'Impresora HP de la academia', 'Mantenimiento y fallas', 'completado'],
+  ['tablero-2026-06-15-cpu-hp', '2026-06-15', 'CPU HP MXJ9460832', 'Cambio de disco y mantenimiento. Coordinación de Mercadotecnia', 'completado'],
+  ['tablero-2026-09-02-servicio-social', '2026-09-02', 'Servicio social', 'Python y teclado', 'pendiente'],
+  ['tablero-2026-09-bitacora-correctivo', '2026-09-29', 'Creación de bitácora de mantenimiento preventivo y correctivo', 'Kevin', 'completado'],
 ];
 
 const USERS = {
@@ -69,9 +77,8 @@ function clearCurrentUser() {
 }
 
 function seedJulyNotes() {
-  if (localStorage.getItem(SEED_KEY) || localStorage.getItem(STORAGE_KEY)) return;
   const now = new Date().toISOString();
-  const records = JULY_NOTES.map(([desc, status], index) => ({
+  const initialRecords = JULY_NOTES.map(([desc, status], index) => ({
     id: `julio-2026-${String(index + 1).padStart(2, '0')}`,
     created_at: now,
     updated_at: now,
@@ -91,7 +98,30 @@ function seedJulyNotes() {
     assigned_to: '',
     completed_at: status === 'completado' ? now : null,
   }));
-  saveRecords(records);
+  const archiveRecords = ARCHIVE_NOTES.map(([id, date, desc, action_detail, status]) => ({
+    id,
+    created_at: now,
+    updated_at: now,
+    updated_by: 'Iván',
+    created_by: 'Iván Fernández Mandujano',
+    date,
+    status,
+    desc,
+    action_detail,
+    equipment_type: '',
+    inventory_number: '',
+    maintenance_type: '',
+    maintenance_detail: '',
+    serial_number: '',
+    location: '',
+    area: 'Comisión Académica de Servicios Informáticos',
+    assigned_to: status === 'completado' && id.includes('bitacora') ? 'Kevin' : '',
+    completed_at: status === 'completado' ? now : null,
+  }));
+  const existing = loadRecords();
+  const knownIds = new Set(existing.map((record) => record.id));
+  const missing = [...initialRecords, ...archiveRecords].filter((record) => !knownIds.has(record.id));
+  if (missing.length) saveRecords([...existing, ...missing]);
   localStorage.setItem(SEED_KEY, '1');
 }
 
