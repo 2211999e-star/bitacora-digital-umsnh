@@ -6,7 +6,7 @@
   <title>Bitácora Digital | Mantenimiento UMSNH</title>
   <meta name="theme-color" content="#123f46" />
   <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
-  <link rel="stylesheet" href="./css/simple.css?v=37" />
+  <link rel="stylesheet" href="./css/simple.css?v=38" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -217,7 +217,7 @@
     <!-- Acciones rápidas (burbuja lateral fija) -->
     <div class="fab" id="fab" aria-label="Acciones rápidas">
       <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-expanded="false">
-        Acciones ▾
+        Acciones rápidas <span aria-hidden="true">⌄</span>
       </button>
       <div class="fab-menu" id="fab-menu" hidden>
         <button class="fab-item fab-item-primary" type="button" id="btn-new">Nueva Actividad</button>
@@ -447,7 +447,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=37"></script>
+  <script type="module" src="./js/simple.js?v=38"></script>
 
   <script>
     // Service Worker (opcional)
@@ -455,7 +455,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=37').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=38').catch(() => {});
       } catch {}
     })();
   </script>

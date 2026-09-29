@@ -1407,3 +1407,37 @@ body{
   #app .filter-actions{width:100%}
   #app .fab{right:12px;bottom:12px}
 }
+
+/* -------- Encabezado y acciones principales -------- */
+#app .topbar{background:rgba(255,255,255,.98);box-shadow:0 4px 18px rgba(32,53,58,.08)}
+#app .topbar-inner{min-height:72px;grid-template-columns:minmax(400px,1fr) auto auto;gap:28px}
+#app .brand-logos--bar{height:42px;padding:5px 14px 5px 0;border-right:1px solid #d9e6e6}
+#app .brand-logo--umich{max-width:76px}
+#app .brand-logo--fcca{max-width:106px}
+#app .brand-kicker{margin-bottom:3px;font-size:8px;letter-spacing:.18em}
+#app .brand-text .title{font-size:16px;letter-spacing:-.015em}
+#app .brand-text .subtitle{margin-top:4px;font-size:10px}
+#app .topnav{padding:4px;background:#f4f8f7;border:1px solid #e0ebea;border-radius:9px;gap:3px}
+#app .navlink{min-height:34px;padding:7px 13px;border-radius:6px;font-size:12px}
+#app .navlink.is-active{background:#fff;border-color:#cfe4df;box-shadow:0 2px 5px rgba(32,53,58,.06)}
+#app .userchip{min-height:38px;padding:8px 11px;border-radius:8px;font-size:12px}
+#app .fab{right:28px;bottom:24px;align-items:flex-end}
+#app .fab-btn{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:11px 16px;border-radius:9px;background:#176b63;font-size:12px;box-shadow:0 8px 20px rgba(23,107,99,.24)}
+#app .fab-btn span{font-size:16px;line-height:10px;opacity:.8}
+#app .fab-btn:hover{background:#12564f;box-shadow:0 10px 24px rgba(23,107,99,.3);transform:translateY(-2px)}
+#app .fab-menu{margin-bottom:2px;border-radius:10px;box-shadow:0 14px 32px rgba(32,53,58,.16)}
+@media(max-width:1080px){
+  #app .topbar-inner{grid-template-columns:1fr auto;gap:14px}
+  #app .topnav{grid-column:1/-1;grid-row:2;justify-self:start}
+}
+@media(max-width:640px){
+  #app .topbar-inner{gap:10px}
+  #app .brand-logos--bar{height:34px;padding-right:8px}
+  #app .brand-logo--umich{max-width:58px}
+  #app .brand-logo--fcca{max-width:78px}
+  #app .brand-text .title{font-size:13px}
+  #app .brand-text .subtitle{font-size:9px;max-width:230px}
+  #app .topnav{width:100%;justify-content:flex-start}
+  #app .fab{right:14px;bottom:14px}
+  #app .fab-btn{min-height:42px;padding:10px 13px}
+}
