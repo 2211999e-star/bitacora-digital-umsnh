@@ -336,11 +336,11 @@ function formatDateHuman(dateISO) {
 
 function downloadHTML(filename, html) {
   const safeName = (filename || 'reporte').replace(/[\\/:*?"<>|]+/g, '_');
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = safeName.endsWith('.html') ? safeName : `${safeName}.html`;
+  a.download = safeName.endsWith('.xls') ? safeName : `${safeName}.xls`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -1040,18 +1040,18 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   <title>Reporte Bitácora</title>
   <style>
     ${pageCSS}
-    body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
+    body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a;background:#fff}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #cfe0df;border-left:6px solid #176b63;border-radius:8px;padding:16px;background:#f3f7f6}
     .logos{display:flex;align-items:center;gap:12px}
     .logos img{height:38px;width:auto;max-width:160px;object-fit:contain}
-    .h-title{font-weight:900;font-size:18px}
-    .h-sub{color:#444;margin-top:4px;font-size:12px}
+    .h-title{font-weight:900;font-size:20px;color:#12564f}
+    .h-sub{color:#587075;margin-top:5px;font-size:12px}
     .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .tag{border:1px solid #ddd;background:#f7f7f7;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+    .tag{border:1px solid #cfe0df;background:#e9f2f0;border-radius:5px;padding:6px 10px;font-size:11px;font-weight:800;color:#176b63}
     table{width:100%;border-collapse:collapse;margin-top:14px;table-layout:fixed}
-    th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
-    th{background:#f2f2f2;font-size:12px;color:#333}
-    tbody tr:nth-child(even){background:#fafafa}
+    th,td{border:1px solid #dce7e8;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
+    th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    tbody tr:nth-child(even){background:#f7faf9}
     thead{display:table-header-group}
     tr{break-inside:avoid;page-break-inside:avoid}
     td:nth-child(1),td:nth-child(7){white-space:nowrap}
@@ -1059,10 +1059,10 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
     .meta{margin-top:10px;font-size:12px;color:#333}
     .meta b{color:#111}
     .footer{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .sig{border:1px dashed #bbb;border-radius:12px;padding:12px}
+    .sig{border:1px dashed #9fb9b7;border-radius:8px;padding:12px;background:#fbfdfc}
     .sig-line{margin-top:32px;border-top:2px solid #111;padding-top:8px;font-weight:900}
     .sig-meta{font-size:12px;color:#333;margin-top:2px}
-    @media print{body{margin:0}.logos img{height:32px;max-width:140px}}
+    @media print{body{margin:0}.logos img{height:32px;max-width:140px}.header{break-inside:avoid}}
   </style>
 </head>
 <body>
@@ -1151,17 +1151,24 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
 
 function exportEventsExcel() {
   const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
-  const rows = [
-    ['Fecha', 'Evento', 'Notas', 'Registrado'],
-    ...events.map((event) => [
-      event.date || '',
-      event.title || '',
-      event.notes || '',
-      event.created_at ? formatDateHuman(event.created_at) : '',
-    ]),
-  ];
-  downloadCSV(`bitacora_eventos_${todayISO()}`, rows);
-  toast('Eventos exportados por separado.');
+  const rows = events.map((event) => `
+    <tr>
+      <td>${escapeHtml(formatDateHuman(event.date))}</td>
+      <td><strong>${escapeHtml(event.title || '—')}</strong></td>
+      <td>${escapeHtml(event.notes || '—')}</td>
+      <td>${escapeHtml(event.created_at ? formatDateHuman(event.created_at) : '—')}</td>
+    </tr>
+  `).join('');
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Eventos · Bitácora Digital</title>
+    <style>
+      body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a}
+      .header{border-left:6px solid #176b63;border:1px solid #cfe0df;border-left-width:6px;border-radius:8px;padding:16px;background:#f3f7f6}
+      h1{margin:0;color:#12564f;font-size:20px}p{margin:5px 0 0;color:#587075;font-size:12px}
+      table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #dce7e8;padding:10px;text-align:left;vertical-align:top}th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}tbody tr:nth-child(even){background:#f7faf9}
+    </style></head><body><div class="header"><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p></div>
+    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th><th>Registrado</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`;
+  downloadHTML(`bitacora_eventos_${todayISO()}`, html);
+  toast('Eventos exportados a Excel por separado.');
 }
 
 function printEvents() {
