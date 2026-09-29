@@ -184,3 +184,19 @@ button,input,select,textarea{font-family:inherit}
 @media(max-width:640px){
   #app main>.panel .panel-head{border-radius:8px 8px 0 0}
 }
+
+/* App only: quitar la masa de color del contenido y recuperar claridad. */
+#app main>.panel .panel-head{background:#fff;color:#25363a;border:1px solid #dce5e1;border-radius:10px;box-shadow:0 6px 18px rgba(37,54,58,.06)}
+#app main>.panel .panel-head::after{display:none}
+#app main>.panel .section-title{color:#25363a}
+#app main>.panel .section-note{color:#718187}
+#app main>.panel .eyebrow{color:#21806a}
+#app main>.panel .section-heading>div:first-child::before{background:#dc7555}
+#app main>.panel .filters-compact{background:#f4f7f5;border-color:#dce5e1;backdrop-filter:none}
+#app main>.panel .field{color:#5e7376}
+#app main>.panel .field input,#app main>.panel .field select,#app main>.panel .field textarea{border-color:#ccd9d5;background:#fff;color:#25363a}
+#app main>.panel .filter-row{border-top-color:#dce5e1}
+#app main>.panel .tab{background:#fff;border-color:#d6e1dd;color:#5d7175}
+#app main>.panel .tab.is-active{color:#fff;background:#21806a;border-color:#21806a}
+#app main>.panel .filter-actions .btn-ghost{color:#52676a;background:#fff;border-color:#d2dfdb}
+#app main>.panel .filter-actions .btn-ghost:hover{color:#145d50;background:#eaf3ef}
