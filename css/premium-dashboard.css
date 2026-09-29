@@ -1,0 +1,91 @@
+:root{
+  --premium-bg:#f5f1ea;
+  --premium-panel:#fffdf9;
+  --premium-panel-strong:#f2eee7;
+  --premium-ink:#1d2a2d;
+  --premium-muted:#697a7d;
+  --premium-line:#e6dccd;
+  --premium-olive:#4a6d5a;
+  --premium-olive-deep:#2f4b41;
+  --premium-gold:#c89b45;
+  --premium-gold-soft:#f6edd8;
+  --premium-coral:#d86a4d;
+  --premium-coral-soft:#fbeae3;
+  --premium-sage:#dfe7d9;
+  --premium-shadow:0 18px 44px rgba(33, 40, 36, 0.10);
+}
+
+#app{background:var(--premium-bg);color:var(--premium-ink)}
+#app .topbar{background:#f8f3ee;border-bottom:1px solid var(--premium-line);box-shadow:none}
+#app .topbar-inner{width:min(1400px,calc(100% - 46px));min-height:84px;padding:12px 0}
+#app .brand{background:linear-gradient(135deg,#2b473f 0%,#1d312d 100%);border:1px solid rgba(255,255,255,.14);box-shadow:var(--premium-shadow)}
+#app .brand::after{display:none}
+#app .brand-logo--umich,#app .brand-logo--fcca{filter:drop-shadow(0 3px 6px rgba(0,0,0,.12))}
+#app .brand-kicker{color:#d9c592;font-size:8px;letter-spacing:.18em}
+#app .brand-text .title{color:#fff;font-size:15px;letter-spacing:-.015em}
+#app .brand-text .subtitle{color:rgba(255,255,255,.72);font-size:10px}
+#app .topnav{background:#f1ede7;border-color:#e2d9cf;border-radius:12px;padding:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+#app .navlink{border-radius:10px;padding:10px 14px;font-weight:800;color:#5f6a67}
+#app .navlink.is-active{background:linear-gradient(135deg,#2d584c 0%,#3d6f5f 100%);color:#fff;box-shadow:0 8px 18px rgba(45,88,76,.16)}
+#app .navlink.is-active .nav-icon{background:rgba(255,255,255,.18);color:#fff}
+#app .nav-icon{background:#f7f2ee;color:#35564f}
+#app .userchip{background:#fff;border-color:#e6dccd;border-radius:11px;color:#364a4a;box-shadow:0 4px 10px rgba(29,42,45,.04)}
+#app .userchip-dot{background:#4a6d5a}
+#app .container{width:min(1400px,calc(100% - 42px));margin:28px auto 72px}
+#app main>.panel .panel-head{background:linear-gradient(135deg,#f9f3ee 0%,#f3eee7 100%);border:1px solid var(--premium-line);border-radius:14px 14px 0 0;color:var(--premium-ink);box-shadow:none}
+#app main>.panel .panel-head::after{display:none}
+#app main>.panel .eyebrow{color:var(--premium-olive);font-weight:900}
+#app main>.panel .section-title{color:var(--premium-ink);font-size:34px;letter-spacing:-.04em}
+#app main>.panel .section-note{color:var(--premium-muted)}
+#app main>.panel .filters-compact{background:#fbf8f4;border:1px solid var(--premium-line);border-radius:12px;padding:16px}
+#app main>.panel .field{color:#587171;font-size:12px;line-height:1.35}
+#app main>.panel .field input,#app main>.panel .field select,#app main>.panel .field textarea{border:1px solid #d9d0c3;border-radius:10px;background:#fff;box-shadow:inset 0 1px 1px rgba(0,0,0,.02)}
+#app main>.panel .tab{background:#fff;border:1px solid var(--premium-line);color:#5f6b6a;border-radius:9px}
+#app main>.panel .tab.is-active{background:var(--premium-olive);color:#fff;border-color:var(--premium-olive)}
+#app main>.panel .filter-actions .btn-ghost{background:#fff;border:1px solid var(--premium-line);color:#364a4a;border-radius:9px}
+#app main>.panel .filter-actions .btn-ghost:hover{background:#f6f0e9}
+#app .summary{gap:14px;margin-top:18px}
+#app .summary-card{background:linear-gradient(145deg,#fffdfb 0%,#f8f4ee 100%);border:1px solid var(--premium-line);border-left:4px solid var(--premium-olive);border-radius:12px;box-shadow:0 10px 24px rgba(30,38,35,.04)}
+#app .summary-card:first-child{border-left-color:var(--premium-olive)}
+#app .summary-card:nth-child(2){border-left-color:var(--premium-coral);background:linear-gradient(145deg,#fffdfb 0%,#fdf3ee 100%)}
+#app .summary-card:nth-child(3){border-left-color:var(--premium-gold);background:linear-gradient(145deg,#fffdfb 0%,#fbf6ea 100%)}
+#app .summary-big{font-size:42px;letter-spacing:-.05em}
+#app .summary-k{font-size:12px;color:var(--premium-muted)}
+#app .summary-v{font-size:16px}
+#app .table-wrap{background:#fff;border:1px solid var(--premium-line);border-radius:12px;overflow:hidden;box-shadow:0 12px 24px rgba(30,38,35,.04)}
+#app .table th{background:#f6f0e7;color:#4d5d5c;font-size:10px;letter-spacing:.08em}
+#app .table td{color:#40565a;padding:14px 12px}
+#app .table tbody tr{background:transparent}
+#app .table tbody tr:hover{background:#faf6f1;box-shadow:inset 4px 0 0 var(--premium-olive)}
+#app .badge.ok{background:#e6f1eb;border-color:#cfe2d9;color:#2d604b}
+#app .badge.todo{background:#fbeae3;border-color:#efc7b3;color:#b36448}
+#app .panel-events{background:#fff;border:1px solid var(--premium-line);border-radius:12px;padding:0 18px;box-shadow:0 12px 24px rgba(30,38,35,.04)}
+#app .panel-head-compact{background:transparent;border:0;padding:18px 0 10px}
+#app .events{padding:0 0 18px}
+#app .event-item{background:#faf7f3;border:1px solid var(--premium-line);border-left:4px solid var(--premium-gold);border-radius:10px;padding:14px 16px;box-shadow:none}
+#app .event-item::before{display:none}
+#app .fab-btn{background:linear-gradient(135deg,#c98d4d,#b76a34);color:#fff;border-radius:12px;box-shadow:0 14px 26px rgba(184,106,52,.22)}
+#app .fab-btn:hover{background:linear-gradient(135deg,#b77d38,#a75d2b)}
+#app .fab-menu{background:#fff;border:1px solid var(--premium-line);border-radius:12px;box-shadow:0 18px 32px rgba(30,38,35,.12)}
+#app .fab-item{border-radius:10px;min-height:38px;background:#f7f3ee;color:#42575b}
+#app .fab-item-primary{background:linear-gradient(135deg,#2d584c,#3a6d5e);color:#fff;border-color:transparent}
+#app .fab-section summary{color:#2d584c;font-weight:900;letter-spacing:.08em}
+#app .fab-section-items .fab-item{background:#f9f6f2}
+#app .modal-card{border:1px solid var(--premium-line);border-radius:14px;box-shadow:var(--premium-shadow)}
+#app .modal-head{background:#f8f3ee;border-bottom:1px solid var(--premium-line)}
+#app .modal-title{color:var(--premium-ink)}
+#app .modal-actions{padding-top:12px;padding-bottom:12px}
+#app .icon-btn{border-radius:8px}
+
+@media(max-width:900px){
+  #app .topbar-inner{width:calc(100% - 24px)}
+  #app .container{width:calc(100% - 24px)}
+}
+
+@media(max-width:640px){
+  #app .topbar-inner{padding:10px 0}
+  #app .brand{width:100%}
+  #app .topnav{width:100%}
+  #app main>.panel .section-title{font-size:28px}
+  #app .table th,#app .table td{font-size:12px}
+}
