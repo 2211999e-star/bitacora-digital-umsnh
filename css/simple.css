@@ -1624,6 +1624,37 @@ body{
   #app .table-wrap{margin-top:14px}
 }
 
+/* -------- Cabecera con identidad y navegacion separadas -------- */
+#app .topbar{background:#f5f7f5;border-bottom:1px solid #dce5e1;box-shadow:none}
+#app .topbar-inner{min-height:86px;width:min(1320px,calc(100% - 48px));padding:14px 0;gap:14px}
+#app .brand{min-height:58px;padding:8px 16px;border-radius:8px;background:#213f40;gap:13px;box-shadow:0 6px 16px rgba(33,63,64,.13)}
+#app .brand-logos--bar{height:40px;padding-right:12px;border-color:rgba(255,255,255,.2)}
+#app .brand-logo--umich{max-width:70px}
+#app .brand-logo--fcca{max-width:96px}
+#app .brand-text .title{color:#fff;font-size:15px}
+#app .brand-kicker{color:#9ed5c4;font-size:8px}
+#app .brand-text .subtitle{color:rgba(255,255,255,.68);font-size:10px}
+#app .topnav{padding:5px;background:#fff;border:1px solid #dce5e1;border-radius:8px;box-shadow:0 3px 10px rgba(31,48,53,.04)}
+#app .navlink{color:#617579;border-radius:5px}
+#app .navlink.is-active{color:#145d50;background:#e3f0eb;border-color:#c4ded3;box-shadow:none}
+#app .userchip{min-height:40px;color:#213f40;background:#fff;border:1px solid #dce5e1;border-radius:8px;box-shadow:0 3px 10px rgba(31,48,53,.04)}
+#app .userchip-dot{background:#197464;box-shadow:0 0 0 4px rgba(25,116,100,.12)}
+@media(max-width:1080px){
+  #app .topbar-inner{min-height:0}
+  #app .brand{min-width:0}
+  #app .topnav{grid-column:1/-1;grid-row:2;justify-self:start}
+}
+@media(max-width:640px){
+  #app .topbar-inner{width:calc(100% - 20px);padding:10px 0;gap:8px}
+  #app .brand{width:100%;padding:7px 10px;border-radius:7px}
+  #app .brand-logos--bar{height:32px;padding-right:8px}
+  #app .brand-logo--umich{max-width:54px}
+  #app .brand-logo--fcca{max-width:74px}
+  #app .brand-text .title{font-size:13px}
+  #app .brand-text .subtitle{font-size:9px}
+  #app .topnav{width:100%;justify-content:flex-start}
+}
+
 /* -------- Legibilidad y claridad -------- */
 #app{font-size:14px}
 #app .brand-text .title{font-size:16px;line-height:1.25}
