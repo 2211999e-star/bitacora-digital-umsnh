@@ -448,6 +448,7 @@ const els = {
   // Burbuja lateral (acciones rápidas)
   fabToggle: document.getElementById('fab-toggle'),
   fabMenu: document.getElementById('fab-menu'),
+  fabClose: document.getElementById('fab-close'),
 
   tabButtons: Array.from(document.querySelectorAll('.tab')),
   countAll: document.getElementById('count-all'),
@@ -1626,6 +1627,10 @@ els.fabToggle?.addEventListener('click', (e) => {
   e.preventDefault();
   e.stopPropagation();
   toggleFabMenu();
+});
+els.fabClose?.addEventListener('click', () => {
+  closeFabMenu();
+  els.fabToggle?.focus();
 });
 
 document.addEventListener('click', (e) => {

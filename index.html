@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=6" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=7" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -218,26 +218,41 @@
 
     <!-- Acciones rápidas (burbuja lateral fija) -->
     <div class="fab" id="fab" aria-label="Acciones rápidas">
-      <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-expanded="false">
+      <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-controls="fab-menu" aria-expanded="false">
         Acciones rápidas <span aria-hidden="true">⌄</span>
       </button>
-      <div class="fab-menu" id="fab-menu" hidden>
-        <button class="fab-item fab-item-primary" type="button" id="btn-new"><span class="action-symbol" aria-hidden="true">+</span>Nueva actividad</button>
-        <button class="fab-item" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span>Captura rápida</button>
-        <button class="fab-item" type="button" id="btn-print"><span class="action-symbol" aria-hidden="true">▤</span>Imprimir actividades</button>
-        <button class="fab-item" type="button" id="btn-print-landscape"><span class="action-symbol" aria-hidden="true">▤</span>Imprimir horizontal</button>
+      <div class="fab-menu" id="fab-menu" role="group" aria-label="Atajos para registro e impresión" hidden>
+        <div class="fab-menu-head">
+          <div>
+            <div class="fab-menu-title">Atajos rápidos</div>
+            <div class="fab-menu-subtitle">Registro y reportes</div>
+          </div>
+          <button class="fab-close" type="button" id="fab-close" aria-label="Cerrar acciones rápidas">×</button>
+        </div>
+
+        <div class="fab-menu-group">
+          <div class="fab-menu-label">REGISTRO</div>
+          <div class="fab-action-grid">
+            <button class="fab-item fab-item-primary" type="button" id="btn-new"><span class="action-symbol" aria-hidden="true">+</span><span>Nueva actividad</span></button>
+            <button class="fab-item" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span><span>Captura rápida</span></button>
+          </div>
+        </div>
+
+        <div class="fab-menu-group">
+          <div class="fab-menu-label">IMPRIMIR ACTIVIDADES</div>
+          <div class="fab-action-grid fab-print-grid">
+            <button class="fab-item fab-item-print" type="button" id="btn-print"><span class="action-symbol" aria-hidden="true">▤</span><span>Vertical</span></button>
+            <button class="fab-item fab-item-print" type="button" id="btn-print-landscape"><span class="action-symbol" aria-hidden="true">▤</span><span>Horizontal</span></button>
+          </div>
+        </div>
+
         <details class="fab-section">
-          <summary>Reportes</summary>
+          <summary>Exportar y reportes</summary>
           <div class="fab-section-items">
             <button class="fab-item" type="button" id="btn-export">Excel · actividades</button>
+            <button class="fab-item" type="button" id="btn-export-landscape">Excel · actividades horizontal</button>
             <button class="fab-item" type="button" id="btn-export-events">Excel · eventos</button>
             <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
-          </div>
-        </details>
-        <details class="fab-section">
-          <summary>Más formatos</summary>
-          <div class="fab-section-items">
-            <button class="fab-item" type="button" id="btn-export-landscape">Excel · horizontal</button>
           </div>
         </details>
         <details class="fab-section">
@@ -460,7 +475,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=60"></script>
+  <script type="module" src="./js/simple.js?v=61"></script>
 
   <script>
     // Service Worker (opcional)
@@ -468,7 +483,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=63').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=64').catch(() => {});
       } catch {}
     })();
   </script>
