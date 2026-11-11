@@ -446,12 +446,15 @@ function renderSummary(allRecords) {
       </div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Análisis Teórico de Estados</div>
-      <div class="analysis">
-        <b>Definición de Pendiente:</b> Actividad programada sin confirmar.<br>
-        <b>Definición de Realizada:</b> Actividad confirmada con registro.<br>
-        <b>Completar:</b> Cambia el estado y registra fecha/hora.
+      <div class="summary-k">Avance del periodo</div>
+      <div class="summary-progress">
+        <strong>${donePct}%</strong>
+        <span class="summary-progress-track" role="progressbar" aria-label="Avance de actividades realizadas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${donePct}">
+          <span class="summary-progress-fill" style="width:${donePct}%"></span>
+        </span>
       </div>
+      <div class="summary-v small">${s.done} de ${s.all} actividades realizadas</div>
+      <div class="summary-v small">${s.pend} pendientes por atender</div>
       <div class="summary-v small">Filtro actual: <b>${escapeHtml(status || 'todas')}</b></div>
     </div>
     <div class="summary-card">

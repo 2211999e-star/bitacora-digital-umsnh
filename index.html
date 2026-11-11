@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bitácora Digital - Actividades</title>
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="stylesheet" href="./css/simple.css?v=20" />
+  <meta name="theme-color" content="#eaf4fc" />
+  <link rel="stylesheet" href="./css/simple.css?v=21" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -14,27 +14,25 @@
   <section class="login" id="login" hidden>
     <div class="login-card">
       <div class="login-side">
-        <div class="login-title">Bitácora Digital</div>
-        <div class="login-subtitle">UMSNH · Comisión Académica de Servicios Informáticos</div>
-        <div class="login-subnote">Inicio local (se guarda en este navegador).</div>
-
-        <div class="login-chips" aria-label="Información rápida">
-          <span class="chip">Iván: Coordinador</span>
-          <span class="chip">Kevin: Servicio</span>
-          <span class="chip chip-muted" id="login-now">—</span>
+        <div class="login-brand">
+          <span class="login-mark" aria-hidden="true">B</span>
+          <span>UMSNH · Servicios Informáticos</span>
         </div>
+        <div class="login-title">Bitácora <span>Digital</span></div>
+        <div class="login-subtitle">Todo el mantenimiento de tu comisión, registrado y a la vista.</div>
+        <div class="login-subnote">UMSNH · Comisión Académica de Servicios Informáticos</div>
 
-        <ul class="login-bullets" aria-label="Funciones">
-          <li>Guardar actividades</li>
-          <li>Marcar realizadas</li>
-          <li>Exportar a Excel</li>
-          <li>Imprimir por rango</li>
-        </ul>
+        <div class="login-chips" aria-label="Funciones principales">
+          <span class="chip">Registro centralizado</span>
+          <span class="chip">Seguimiento claro</span>
+          <span class="chip">Reportes por periodo</span>
+        </div>
+        <span class="visually-hidden" id="login-now">—</span>
       </div>
 
       <div class="login-main">
-        <div class="login-main-title">Iniciar sesión</div>
-        <div class="login-main-sub">Elige tu usuario y entra.</div>
+        <div class="login-main-title">Inicia sesión</div>
+        <div class="login-main-sub">Elige tu usuario para continuar.</div>
 
         <form id="login-form" class="login-form">
           <label class="field">
@@ -58,7 +56,7 @@
           <button class="btn" type="submit">Entrar</button>
 
           <details class="login-hint">
-            <summary>Ver contraseña</summary>
+            <summary>Ver contraseña de demostración</summary>
             <div>Contraseña: <code>123456789</code></div>
           </details>
         </form>
@@ -108,6 +106,14 @@
       <!-- Encabezado para impresión -->
       <section class="print-header" id="print-header" hidden aria-hidden="true"></section>
       <section class="print-footer" id="print-footer" hidden aria-hidden="true"></section>
+
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <div class="eyebrow">Control de mantenimiento</div>
+          <h1 id="page-title">Actividades registradas</h1>
+        </div>
+        <p>Filtra, consulta y prepara tus reportes.</p>
+      </section>
 
       <section class="panel">
         <div class="panel-head">
@@ -337,7 +343,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=20"></script>
+  <script type="module" src="./js/simple.js?v=21"></script>
 
   <script>
     // Service Worker (opcional)
@@ -345,7 +351,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=20').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=21').catch(() => {});
       } catch {}
     })();
   </script>
