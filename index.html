@@ -170,7 +170,8 @@
               <tr>
                 <th>Fecha</th>
                 <th>Actividad</th>
-                <th>Equipo / mantenimiento</th>
+                <th>Equipo</th>
+                <th>Mantenimiento (preventivo/correctivo)</th>
                 <th>Ubicación</th>
                 <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
@@ -180,7 +181,7 @@
               </tr>
             </thead>
             <tbody id="rows">
-              <tr><td colspan="9" class="empty">Sin registros todavía.</td></tr>
+              <tr><td colspan="10" class="empty">Sin registros todavía.</td></tr>
             </tbody>
           </table>
         </div>
@@ -459,7 +460,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=59"></script>
+  <script type="module" src="./js/simple.js?v=60"></script>
 
   <script>
     // Service Worker (opcional)
@@ -467,7 +468,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=62').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=63').catch(() => {});
       } catch {}
     })();
   </script>

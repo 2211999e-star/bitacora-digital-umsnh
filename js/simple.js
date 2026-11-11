@@ -685,7 +685,7 @@ function render() {
 
   if (!els.rows) return;
   if (!list.length) {
-    els.rows.innerHTML = `<tr><td colspan="9" class="empty">Sin registros con esos filtros.</td></tr>`;
+    els.rows.innerHTML = `<tr><td colspan="10" class="empty">Sin registros con esos filtros.</td></tr>`;
     return;
   }
 
@@ -700,8 +700,6 @@ function render() {
       const equipmentParts = [
         ['Tipo', r.equipment_type],
         ['Patrimonio', r.inventory_number],
-        ['Mantenimiento', r.maintenance_type],
-        ['Detalle', r.maintenance_detail],
         ['Serie', r.serial_number],
       ].filter(([, value]) => safeStr(value));
       const equipment = equipmentParts.length
@@ -715,7 +713,8 @@ function render() {
         <tr>
           <td class="td-date" data-label="Fecha">${escapeHtml(formatDateHuman(date))}</td>
           <td class="td-activity" data-label="Actividad">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
-          <td class="td-equipment" data-label="Equipo / mantenimiento">${escapeHtml(equipment)}</td>
+          <td class="td-equipment" data-label="Equipo">${escapeHtml(equipment)}</td>
+          <td class="td-maintenance" data-label="Mantenimiento (preventivo/correctivo)">${escapeHtml(maintenanceSummary(r))}</td>
           <td class="td-location" data-label="Ubicación">${escapeHtml(loc)}</td>
           <td class="td-area" data-label="Comisión Académica">${escapeHtml(area)}</td>
           <td class="td-assigned" data-label="Responsable(s)">${escapeHtml(assigned)}</td>
@@ -761,6 +760,12 @@ function escapeHtml(text) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function maintenanceSummary(record) {
+  const type = safeStr(record?.maintenance_type) || 'Sin especificar';
+  const detail = safeStr(record?.maintenance_detail);
+  return detail ? `${type} · ${detail}` : type;
 }
 
 function updateEquipmentFields() {
@@ -967,10 +972,12 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   const { start, end, status } = getFilters();
   const stats = summarizeRecords(list);
   const hasEquipment = list.some((record) =>
-    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
-      .map(safeStr)
-      .some(Boolean),
+    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
   );
+  const maintenanceCounts = {
+    preventive: list.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'preventivo').length,
+    corrective: list.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'correctivo').length,
+  };
   const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}`;
 
@@ -995,6 +1002,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
           <col style="width:104px">
           <col style="width:auto">
           ${hasEquipment ? '<col style="width:230px">' : ''}
+          <col style="width:150px">
           <col style="width:200px">
           <col style="width:230px">
           <col style="width:210px">
@@ -1005,6 +1013,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
           <col style="width:104px">
           <col style="width:auto">
           ${hasEquipment ? '<col style="width:190px">' : ''}
+          <col style="width:125px">
           <col style="width:170px">
           <col style="width:190px">
           <col style="width:180px">
@@ -1022,10 +1031,9 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
             ${hasEquipment ? `<td>${escapeHtml([
               ['Tipo', r.equipment_type],
               ['Patrimonio', r.inventory_number],
-              ['Mantenimiento', r.maintenance_type],
-              ['Detalle', r.maintenance_detail],
               ['Serie', r.serial_number],
             ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '))}</td>` : ''}
+            <td>${escapeHtml(maintenanceSummary(r))}</td>
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
             <td>${escapeHtml(r.assigned_to || '')}</td>
@@ -1094,6 +1102,8 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <div class="tag">Registros: ${list.length}</div>
       <div class="tag">Pend: ${stats.pend}</div>
       <div class="tag">Real: ${stats.done}</div>
+      <div class="tag">Preventivos: ${maintenanceCounts.preventive}</div>
+      <div class="tag">Correctivos: ${maintenanceCounts.corrective}</div>
     </div>
   </div>
 
@@ -1105,7 +1115,8 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
-        ${hasEquipment ? '<th>Equipo / mantenimiento</th>' : ''}
+        ${hasEquipment ? '<th>Equipo</th>' : ''}
+        <th>Mantenimiento (preventivo/correctivo)</th>
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -1114,7 +1125,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       </tr>
     </thead>
     <tbody>
-      ${rows || `<tr><td colspan=\"${hasEquipment ? 8 : 7}\">Sin registros.</td></tr>`}
+      ${rows || `<tr><td colspan=\"${hasEquipment ? 9 : 8}\">Sin registros.</td></tr>`}
     </tbody>
   </table>
 
@@ -1136,11 +1147,12 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo / mantenimiento'] : []), 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Mantenimiento (preventivo/correctivo)', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
         r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
-        ...(hasEquipment ? [[r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number].map(safeStr).filter(Boolean).join(' · ')] : []),
+        ...(hasEquipment ? [[r.equipment_type, r.inventory_number, r.serial_number].map(safeStr).filter(Boolean).join(' · ')] : []),
+        maintenanceSummary(r),
         r.location || '',
         r.area || '',
         r.assigned_to || '',
@@ -1254,9 +1266,7 @@ function printCurrent({ orientation = 'portrait' } = {}) {
   preparePrintFooter(folio);
   const cleanupOrientation = applyPrintOrientation(orientation);
   const hasEquipment = filteredRecords(loadRecords()).some((record) =>
-    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
-      .map(safeStr)
-      .some(Boolean),
+    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
   );
   document.body.classList.toggle('print-without-equipment', !hasEquipment);
   let cleaned = false;
@@ -1332,6 +1342,11 @@ function preparePrintHeader(folio) {
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const count = filteredRecords(loadRecords()).length;
   const stats = summarizeRecords(filteredRecords(loadRecords()));
+  const filtered = filteredRecords(loadRecords());
+  const maintenanceCounts = {
+    preventive: filtered.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'preventivo').length,
+    corrective: filtered.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'correctivo').length,
+  };
 
   els.printHeader.hidden = false;
   els.printHeader.innerHTML = `
@@ -1359,6 +1374,8 @@ function preparePrintHeader(folio) {
         <span class="tag">Registros: ${count}</span>
         <span class="tag">Pend: ${stats.pend}</span>
         <span class="tag">Real: ${stats.done}</span>
+        <span class="tag">Preventivos: ${maintenanceCounts.preventive}</span>
+        <span class="tag">Correctivos: ${maintenanceCounts.corrective}</span>
       </div>
     </div>
   `;
