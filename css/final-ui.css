@@ -173,7 +173,7 @@ button,input,select,textarea{font-family:inherit}
 #app main>.panel .tab.is-active{color:#fff;background:#23806a;border-color:#23806a}
 #app main>.panel .filter-actions .btn-ghost{color:#52676a;background:#fff;border-color:#d2dfdb}
 #app main>.panel .filter-actions .btn-ghost:hover{color:#145d50;background:#eaf3ef}
-#app .summary-card{background:#fff!important;border-top:0;border-left:4px solid #b5c8c1}
+#app .summary-card{background:#fff;border-top:0;border-left:4px solid #b5c8c1}
 #app .summary-card:first-child{border-left-color:#23806a}
 #app .summary-card:nth-child(2){border-left-color:#d27658}
 #app .summary-card:nth-child(3){border-left-color:#6f91b3}

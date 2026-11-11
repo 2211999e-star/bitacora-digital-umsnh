@@ -445,3 +445,440 @@ body{
   .brand-logo--umich,.brand-logo--fcca{max-width:42px}
   .title{font-size:15px}
 }
+
+/* Blue institutional dashboard from the supplied reference */
+#app{
+  min-height:100vh;
+  background:
+    radial-gradient(circle,rgba(56,112,151,.10) 1px,transparent 1.2px) 0 0/14px 14px,
+    linear-gradient(135deg,#f3f9fe,#eaf5fc 54%,#f7fbff);
+  color:#14283a;
+}
+#app .topbar{
+  background:rgba(226,241,252,.96);
+  border-bottom:1px solid #cfe0ee;
+  box-shadow:0 3px 14px rgba(27,65,96,.07);
+}
+#app .topbar-inner{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"brand actions" "nav nav";
+  grid-template-rows:54px 30px;
+  align-items:center;
+  gap:0 22px;
+  width:min(1400px,calc(100% - 48px));
+  min-height:88px;
+  padding:4px 0 0;
+}
+#app .brand{
+  grid-area:brand;
+  min-height:54px;
+  max-width:none;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+#app .brand::before,#app .brand::after{display:none}
+#app .brand-logos--bar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  height:50px;
+  padding-right:13px;
+  border-right:1px solid #bfd2e1;
+}
+#app .brand-logo{
+  height:48px;
+  padding:0;
+  border:0;
+  filter:none;
+}
+#app .brand-logo--umich{max-width:54px}
+#app .brand-logo--fcca{max-width:52px}
+#app .brand-kicker{
+  color:#61768a;
+  font-size:9px;
+  letter-spacing:.08em;
+}
+#app .brand-text .title{
+  color:#12263a;
+  font-size:18px;
+  letter-spacing:-.02em;
+}
+#app .brand-text .subtitle{
+  color:#52697d;
+  font-size:10px;
+}
+#app .topnav{
+  grid-area:nav;
+  justify-self:center;
+  align-self:end;
+  height:30px;
+  min-width:0;
+  gap:10px;
+  padding:0 12px;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+#app .navlink{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:30px;
+  padding:4px 12px 6px;
+  border:0;
+  border-radius:0;
+  color:#526a80;
+  font-size:12px;
+  font-weight:750;
+}
+#app .navlink:hover{
+  color:#155f8b;
+  background:rgba(32,112,158,.07);
+  transform:none;
+}
+#app .navlink.is-active{
+  color:#145c87;
+  background:transparent;
+  box-shadow:inset 0 -3px #287ba7;
+}
+#app .nav-icon{
+  width:18px;
+  height:18px;
+  border-radius:4px;
+  background:rgba(255,255,255,.62);
+  color:#236f9a;
+}
+#app .navlink.is-active .nav-icon{
+  background:#d0e7f6;
+  color:#176995;
+}
+#app .top-actions{
+  grid-area:actions;
+  align-self:center;
+}
+#app .userchip{
+  min-height:44px;
+  padding:7px 12px;
+  border:1px solid #c6d9e8;
+  border-radius:10px;
+  background:rgba(255,255,255,.58);
+  color:#1e3549;
+  font-size:12px;
+  box-shadow:none;
+}
+#app .userchip-dot{
+  background:#3581a8;
+  box-shadow:0 0 0 4px rgba(53,129,168,.12);
+}
+#app .container{
+  width:min(1380px,86%);
+  max-width:1380px;
+  margin:10px auto 54px;
+}
+#app main>.panel .panel-head{
+  padding:4px 0 10px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:#14283a;
+}
+#app main>.panel .section-heading{
+  margin:0 0 10px;
+}
+#app main>.panel .section-heading>div:first-child{
+  padding-left:12px;
+}
+#app main>.panel .section-heading>div:first-child::before{
+  width:4px;
+  background:#287ba7;
+}
+#app main>.panel .eyebrow{
+  color:#48677d;
+  font-size:10px;
+  letter-spacing:.06em;
+}
+#app main>.panel .section-title{
+  color:#13283d;
+  font-size:27px;
+  letter-spacing:-.025em;
+}
+#app main>.panel .section-note{
+  color:#536b80;
+  font-size:12px;
+}
+#app main>.panel .filters-compact{
+  padding:8px;
+  border:1px solid #d1e0ec;
+  border-radius:12px;
+  background:rgba(255,255,255,.80);
+  box-shadow:0 5px 16px rgba(33,76,108,.08);
+}
+#app main>.panel .field{
+  color:#314d63;
+}
+#app main>.panel .field input,
+#app main>.panel .field select,
+#app main>.panel .field textarea{
+  min-height:32px;
+  padding:7px 10px;
+  border:1px solid #aebfca;
+  border-radius:8px;
+  background:#e8f3fb;
+  color:#1b3449;
+}
+#app main>.panel .field input::placeholder{
+  color:#708699;
+}
+#app main>.panel .field input:focus,
+#app main>.panel .field select:focus,
+#app main>.panel .field textarea:focus{
+  border-color:#287ba7;
+  box-shadow:0 0 0 3px rgba(40,123,167,.14);
+}
+#app main>.panel .filter-row{
+  margin-top:16px;
+  padding-top:0;
+  border-top:0;
+}
+#app main>.panel .tab{
+  min-height:38px;
+  border:1px solid #b8cad7;
+  border-radius:9px;
+  background:#f6fbff;
+  color:#203b50;
+  font-size:12px;
+}
+#app main>.panel .tab.is-active{
+  border-color:#1d6b97;
+  background:#1d6b97;
+  color:#fff;
+}
+#app main>.panel .tab-count{
+  border-color:#cfdee8;
+  background:#e2f0f8;
+  color:#34566e;
+}
+#app main>.panel .tab.is-active .tab-count{
+  border-color:rgba(255,255,255,.3);
+  background:rgba(255,255,255,.16);
+  color:#fff;
+}
+#app main>.panel .filter-actions .btn-ghost{
+  min-height:38px;
+  border:1px solid #1e6e9a;
+  border-radius:9px;
+  background:#287da8;
+  color:#fff;
+  font-size:12px;
+}
+#app main>.panel .filter-actions .btn-ghost:hover{
+  background:#1e6b96;
+}
+#app .summary{
+  margin-top:12px;
+  gap:12px;
+}
+#app .summary-card,
+#app .summary-card:first-child,
+#app .summary-card:nth-child(2),
+#app .summary-card:nth-child(3){
+  min-height:124px;
+  padding:12px;
+  justify-content:flex-start;
+  border:1px solid #d0e1ee;
+  border-radius:12px;
+  background:linear-gradient(145deg,#e2f1fb,#d9ebf8);
+  box-shadow:0 5px 14px rgba(32,76,108,.10);
+  color:#14283a;
+  transform:none;
+}
+#app .summary-card:hover{
+  box-shadow:0 7px 18px rgba(32,76,108,.13);
+}
+#app .summary-k{
+  color:#3e586c;
+  font-size:11px;
+}
+#app .summary-big{
+  color:#14283a;
+  font-size:28px;
+  line-height:1;
+}
+#app .summary-v,#app .summary-v.small{
+  color:#213c51;
+}
+#app .summary-v{font-size:14px}
+#app .summary-v.small{font-size:12px}
+#app .summary-progress{
+  gap:10px;
+  margin:3px 0 1px;
+}
+#app .summary-progress strong{
+  color:#347da3;
+  font-size:28px;
+}
+#app .donut{
+  width:44px;
+  height:44px;
+}
+#app .donut-center{
+  width:24px;
+  height:24px;
+}
+#app .donut-wrap{
+  gap:9px;
+  flex-wrap:nowrap;
+  align-items:center;
+}
+#app .donut-wrap>div:last-child{
+  min-width:0;
+}
+#app .summary-row{
+  gap:4px;
+}
+#app .mini{
+  gap:5px;
+  padding:3px 6px;
+  font-size:10px;
+}
+#app .summary-v.small{
+  margin-top:2px;
+  font-size:11px;
+}
+#app .summary-progress-track{
+  height:8px;
+  background:#b9d5e8;
+}
+#app .summary-progress-fill{
+  background:#3888b1;
+}
+#app .mini{
+  border-color:#cfdee8;
+  background:rgba(255,255,255,.78);
+  color:#2b485e;
+}
+#app .table-wrap{
+  margin-top:8px;
+  border:1px solid #d3e2ec;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:0 5px 16px rgba(33,76,108,.07);
+}
+#app .table th{
+  padding:11px 12px;
+  background:#dceefa;
+  color:#26465c;
+  font-size:10px;
+}
+#app .table td{
+  color:#2f485b;
+}
+#app .table tbody tr:nth-child(even){
+  background:#f6fbff;
+}
+#app .table tbody tr:hover{
+  background:#eaf5fc;
+  box-shadow:inset 3px 0 #3884aa;
+}
+#app .badge.ok{
+  border-color:#c3dfcf;
+  background:#e8f4ec;
+  color:#2d6849;
+}
+#app .badge.todo{
+  border-color:#ebd9a8;
+  background:#fff6dc;
+  color:#806522;
+}
+#app .pager,#app .table-footer{
+  border-color:#d3e2ec;
+  background:#f5faff;
+  color:#39556b;
+}
+#app .fab-btn{
+  border:1px solid #165b83;
+  border-radius:999px;
+  background:#155b83;
+  color:#fff;
+  box-shadow:0 8px 18px rgba(21,91,131,.22);
+}
+#app .fab-btn:hover{
+  background:#104c70;
+}
+#app .fab-menu{
+  border-color:#d1e0eb;
+  background:#fff;
+}
+#app .fab-item{
+  border-color:#d1e0eb;
+  background:#f3f9fd;
+  color:#29485e;
+}
+#app .fab-item-primary{
+  border-color:#1d6b97;
+  background:#1d6b97;
+  color:#fff;
+}
+
+@media(max-width:1080px){
+  #app .container{
+    width:calc(100% - 40px);
+    margin:10px auto 54px;
+  }
+  #app .topbar-inner{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand actions" "nav nav";
+    min-height:88px;
+    gap:0 12px;
+  }
+  #app .topnav{
+    grid-area:nav;
+    justify-self:center;
+    width:auto;
+  }
+  #app .brand{width:auto}
+}
+@media(min-width:900px){
+  #app main>.panel .filters{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+  #app main>.panel .filters .field-wide{
+    grid-column:span 1;
+  }
+  #app .summary{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  #app .summary-card:last-child{
+    grid-column:auto;
+  }
+}
+@media(max-width:640px){
+  #app .topbar-inner{
+    width:calc(100% - 20px);
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand actions" "nav nav";
+    min-height:0;
+    padding:8px 0 0;
+  }
+  #app .brand{min-width:0}
+  #app .brand-logos--bar{gap:5px;padding-right:7px}
+  #app .brand-logo{height:36px}
+  #app .brand-logo--umich,#app .brand-logo--fcca{max-width:40px}
+  #app .brand-text .title{font-size:13px}
+  #app .brand-text .subtitle{font-size:9px}
+  #app .topnav{width:auto;gap:2px;padding:0}
+  #app .navlink{gap:4px;padding:8px 8px;font-size:11px}
+  #app .container{width:calc(100% - 20px);margin-top:12px}
+  #app main>.panel .panel-head{padding:10px 0}
+  #app main>.panel .section-title{font-size:23px}
+  #app main>.panel .filters-compact{padding:10px}
+  #app .summary-card,
+  #app .summary-card:first-child,
+  #app .summary-card:nth-child(2),
+  #app .summary-card:nth-child(3){min-height:0}
+}
