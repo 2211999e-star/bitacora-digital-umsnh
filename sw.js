@@ -2,7 +2,7 @@
  * Cache básico para index + assets del modo simple.
  */
 
-const CACHE_VERSION = 'bitacora-simple-v61';
+const CACHE_VERSION = 'bitacora-simple-v62';
 
 const PRECACHE_URLS = [
   './',
@@ -62,6 +62,26 @@ self.addEventListener('fetch', (event) => {
           return fresh;
         } catch {
           return (await cache.match('./index.html')) || (await cache.match('./'));
+        }
+      }
+
+      const isVersionedCode = url.searchParams.has('v') && /\.(?:css|js)$/.test(url.pathname);
+      if (isVersionedCode) {
+        try {
+          const fresh = await fetch(req);
+          if (fresh.ok) {
+            try {
+              await cache.put(req, fresh.clone());
+              await cache.put(url.origin + url.pathname, fresh.clone());
+            } catch {
+              // Keep serving the network response if it cannot be cached.
+            }
+          }
+          return fresh;
+        } catch (error) {
+          const cached = (await cache.match(req)) || (await cache.match(url.origin + url.pathname));
+          if (cached) return cached;
+          throw error;
         }
       }
 
