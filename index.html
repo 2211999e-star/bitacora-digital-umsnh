@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=7" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=8" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -171,7 +171,7 @@
                 <th>Fecha</th>
                 <th>Actividad</th>
                 <th>Equipo</th>
-                <th>Mantenimiento (preventivo/correctivo)</th>
+                <th>Mantenimiento</th>
                 <th>Ubicación</th>
                 <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
@@ -483,7 +483,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=64').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=65').catch(() => {});
       } catch {}
     })();
   </script>

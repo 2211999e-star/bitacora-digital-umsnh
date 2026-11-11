@@ -715,7 +715,7 @@ function render() {
           <td class="td-date" data-label="Fecha">${escapeHtml(formatDateHuman(date))}</td>
           <td class="td-activity" data-label="Actividad">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
           <td class="td-equipment" data-label="Equipo">${escapeHtml(equipment)}</td>
-          <td class="td-maintenance" data-label="Mantenimiento (preventivo/correctivo)">${escapeHtml(maintenanceSummary(r))}</td>
+          <td class="td-maintenance" data-label="Mantenimiento">${escapeHtml(maintenanceSummary(r))}</td>
           <td class="td-location" data-label="Ubicación">${escapeHtml(loc)}</td>
           <td class="td-area" data-label="Comisión Académica">${escapeHtml(area)}</td>
           <td class="td-assigned" data-label="Responsable(s)">${escapeHtml(assigned)}</td>
@@ -1117,7 +1117,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         <th>Fecha</th>
         <th>Actividad</th>
         ${hasEquipment ? '<th>Equipo</th>' : ''}
-        <th>Mantenimiento (preventivo/correctivo)</th>
+        <th>Mantenimiento</th>
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -1148,7 +1148,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Mantenimiento (preventivo/correctivo)', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Mantenimiento', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
         r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
