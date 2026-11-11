@@ -226,27 +226,216 @@ function saveEvents(events) {
   localStorage.setItem(EVENTS_KEY, JSON.stringify(events || []));
 }
 
-function csvCell(value) {
-  let v = value == null ? '' : String(value);
-  // Evita que Excel interprete contenido de usuario como fórmulas.
-  if (/^[\s\u0000-\u001f]*[=+@-]/.test(v)) v = `'${v}`;
-  const escaped = v.replaceAll('"', '""');
-  if (/[",\n]/.test(escaped)) return `"${escaped}"`;
-  return escaped;
-}
-
-function downloadCSV(filename, rows) {
+function downloadBlob(filename, blob) {
   const safeName = (filename || 'export').replace(/[\\/:*?"<>|]+/g, '_');
-  const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }); // BOM para Excel
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = safeName.endsWith('.csv') ? safeName : `${safeName}.csv`;
+  a.download = safeName;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+}
+
+function xmlEscape(value) {
+  return String(value ?? '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&apos;');
+}
+
+function excelColumnName(index) {
+  let name = '';
+  let value = index + 1;
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    name = String.fromCharCode(65 + remainder) + name;
+    value = Math.floor((value - 1) / 26);
+  }
+  return name;
+}
+
+function worksheetXml(sheet) {
+  const rows = Array.isArray(sheet.rows) ? sheet.rows : [];
+  const maxColumns = Math.max(1, ...rows.map((row) => row.length));
+  const lastCell = `${excelColumnName(maxColumns - 1)}${Math.max(1, rows.length)}`;
+  const cols = (sheet.widths || []).map((width, index) =>
+    `<col min="${index + 1}" max="${index + 1}" width="${Math.max(8, Math.min(60, Number(width) || 16))}" customWidth="1"/>`,
+  ).join('');
+  const rowXml = rows.map((row, rowIndex) => {
+    const cells = row.map((value, columnIndex) => {
+      const address = `${excelColumnName(columnIndex)}${rowIndex + 1}`;
+      const style = rowIndex === 0 ? ' s="1"' : '';
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return `<c r="${address}"${style}><v>${value}</v></c>`;
+      }
+      return `<c r="${address}" t="inlineStr"${style}><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
+    }).join('');
+    return `<row r="${rowIndex + 1}">${cells}</row>`;
+  }).join('');
+  const filter = rows.length > 1 ? `<autoFilter ref="A1:${lastCell}"/>` : '';
+  const orientation = sheet.orientation === 'landscape' ? 'landscape' : 'portrait';
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <dimension ref="A1:${lastCell}"/>
+  <sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <sheetFormatPr defaultRowHeight="19"/>
+  <cols>${cols}</cols>
+  <sheetData>${rowXml}</sheetData>
+  ${filter}
+  <pageMargins left="0.3" right="0.3" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>
+  <pageSetup paperSize="9" orientation="${orientation}"/>
+</worksheet>`;
+}
+
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function zipFiles(files) {
+  const encoder = new TextEncoder();
+  const entries = Object.entries(files);
+  const chunks = [];
+  const centralDirectory = [];
+  const date = new Date();
+  const dosTime = (date.getHours() << 11) | (date.getMinutes() << 5) | Math.floor(date.getSeconds() / 2);
+  const dosDate = ((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate();
+  let offset = 0;
+
+  const makeHeader = (size, write) => {
+    const bytes = new Uint8Array(size);
+    write(new DataView(bytes.buffer));
+    return bytes;
+  };
+  const joinBytes = (parts) => {
+    const output = new Uint8Array(parts.reduce((size, part) => size + part.length, 0));
+    let position = 0;
+    parts.forEach((part) => {
+      output.set(part, position);
+      position += part.length;
+    });
+    return output;
+  };
+
+  for (const [name, content] of entries) {
+    const nameBytes = encoder.encode(name);
+    const data = encoder.encode(content);
+    const checksum = crc32(data);
+    const localHeader = makeHeader(30, (view) => {
+      view.setUint32(0, 0x04034b50, true);
+      view.setUint16(4, 20, true);
+      view.setUint16(6, 0x0800, true);
+      view.setUint16(8, 0, true);
+      view.setUint16(10, dosTime, true);
+      view.setUint16(12, dosDate, true);
+      view.setUint32(14, checksum, true);
+      view.setUint32(18, data.length, true);
+      view.setUint32(22, data.length, true);
+      view.setUint16(26, nameBytes.length, true);
+      view.setUint16(28, 0, true);
+    });
+    chunks.push(localHeader, nameBytes, data);
+
+    const centralHeader = makeHeader(46, (view) => {
+      view.setUint32(0, 0x02014b50, true);
+      view.setUint16(4, 20, true);
+      view.setUint16(6, 20, true);
+      view.setUint16(8, 0x0800, true);
+      view.setUint16(10, 0, true);
+      view.setUint16(12, dosTime, true);
+      view.setUint16(14, dosDate, true);
+      view.setUint32(16, checksum, true);
+      view.setUint32(20, data.length, true);
+      view.setUint32(24, data.length, true);
+      view.setUint16(28, nameBytes.length, true);
+      view.setUint16(30, 0, true);
+      view.setUint16(32, 0, true);
+      view.setUint16(34, 0, true);
+      view.setUint16(36, 0, true);
+      view.setUint32(38, 0, true);
+      view.setUint32(42, offset, true);
+    });
+    centralDirectory.push(centralHeader, nameBytes);
+    offset += localHeader.length + nameBytes.length + data.length;
+  }
+
+  const centralBytes = joinBytes(centralDirectory);
+  const endRecord = makeHeader(22, (view) => {
+    view.setUint32(0, 0x06054b50, true);
+    view.setUint16(4, 0, true);
+    view.setUint16(6, 0, true);
+    view.setUint16(8, entries.length, true);
+    view.setUint16(10, entries.length, true);
+    view.setUint32(12, centralBytes.length, true);
+    view.setUint32(16, offset, true);
+    view.setUint16(20, 0, true);
+  });
+  return new Blob([...chunks, centralBytes, endRecord], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+}
+
+function downloadXlsx(filename, sheets) {
+  const safeSheets = sheets.map((sheet, index) => {
+    const name = safeStr(sheet.name).replace(/[\\/*?:\[\]]/g, '').slice(0, 31) || `Hoja${index + 1}`;
+    return { ...sheet, name };
+  });
+  if (!safeSheets.length) throw new Error('El libro no contiene hojas.');
+
+  const sheetOverrides = safeSheets.map((_, index) =>
+    `<Override PartName="/xl/worksheets/sheet${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
+  ).join('');
+  const workbookSheets = safeSheets.map((sheet, index) =>
+    `<sheet name="${xmlEscape(sheet.name)}" sheetId="${index + 1}" r:id="rId${index + 1}"/>`,
+  ).join('');
+  const workbookRels = safeSheets.map((_, index) =>
+    `<Relationship Id="rId${index + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${index + 1}.xml"/>`,
+  ).join('');
+  const files = {
+    '[Content_Types].xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+  ${sheetOverrides}
+</Types>`,
+    '_rels/.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`,
+    'xl/workbook.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>${workbookSheets}</sheets>
+</workbook>`,
+    'xl/_rels/workbook.xml.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  ${workbookRels}
+  <Relationship Id="rId${safeSheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`,
+    'xl/styles.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Calibri"/></font></fonts>
+  <fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF176B63"/><bgColor indexed="64"/></patternFill></fill></fills>
+  <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFDCE7E8"/></left><right style="thin"><color rgb="FFDCE7E8"/></right><top style="thin"><color rgb="FFDCE7E8"/></top><bottom style="thin"><color rgb="FFDCE7E8"/></bottom><diagonal/></border></borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf><xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf></cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`,
+  };
+  safeSheets.forEach((sheet, index) => {
+    files[`xl/worksheets/sheet${index + 1}.xml`] = worksheetXml(sheet);
+  });
+  downloadBlob(filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`, zipFiles(files));
 }
 
 function downloadBackup() {
@@ -259,14 +448,7 @@ function downloadBackup() {
     profiles: Object.fromEntries(Object.values(USERS).map((user) => [user.id, loadProfile(user)])),
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `respaldo_bitacora_${todayISO()}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(`respaldo_bitacora_${todayISO()}.json`, blob);
   toast('Respaldo descargado. Guárdalo en un lugar seguro.');
 }
 
@@ -332,30 +514,6 @@ function formatDateHuman(dateISO) {
   if (!d) return '—';
   const [year, month, day] = d.split('-');
   return year && month && day ? `${day}/${month}/${year}` : d;
-}
-
-function downloadHTML(filename, html) {
-  const safeName = (filename || 'reporte').replace(/[\\/:*?"<>|]+/g, '_');
-  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = safeName.endsWith('.xls') ? safeName : `${safeName}.xls`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-async function fetchAsDataUrl(path) {
-  const res = await fetch(path, { cache: 'no-cache' });
-  const blob = await res.blob();
-  return await new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result || ''));
-    r.onerror = reject;
-    r.readAsDataURL(blob);
-  });
 }
 
 function matchesSearch(rec, q) {
@@ -966,226 +1124,88 @@ function markCompleted(id) {
   saveRecords(records);
 }
 
-async function exportExcel({ orientation = 'portrait' } = {}) {
+function exportExcel({ orientation = 'portrait' } = {}) {
   const user = getCurrentUser();
   const profile = loadProfile(user);
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
   const stats = summarizeRecords(list);
-  const hasEquipment = list.some((record) =>
-    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
-  );
   const maintenanceCounts = {
     preventive: list.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'preventivo').length,
     corrective: list.filter((record) => safeStr(record.maintenance_type).toLowerCase() === 'correctivo').length,
   };
   const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
-  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}`;
+  const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}.xlsx`;
+  const activityRows = [
+    ['Fecha', 'Actividad', 'Detalle de actividad', 'Equipo', 'Mantenimiento', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+    ...list.map((record) => [
+      formatDateHuman(record.date),
+      safeStr(record.desc),
+      safeStr(record.action_detail),
+      [
+        ['Tipo', record.equipment_type],
+        ['Patrimonio', record.inventory_number],
+        ['Serie', record.serial_number],
+      ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '),
+      maintenanceSummary(record),
+      safeStr(record.location),
+      safeStr(record.area),
+      safeStr(record.assigned_to),
+      safeStr(record.created_by),
+      record.status === 'completado' ? 'Realizada' : 'Pendiente',
+    ]),
+  ];
+  const summaryRows = [
+    ['Resumen del reporte', 'Valor'],
+    ['Generado', nowHuman()],
+    ['Usuario de sesión', user?.name || '—'],
+    ['Nombre', profile.full_name || '—'],
+    ['Correo', profile.email || '—'],
+    ['Matrícula', profile.matricula || '—'],
+    ['Comisión Académica', profile.area || '—'],
+    ['Orientación solicitada', orientLabel === 'horizontal' ? 'Horizontal' : 'Vertical'],
+    ['Estado', status || 'Todos'],
+    ['Desde', start || 'Sin límite'],
+    ['Hasta', end || 'Sin límite'],
+    ['Registros incluidos', stats.all],
+    ['Pendientes', stats.pend],
+    ['Realizadas', stats.done],
+    ['Mantenimientos preventivos', maintenanceCounts.preventive],
+    ['Mantenimientos correctivos', maintenanceCounts.corrective],
+  ];
 
   try {
-    const [umich, fcca] = await Promise.all([
-      fetchAsDataUrl('./assets/logo_umich.png'),
-      fetchAsDataUrl('./assets/logo_fcca.png'),
+    downloadXlsx(file, [
+      { name: 'Actividades', rows: activityRows, widths: [14, 36, 40, 32, 24, 24, 38, 28, 28, 16], orientation },
+      { name: 'Resumen', rows: summaryRows, widths: [30, 48] },
     ]);
-
-    const now = new Date();
-    const fechaGen = now.toISOString().slice(0, 19).replace('T', ' ');
-    const folio = makeFolio();
-
-    const pageCSS =
-      orientation === 'landscape'
-        ? '@page{size:A4 landscape;margin:10mm}'
-        : '@page{size:A4 portrait;margin:12mm}';
-
-    const colgroup =
-      orientation === 'landscape'
-        ? `
-          <col style="width:104px">
-          <col style="width:auto">
-          ${hasEquipment ? '<col style="width:230px">' : ''}
-          <col style="width:150px">
-          <col style="width:200px">
-          <col style="width:230px">
-          <col style="width:210px">
-          <col style="width:150px">
-          <col style="width:120px">
-        `
-        : `
-          <col style="width:104px">
-          <col style="width:auto">
-          ${hasEquipment ? '<col style="width:190px">' : ''}
-          <col style="width:125px">
-          <col style="width:170px">
-          <col style="width:190px">
-          <col style="width:180px">
-          <col style="width:140px">
-          <col style="width:120px">
-        `;
-
-    const rows = list
-      .map((r) => {
-        const estado = r.status === 'completado' ? 'Realizada' : 'Pendiente';
-        return `
-          <tr>
-            <td>${escapeHtml(r.date || '')}</td>
-            <td>${escapeHtml(r.desc || '')}${r.action_detail ? `<br><small>Detalle: ${escapeHtml(r.action_detail)}</small>` : ''}</td>
-            ${hasEquipment ? `<td>${escapeHtml([
-              ['Tipo', r.equipment_type],
-              ['Patrimonio', r.inventory_number],
-              ['Serie', r.serial_number],
-            ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '))}</td>` : ''}
-            <td>${escapeHtml(maintenanceSummary(r))}</td>
-            <td>${escapeHtml(r.location || '')}</td>
-            <td>${escapeHtml(r.area || '')}</td>
-            <td>${escapeHtml(r.assigned_to || '')}</td>
-            <td>${escapeHtml(r.created_by || '')}</td>
-            <td>${escapeHtml(estado)}</td>
-          </tr>
-        `;
-      })
-      .join('');
-
-    const html = `<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Reporte Bitácora</title>
-  <style>
-    ${pageCSS}
-    body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a;background:#fff}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #cfe0df;border-left:6px solid #176b63;border-radius:8px;padding:16px;background:#f3f7f6}
-    .logos{display:flex;align-items:center;gap:12px}
-    .logos img{height:38px;width:auto;max-width:160px;object-fit:contain}
-    .h-title{font-weight:900;font-size:20px;color:#12564f}
-    .h-sub{color:#587075;margin-top:5px;font-size:12px}
-    .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .tag{border:1px solid #cfe0df;background:#e9f2f0;border-radius:5px;padding:6px 10px;font-size:11px;font-weight:800;color:#176b63}
-    table{width:100%;border-collapse:collapse;margin-top:14px;table-layout:fixed}
-    th,td{border:1px solid #dce7e8;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
-    th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-    tbody tr:nth-child(even){background:#f7faf9}
-    thead{display:table-header-group}
-    tr{break-inside:avoid;page-break-inside:avoid}
-    td:nth-child(1),td:nth-child(7){white-space:nowrap}
-    td:nth-child(2){white-space:pre-wrap}
-    .meta{margin-top:10px;font-size:12px;color:#333}
-    .meta b{color:#111}
-    .footer{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .sig{border:1px dashed #9fb9b7;border-radius:8px;padding:12px;background:#fbfdfc}
-    .sig-line{margin-top:32px;border-top:2px solid #111;padding-top:8px;font-weight:900}
-    .sig-meta{font-size:12px;color:#333;margin-top:2px}
-    @media print{body{margin:0}.logos img{height:32px;max-width:140px}.header{break-inside:avoid}}
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="logos">
-      <img src="${umich}" alt="UMSNH">
-      <img src="${fcca}" alt="FCCA">
-    </div>
-    <div style="flex:1;min-width:240px">
-      <div class="h-title">Bitácora Digital · Reporte</div>
-      <div class="h-sub">UMSNH - Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(fechaGen)} · Folio: ${escapeHtml(folio)}</div>
-      <div class="meta">
-        Usuario sesión: <b>${escapeHtml(user?.name || '—')}</b> ·
-        Nombre: <b>${escapeHtml(profile.full_name || '—')}</b> ·
-        Correo: <b>${escapeHtml(profile.email || '—')}</b> ·
-        Matrícula: <b>${escapeHtml(profile.matricula || '—')}</b> ·
-        Comisión Académica: <b>${escapeHtml(profile.area || '—')}</b> ·
-        Rol: <b>${escapeHtml(profile.role || '—')}</b>
-      </div>
-    </div>
-    <div class="tags">
-      <div class="tag">Estado: ${escapeHtml(status || 'todas')}</div>
-      <div class="tag">Inicio: ${escapeHtml(start || '—')}</div>
-      <div class="tag">Fin: ${escapeHtml(end || '—')}</div>
-      <div class="tag">Registros: ${list.length}</div>
-      <div class="tag">Pend: ${stats.pend}</div>
-      <div class="tag">Real: ${stats.done}</div>
-      <div class="tag">Preventivos: ${maintenanceCounts.preventive}</div>
-      <div class="tag">Correctivos: ${maintenanceCounts.corrective}</div>
-    </div>
-  </div>
-
-  <table>
-    <colgroup>
-      ${colgroup}
-    </colgroup>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>Actividad</th>
-        ${hasEquipment ? '<th>Equipo</th>' : ''}
-        <th>Mantenimiento</th>
-        <th>Ubicación</th>
-        <th>Comisión Académica</th>
-        <th>Responsable(s)</th>
-        <th>Registró</th>
-        <th>Estado</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rows || `<tr><td colspan=\"${hasEquipment ? 9 : 8}\">Sin registros.</td></tr>`}
-    </tbody>
-  </table>
-
-  <div class="footer">
-    <div class="sig">
-      <div class="sig-line">${escapeHtml(USERS.ivan.defaults.full_name)}</div>
-      <div class="sig-meta">${escapeHtml(USERS.ivan.role)} · ${escapeHtml(USERS.ivan.defaults.email)}</div>
-    </div>
-    <div class="sig">
-      <div class="sig-line">${escapeHtml(USERS.kevin.defaults.full_name)}</div>
-      <div class="sig-meta">${escapeHtml(USERS.kevin.role)} · ${escapeHtml(USERS.kevin.defaults.email)} · Matrícula: ${escapeHtml(USERS.kevin.defaults.matricula)}</div>
-    </div>
-  </div>
-</body>
-</html>`;
-
-    downloadHTML(file, html);
-    toast('Reporte listo (ábrelo con Excel).');
-  } catch {
-    // fallback: CSV
-    const out = [
-      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Mantenimiento', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
-      ...list.map((r) => [
-        r.date || '',
-        r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
-        ...(hasEquipment ? [[r.equipment_type, r.inventory_number, r.serial_number].map(safeStr).filter(Boolean).join(' · ')] : []),
-        maintenanceSummary(r),
-        r.location || '',
-        r.area || '',
-        r.assigned_to || '',
-        r.created_by || '',
-        r.status === 'completado' ? 'Realizada' : 'Pendiente',
-      ]),
-    ];
-    downloadCSV(file, out);
-    toast('Exportado a Excel (CSV).');
+    toast('Reporte de actividades descargado en Excel (.xlsx).');
+  } catch (error) {
+    console.error('No se pudo exportar el reporte de actividades:', error);
+    toast('No se pudo generar el Excel de actividades. Intenta de nuevo.');
   }
 }
 
 function exportEventsExcel() {
   const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
-  const rows = events.map((event) => `
-    <tr>
-      <td>${escapeHtml(formatDateHuman(event.date))}</td>
-      <td><strong>${escapeHtml(event.title || '—')}</strong></td>
-      <td>${escapeHtml(event.notes || '—')}</td>
-      <td>${escapeHtml(event.created_at ? formatDateHuman(event.created_at) : '—')}</td>
-    </tr>
-  `).join('');
-  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Eventos · Bitácora Digital</title>
-    <style>
-      body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a}
-      .header{border-left:6px solid #176b63;border:1px solid #cfe0df;border-left-width:6px;border-radius:8px;padding:16px;background:#f3f7f6}
-      h1{margin:0;color:#12564f;font-size:20px}p{margin:5px 0 0;color:#587075;font-size:12px}
-      table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #dce7e8;padding:10px;text-align:left;vertical-align:top}th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}tbody tr:nth-child(even){background:#f7faf9}
-    </style></head><body><div class="header"><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p></div>
-    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th><th>Registrado</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`;
-  downloadHTML(`bitacora_eventos_${todayISO()}`, html);
-  toast('Eventos exportados a Excel por separado.');
+  const rows = [
+    ['Fecha', 'Evento', 'Notas', 'Registrado'],
+    ...events.map((event) => [
+      formatDateHuman(event.date),
+      safeStr(event.title) || '—',
+      safeStr(event.notes) || '—',
+      event.created_at ? formatDateHuman(event.created_at) : '—',
+    ]),
+  ];
+  try {
+    downloadXlsx(`bitacora_eventos_${todayISO()}.xlsx`, [
+      { name: 'Eventos', rows, widths: [16, 36, 60, 16] },
+    ]);
+    toast('Reporte de eventos descargado en Excel (.xlsx).');
+  } catch (error) {
+    console.error('No se pudo exportar el reporte de eventos:', error);
+    toast('No se pudo generar el Excel de eventos. Intenta de nuevo.');
+  }
 }
 
 function printEvents() {
@@ -1203,7 +1223,8 @@ function printEvents() {
       <td>${escapeHtml(event.notes || '—')}</td>
     </tr>
   `).join('');
-  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reporte de eventos · Bitácora Digital</title>
+  try {
+    popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reporte de eventos · Bitácora Digital</title>
     <style>
       @page{size:A4 portrait;margin:14mm}
       *{box-sizing:border-box}
@@ -1224,11 +1245,25 @@ function printEvents() {
       @media print{body{margin:0}.report-head{break-inside:avoid;page-break-inside:avoid}}
     </style>
     </head><body><header class="report-head"><div><h1>Bitácora Digital · Eventos</h1><p class="subtitle">UMSNH · Comisión Académica de Servicios Informáticos<br>Reporte generado: ${escapeHtml(nowHuman())}</p></div><div class="report-count">${events.length} ${events.length === 1 ? 'evento' : 'eventos'}</div></header>
-    <table><colgroup><col style="width:110px"><col style="width:30%"><col></colgroup><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table>
-    <footer class="report-foot">Bitácora Digital · UMSNH</footer></body></html>`);
-  popup.document.close();
-  popup.focus();
-  popup.print();
+      <table><colgroup><col style="width:110px"><col style="width:30%"><col></colgroup><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table>
+      <footer class="report-foot">Bitácora Digital · UMSNH</footer></body></html>`);
+    popup.document.close();
+    window.setTimeout(() => {
+      if (popup.closed) return;
+      try {
+        popup.focus();
+        popup.print();
+      } catch (error) {
+        console.error('No se pudo imprimir el reporte de eventos:', error);
+        popup.close();
+        toast('No se pudo abrir la impresión de eventos.');
+      }
+    }, 250);
+  } catch (error) {
+    console.error('No se pudo preparar el reporte de eventos:', error);
+    popup.close();
+    toast('No se pudo preparar la impresión de eventos.');
+  }
 }
 
 function applyPrintOrientation(orientation) {
@@ -1282,7 +1317,14 @@ function printCurrent({ orientation = 'portrait' } = {}) {
     render();
   };
   window.addEventListener('afterprint', cleanup, { once: true });
-  window.print();
+  try {
+    window.print();
+  } catch (error) {
+    console.error('No se pudo imprimir el reporte de actividades:', error);
+    cleanup();
+    toast('No se pudo abrir la impresión de actividades.');
+    return;
+  }
   // Fallback (algunos navegadores no disparan afterprint)
   window.setTimeout(cleanup, 1500);
 }

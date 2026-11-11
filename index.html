@@ -249,9 +249,9 @@
         <details class="fab-section">
           <summary>Exportar y reportes</summary>
           <div class="fab-section-items">
-            <button class="fab-item" type="button" id="btn-export">Excel · actividades</button>
-            <button class="fab-item" type="button" id="btn-export-landscape">Excel · actividades horizontal</button>
-            <button class="fab-item" type="button" id="btn-export-events">Excel · eventos</button>
+            <button class="fab-item" type="button" id="btn-export">Excel (.xlsx) · actividades</button>
+            <button class="fab-item" type="button" id="btn-export-landscape">Excel (.xlsx) · horizontal</button>
+            <button class="fab-item" type="button" id="btn-export-events">Excel (.xlsx) · eventos</button>
             <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
           </div>
         </details>
@@ -475,7 +475,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=61"></script>
+  <script type="module" src="./js/simple.js?v=62"></script>
 
   <script>
     // Service Worker (opcional)
@@ -483,7 +483,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=65').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=66').catch(() => {});
       } catch {}
     })();
   </script>
