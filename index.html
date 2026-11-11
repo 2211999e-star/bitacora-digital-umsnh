@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=5" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=6" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -155,9 +155,9 @@
             </div>
 
             <div class="filter-actions" aria-label="Acciones rápidas">
-              <button class="btn btn-ghost" type="button" id="btn-this-month">Este mes</button>
-              <button class="btn btn-ghost" type="button" id="btn-today">Hoy</button>
-              <button class="btn btn-ghost" type="button" id="btn-clear">Limpiar</button>
+              <button class="btn btn-ghost" type="button" id="btn-this-month"><span aria-hidden="true">▦</span> Este mes</button>
+                <button class="btn btn-ghost" type="button" id="btn-today"><span aria-hidden="true">◷</span> Hoy</button>
+                <button class="btn btn-ghost" type="button" id="btn-clear"><span aria-hidden="true">↺</span> Limpiar</button>
             </div>
           </div>
 
@@ -170,7 +170,7 @@
               <tr>
                 <th>Fecha</th>
                 <th>Actividad</th>
-                <th>Equipo</th>
+                <th>Equipo / mantenimiento</th>
                 <th>Ubicación</th>
                 <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
@@ -223,12 +223,13 @@
       <div class="fab-menu" id="fab-menu" hidden>
         <button class="fab-item fab-item-primary" type="button" id="btn-new"><span class="action-symbol" aria-hidden="true">+</span>Nueva actividad</button>
         <button class="fab-item" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span>Captura rápida</button>
+        <button class="fab-item" type="button" id="btn-print"><span class="action-symbol" aria-hidden="true">▤</span>Imprimir actividades</button>
+        <button class="fab-item" type="button" id="btn-print-landscape"><span class="action-symbol" aria-hidden="true">▤</span>Imprimir horizontal</button>
         <details class="fab-section">
           <summary>Reportes</summary>
           <div class="fab-section-items">
             <button class="fab-item" type="button" id="btn-export">Excel · actividades</button>
             <button class="fab-item" type="button" id="btn-export-events">Excel · eventos</button>
-            <button class="fab-item" type="button" id="btn-print">Imprimir · actividades</button>
             <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
           </div>
         </details>
@@ -236,7 +237,6 @@
           <summary>Más formatos</summary>
           <div class="fab-section-items">
             <button class="fab-item" type="button" id="btn-export-landscape">Excel · horizontal</button>
-            <button class="fab-item" type="button" id="btn-print-landscape">Imprimir · horizontal</button>
           </div>
         </details>
         <details class="fab-section">
@@ -256,7 +256,7 @@
         <div class="modal-head">
           <div>
             <div class="modal-title" id="modal-title">Nueva actividad</div>
-            <div class="modal-sub">Guarda, marca completado, exporta a Excel e imprime por día o mes.</div>
+            <div class="modal-sub">Clasifica el mantenimiento como preventivo o correctivo. La impresión respeta tus filtros.</div>
           </div>
           <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
         </div>
@@ -287,20 +287,15 @@
           <label class="field">
             <span>Tipo de actividad</span>
             <select id="f-equipment-type">
-              <option value="Normal">Actividad normal</option>
+              <option value="Normal">Actividad general</option>
               <option value="Computadora">Computadora</option>
               <option value="Impresora">Impresora</option>
             </select>
           </label>
-          <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
-          <label class="field equipment-field" hidden>
-            <span>Número de patrimonio</span>
-            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
-          </label>
-          <label class="field equipment-field" hidden>
-            <span>Tipo de mantenimiento o arreglo</span>
+          <label class="field">
+            <span>Tipo de mantenimiento (si aplica)</span>
             <select id="f-maintenance-type">
-              <option value="">No especificado</option>
+              <option value="">Sin especificar</option>
               <option value="Preventivo">Preventivo</option>
               <option value="Correctivo">Correctivo</option>
               <option value="Formateo">Formateo</option>
@@ -313,11 +308,16 @@
               <option value="Otro arreglo">Otro arreglo</option>
             </select>
           </label>
+          <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
+          <label class="field equipment-field" hidden>
+            <span>Número de patrimonio</span>
+            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
+          </label>
           <label class="field equipment-field" hidden>
             <span>Número de serie</span>
             <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
           </label>
-          <label class="field field-wide equipment-field" hidden>
+          <label class="field field-wide" hidden>
             <span>Especificar otro arreglo (opcional)</span>
             <input type="text" id="f-maintenance-detail" placeholder="Ej. Cambiar rodillo, ajustar bandeja o reemplazar memoria." />
           </label>
@@ -459,7 +459,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=58"></script>
+  <script type="module" src="./js/simple.js?v=59"></script>
 
   <script>
     // Service Worker (opcional)
@@ -467,7 +467,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=60').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=61').catch(() => {});
       } catch {}
     })();
   </script>

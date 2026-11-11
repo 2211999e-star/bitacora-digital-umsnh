@@ -669,6 +669,10 @@ body{
   color:#fff;
 }
 #app main>.panel .filter-actions .btn-ghost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
   min-height:38px;
   border:1px solid #1e6e9a;
   border-radius:9px;
@@ -678,6 +682,8 @@ body{
 }
 #app main>.panel .filter-actions .btn-ghost:hover{
   background:#1e6b96;
+  box-shadow:0 4px 10px rgba(29,107,151,.17);
+  transform:translateY(-1px);
 }
 #app .summary{
   margin-top:12px;
@@ -801,28 +807,113 @@ body{
   color:#39556b;
 }
 #app .fab-btn{
+  min-height:44px;
+  padding:10px 16px;
   border:1px solid #165b83;
   border-radius:999px;
   background:#155b83;
   color:#fff;
   box-shadow:0 8px 18px rgba(21,91,131,.22);
 }
+#app .fab{
+  top:auto;
+  right:20px;
+  bottom:20px;
+  flex-direction:column-reverse;
+  transform:none;
+}
 #app .fab-btn:hover{
   background:#104c70;
 }
 #app .fab-menu{
+  width:min(340px,calc(100vw - 28px));
+  max-height:min(72vh,620px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:12px;
+  gap:8px;
   border-color:#d1e0eb;
+  border-radius:16px;
   background:#fff;
+  box-shadow:0 18px 42px rgba(27,65,96,.20);
 }
 #app .fab-item{
+  min-height:42px;
+  justify-content:flex-start;
+  padding:9px 11px;
+  border-radius:10px;
   border-color:#d1e0eb;
   background:#f3f9fd;
   color:#29485e;
+  font-size:13px;
+  text-align:left;
+  transition:background .16s ease,border-color .16s ease,transform .16s ease;
+}
+#app .fab-item:hover{
+  border-color:#a9cadd;
+  background:#e7f3fa;
+  transform:translateY(-1px);
+}
+#app .fab-item:focus-visible,
+#app .fab-btn:focus-visible,
+#app main>.panel .filter-actions .btn-ghost:focus-visible{
+  outline:3px solid rgba(40,123,167,.35);
+  outline-offset:2px;
+}
+#app .fab-item .action-symbol{
+  display:grid;
+  flex:0 0 24px;
+  place-items:center;
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  background:rgba(255,255,255,.82);
+  color:#1d6b97;
+  font-size:15px;
+}
+#app .fab-section{
+  overflow:hidden;
+  border:1px solid #dbe7ef;
+  border-radius:10px;
+  background:#f8fbfe;
+}
+#app .fab-section>summary{
+  padding:10px 12px;
+  color:#29485e;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:800;
+}
+#app .fab-section[open]>summary{
+  border-bottom:1px solid #dbe7ef;
+  color:#155f8b;
+}
+#app .fab-section-items{
+  display:grid;
+  gap:6px;
+  padding:8px;
+}
+#app .fab-section-items .fab-item{
+  min-height:38px;
+  background:#fff;
 }
 #app .fab-item-primary{
   border-color:#1d6b97;
   background:#1d6b97;
   color:#fff;
+}
+#app .fab-item-primary:hover{
+  border-color:#155b83;
+  background:#155b83;
+}
+#app .fab-item-primary .action-symbol{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+}
+@media(max-width:640px){
+  #app .fab{right:12px;bottom:12px}
+  #app .fab-menu{max-height:68vh}
+  #app main>.panel .filter-actions .btn-ghost{min-height:36px;padding:7px 8px}
 }
 
 @media(max-width:1080px){

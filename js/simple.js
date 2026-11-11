@@ -715,7 +715,7 @@ function render() {
         <tr>
           <td class="td-date" data-label="Fecha">${escapeHtml(formatDateHuman(date))}</td>
           <td class="td-activity" data-label="Actividad">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
-          <td class="td-equipment" data-label="Equipo">${escapeHtml(equipment)}</td>
+          <td class="td-equipment" data-label="Equipo / mantenimiento">${escapeHtml(equipment)}</td>
           <td class="td-location" data-label="Ubicación">${escapeHtml(loc)}</td>
           <td class="td-area" data-label="Comisión Académica">${escapeHtml(area)}</td>
           <td class="td-assigned" data-label="Responsable(s)">${escapeHtml(assigned)}</td>
@@ -771,8 +771,7 @@ function updateEquipmentFields() {
 }
 
 function updateMaintenanceDetailField() {
-  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
-  const isOther = isEquipment && safeStr(els.fMaintenanceType.value) === 'Otro arreglo';
+  const isOther = safeStr(els.fMaintenanceType.value) === 'Otro arreglo';
   if (els.fMaintenanceDetail) els.fMaintenanceDetail.closest('.field').hidden = !isOther;
 }
 
@@ -889,7 +888,7 @@ function upsertFromForm() {
   const selectedType = safeStr(els.fEquipmentType.value);
   const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
   const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
-  const maintenance_type = equipment_type ? safeStr(els.fMaintenanceType.value) : '';
+  const maintenance_type = safeStr(els.fMaintenanceType.value);
   const maintenance_detail = maintenance_type === 'Otro arreglo' ? safeStr(els.fMaintenanceDetail.value) : '';
   const serial_number = equipment_type ? safeStr(els.fSerialNumber.value) : '';
   const location = safeStr(els.fLocation.value);
@@ -1106,7 +1105,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
-        ${hasEquipment ? '<th>Equipo</th>' : ''}
+        ${hasEquipment ? '<th>Equipo / mantenimiento</th>' : ''}
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -1137,7 +1136,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo / mantenimiento'] : []), 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
         r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
@@ -1191,10 +1190,29 @@ function printEvents() {
       <td>${escapeHtml(event.notes || '—')}</td>
     </tr>
   `).join('');
-  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte de eventos</title>
-    <style>body{font-family:Segoe UI,Arial,sans-serif;color:#203239;margin:28px}h1{margin:0 0 5px;font-size:22px}p{color:#647980;font-size:12px;margin:0 0 18px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border:1px solid #d9e3e6;text-align:left;vertical-align:top}th{background:#edf4f4;font-size:11px;text-transform:uppercase;letter-spacing:.05em}td{font-size:12px}@media print{body{margin:0}}</style>
-    </head><body><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p>
-    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`);
+  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reporte de eventos · Bitácora Digital</title>
+    <style>
+      @page{size:A4 portrait;margin:14mm}
+      *{box-sizing:border-box}
+      body{font-family:Segoe UI,Arial,sans-serif;color:#19354a;margin:24px;background:#fff}
+      .report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px 20px;border:1px solid #cfe0ee;border-left:6px solid #287ba7;border-radius:12px;background:#f1f8fd}
+      h1{margin:0;color:#163d59;font-size:22px;letter-spacing:-.02em}
+      .subtitle{margin:5px 0 0;color:#526c80;font-size:12px;line-height:1.5}
+      .report-count{flex:0 0 auto;padding:7px 10px;border:1px solid #c7dce9;border-radius:999px;background:#fff;color:#245a7c;font-size:11px;font-weight:800}
+      table{width:100%;border-collapse:collapse;margin-top:16px;table-layout:fixed}
+      th,td{padding:9px 10px;border:1px solid #d2e1eb;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+      th{background:#dceefa;color:#284d67;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+      td{font-size:11px;line-height:1.45}
+      td:first-child{width:110px;white-space:nowrap}
+      tbody tr:nth-child(even){background:#f6fbff}
+      thead{display:table-header-group}
+      tr{break-inside:avoid;page-break-inside:avoid}
+      .report-foot{margin-top:12px;color:#60788a;font-size:10px;text-align:right}
+      @media print{body{margin:0}.report-head{break-inside:avoid;page-break-inside:avoid}}
+    </style>
+    </head><body><header class="report-head"><div><h1>Bitácora Digital · Eventos</h1><p class="subtitle">UMSNH · Comisión Académica de Servicios Informáticos<br>Reporte generado: ${escapeHtml(nowHuman())}</p></div><div class="report-count">${events.length} ${events.length === 1 ? 'evento' : 'eventos'}</div></header>
+    <table><colgroup><col style="width:110px"><col style="width:30%"><col></colgroup><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table>
+    <footer class="report-foot">Bitácora Digital · UMSNH</footer></body></html>`);
   popup.document.close();
   popup.focus();
   popup.print();
@@ -1224,16 +1242,34 @@ function applyPrintOrientation(orientation) {
 }
 
 function printCurrent({ orientation = 'portrait' } = {}) {
+  const previousPageSize = uiState.pageSize;
+  const previousPage = uiState.page;
+  const filtered = filteredRecords(loadRecords());
+  uiState.pageSize = Math.max(1, filtered.length);
+  uiState.page = 1;
+  render();
+
   const folio = makeFolio();
   preparePrintHeader(folio);
   preparePrintFooter(folio);
-  const cleanup = applyPrintOrientation(orientation);
+  const cleanupOrientation = applyPrintOrientation(orientation);
   const hasEquipment = filteredRecords(loadRecords()).some((record) =>
     [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
       .map(safeStr)
       .some(Boolean),
   );
   document.body.classList.toggle('print-without-equipment', !hasEquipment);
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    cleanupOrientation();
+    uiState.pageSize = previousPageSize;
+    uiState.page = previousPage;
+    if (els.printHeader) els.printHeader.hidden = true;
+    if (els.printFooter) els.printFooter.hidden = true;
+    render();
+  };
   window.addEventListener('afterprint', cleanup, { once: true });
   window.print();
   // Fallback (algunos navegadores no disparan afterprint)
