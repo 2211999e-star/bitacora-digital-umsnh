@@ -2,6 +2,34 @@ const STORAGE_KEY = 'bitacora_simple_v1_records';
 const USER_KEY = 'bitacora_simple_v1_user';
 const PROFILE_KEY_PREFIX = 'bitacora_simple_v1_profile_';
 const EVENTS_KEY = 'bitacora_simple_v1_events';
+const SEED_KEY = 'bitacora_simple_v1_whiteboard_seed_v2';
+
+const JULY_NOTES = [
+  ['Laptop Dell: formateo', 'completado'],
+  ['CPU Lenovo: formateo y limpieza', 'completado'],
+  ['Antena del AIV 12', 'completado'],
+  ['Antenas de posgrado', 'completado'],
+  ['Traer antenas de cómputo A4', 'completado'],
+  ['Instalar CPU', 'completado'],
+  ['Cambio de base, salón 10', 'completado'],
+  ['2 monitores: van Miguel y Benja', 'pendiente'],
+  ['Antenas 15 y 16 A.V.: urgente, Kevin y Yair', 'pendiente'],
+  ['Antena del Z15', 'pendiente'],
+  ['Cañón: configurar A4 del salón 2', 'pendiente'],
+  ['Instalación de CPU, salón 10 A4', 'pendiente'],
+  ['Asignación de IP, edificio Y', 'pendiente'],
+  ['Formateo de laboratorio 6, edificio Y: Luis, Miguel, Gerardo, Miguel y Benja', 'pendiente'],
+  ['Formateo de laboratorio 2: Yair', 'pendiente'],
+  ['Bitácora: urgente, Kevin', 'pendiente'],
+];
+
+const ARCHIVE_NOTES = [
+  ['tablero-2026-04-13-impresora-chulada', '2026-04-13', 'Impresora Chulada', 'Mantenimiento', 'completado'],
+  ['tablero-2026-04-16-impresora-hp', '2026-04-16', 'Impresora HP de la academia', 'Mantenimiento y fallas', 'completado'],
+  ['tablero-2026-06-15-cpu-hp', '2026-06-15', 'CPU HP MXJ9460832', 'Cambio de disco y mantenimiento. Coordinación de Mercadotecnia', 'completado'],
+  ['tablero-2026-09-02-servicio-social', '2026-09-02', 'Servicio social', 'Python y teclado', 'pendiente'],
+  ['tablero-2026-09-bitacora-correctivo', '2026-09-29', 'Creación de bitácora de mantenimiento preventivo y correctivo', 'Kevin', 'completado'],
+];
 
 const USERS = {
   ivan: {
@@ -48,12 +76,65 @@ function clearCurrentUser() {
   localStorage.removeItem(USER_KEY);
 }
 
+function seedJulyNotes() {
+  const now = new Date().toISOString();
+  const initialRecords = JULY_NOTES.map(([desc, status], index) => ({
+    id: `julio-2026-${String(index + 1).padStart(2, '0')}`,
+    created_at: now,
+    updated_at: now,
+    updated_by: 'Iván',
+    created_by: 'Iván Fernández Mandujano',
+    date: '2026-07-01',
+    status,
+    desc,
+    action_detail: 'Nota inicial del pizarrón de mantenimiento de julio.',
+    equipment_type: '',
+    inventory_number: '',
+    maintenance_type: '',
+    maintenance_detail: '',
+    serial_number: '',
+    location: '',
+    area: 'Comisión Académica de Servicios Informáticos',
+    assigned_to: '',
+    completed_at: status === 'completado' ? now : null,
+  }));
+  const archiveRecords = ARCHIVE_NOTES.map(([id, date, desc, action_detail, status]) => ({
+    id,
+    created_at: now,
+    updated_at: now,
+    updated_by: 'Iván',
+    created_by: 'Iván Fernández Mandujano',
+    date,
+    status,
+    desc,
+    action_detail,
+    equipment_type: '',
+    inventory_number: '',
+    maintenance_type: '',
+    maintenance_detail: '',
+    serial_number: '',
+    location: '',
+    area: 'Comisión Académica de Servicios Informáticos',
+    assigned_to: status === 'completado' && id.includes('bitacora') ? 'Kevin' : '',
+    completed_at: status === 'completado' ? now : null,
+  }));
+  const existing = loadRecords();
+  const knownIds = new Set(existing.map((record) => record.id));
+  const missing = [...initialRecords, ...archiveRecords].filter((record) => !knownIds.has(record.id));
+  if (missing.length) saveRecords([...existing, ...missing]);
+  localStorage.setItem(SEED_KEY, '1');
+}
+
 function uid() {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function safeStr(v) {
@@ -146,7 +227,9 @@ function saveEvents(events) {
 }
 
 function csvCell(value) {
-  const v = value == null ? '' : String(value);
+  let v = value == null ? '' : String(value);
+  // Evita que Excel interprete contenido de usuario como fórmulas.
+  if (/^[\s\u0000-\u001f]*[=+@-]/.test(v)) v = `'${v}`;
   const escaped = v.replaceAll('"', '""');
   if (/[",\n]/.test(escaped)) return `"${escaped}"`;
   return escaped;
@@ -166,6 +249,63 @@ function downloadCSV(filename, rows) {
   URL.revokeObjectURL(url);
 }
 
+function downloadBackup() {
+  const backup = {
+    app: 'bitacora-digital-umsnh',
+    version: 1,
+    exported_at: new Date().toISOString(),
+    records: loadRecords(),
+    events: loadEvents(),
+    profiles: Object.fromEntries(Object.values(USERS).map((user) => [user.id, loadProfile(user)])),
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `respaldo_bitacora_${todayISO()}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  toast('Respaldo descargado. Guárdalo en un lugar seguro.');
+}
+
+async function restoreBackup(file) {
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    alert('El archivo supera el límite de 10 MB.');
+    return;
+  }
+  try {
+    const backup = JSON.parse(await file.text());
+    const validRecords = Array.isArray(backup?.records) && backup.records.every((record) =>
+      record && typeof record === 'object' && typeof record.id === 'string' && typeof record.desc === 'string',
+    );
+    const validEvents = Array.isArray(backup?.events) && backup.events.every((event) =>
+      event && typeof event === 'object' && typeof event.id === 'string' && typeof event.title === 'string',
+    );
+    if (backup?.app !== 'bitacora-digital-umsnh' || backup?.version !== 1 || !validRecords || !validEvents) {
+      throw new Error('Formato de respaldo no válido.');
+    }
+    if (!confirm(`El respaldo contiene ${backup.records.length} actividades y ${backup.events.length} eventos. Se reemplazarán los datos actuales. ¿Continuar?`)) return;
+
+    saveRecords(backup.records);
+    saveEvents(backup.events);
+    Object.entries(backup.profiles || {}).forEach(([id, profile]) => {
+      if (!USERS[id] || !profile || typeof profile !== 'object') return;
+      saveProfile(USERS[id], profile);
+    });
+    uiState.page = 1;
+    render();
+    toast('Respaldo restaurado correctamente.');
+  } catch (error) {
+    console.error('No se pudo restaurar el respaldo:', error);
+    alert('No se pudo restaurar. Verifica que seleccionaste un respaldo válido de esta aplicación.');
+  } finally {
+    if (els.backupFile) els.backupFile.value = '';
+  }
+}
+
 function setMonthToRange(month) {
   const value = safeStr(month);
   if (!value) return null;
@@ -173,8 +313,9 @@ function setMonthToRange(month) {
   const y = Number(yRaw);
   const m = Number(mRaw);
   if (!y || !m) return null;
-  const first = new Date(y, m - 1, 1).toISOString().slice(0, 10);
-  const last = new Date(y, m, 0).toISOString().slice(0, 10);
+  const first = `${y}-${String(m).padStart(2, '0')}-01`;
+  const finalDay = new Date(y, m, 0).getDate();
+  const last = `${y}-${String(m).padStart(2, '0')}-${String(finalDay).padStart(2, '0')}`;
   return { start: first, end: last };
 }
 
@@ -189,16 +330,17 @@ function inRange(dateISO, start, end) {
 function formatDateHuman(dateISO) {
   const d = safeStr(dateISO).slice(0, 10);
   if (!d) return '—';
-  return d;
+  const [year, month, day] = d.split('-');
+  return year && month && day ? `${day}/${month}/${year}` : d;
 }
 
 function downloadHTML(filename, html) {
   const safeName = (filename || 'reporte').replace(/[\\/:*?"<>|]+/g, '_');
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = safeName.endsWith('.html') ? safeName : `${safeName}.html`;
+  a.download = safeName.endsWith('.xls') ? safeName : `${safeName}.xls`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -221,9 +363,15 @@ function matchesSearch(rec, q) {
   if (!query) return true;
   const hay = [
     rec.desc,
+    rec.action_detail,
     rec.location,
     rec.area,
     rec.assigned_to,
+    rec.equipment_type,
+    rec.inventory_number,
+    rec.maintenance_type,
+    rec.maintenance_detail,
+    rec.serial_number,
     rec.created_by,
     rec.status,
     rec.date,
@@ -276,10 +424,13 @@ const els = {
   form: document.getElementById('form'),
   modalTitle: document.getElementById('modal-title'),
   btnNew: document.getElementById('btn-new'),
+  btnBulk: document.getElementById('btn-bulk'),
   btnExport: document.getElementById('btn-export'),
   btnExportLandscape: document.getElementById('btn-export-landscape'),
+  btnExportEvents: document.getElementById('btn-export-events'),
   btnPrint: document.getElementById('btn-print'),
   btnPrintLandscape: document.getElementById('btn-print-landscape'),
+  btnPrintEvents: document.getElementById('btn-print-events'),
   btnClear: document.getElementById('btn-clear'),
   btnToday: document.getElementById('btn-today'),
   btnThisMonth: document.getElementById('btn-this-month'),
@@ -288,6 +439,11 @@ const els = {
   printHeader: document.getElementById('print-header'),
   printFooter: document.getElementById('print-footer'),
   pager: document.getElementById('pager'),
+  pageSize: document.getElementById('page-size'),
+  resultsLabel: document.getElementById('results-label'),
+  backupFile: document.getElementById('backup-file'),
+  btnBackup: document.getElementById('btn-backup'),
+  btnRestore: document.getElementById('btn-restore'),
 
   // Burbuja lateral (acciones rápidas)
   fabToggle: document.getElementById('fab-toggle'),
@@ -306,6 +462,12 @@ const els = {
   fDate: document.getElementById('f-date'),
   fStatus: document.getElementById('f-status'),
   fDesc: document.getElementById('f-desc'),
+  fActionDetail: document.getElementById('f-action-detail'),
+  fEquipmentType: document.getElementById('f-equipment-type'),
+  fInventoryNumber: document.getElementById('f-inventory-number'),
+  fMaintenanceType: document.getElementById('f-maintenance-type'),
+  fMaintenanceDetail: document.getElementById('f-maintenance-detail'),
+  fSerialNumber: document.getElementById('f-serial-number'),
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
   fAssigned: document.getElementById('f-assigned'),
@@ -332,6 +494,12 @@ const els = {
   eNotes: document.getElementById('e-notes'),
   btnEventCancel: document.getElementById('btn-event-cancel'),
   btnEventDelete: document.getElementById('btn-event-delete'),
+  bulkModal: document.getElementById('bulk-modal'),
+  bulkForm: document.getElementById('bulk-form'),
+  bulkMonth: document.getElementById('bulk-month'),
+  bulkStatus: document.getElementById('bulk-status'),
+  bulkText: document.getElementById('bulk-text'),
+  btnBulkCancel: document.getElementById('btn-bulk-cancel'),
 };
 
 const uiState = {
@@ -446,7 +614,7 @@ function renderSummary(allRecords) {
       </div>
     </div>
     <div class="summary-card">
-      <div class="summary-k">Avance del periodo</div>
+      <div class="summary-k">Avance del período</div>
       <div class="summary-progress">
         <strong>${donePct}%</strong>
         <span class="summary-progress-track" role="progressbar" aria-label="Avance de actividades realizadas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${donePct}">
@@ -454,8 +622,8 @@ function renderSummary(allRecords) {
         </span>
       </div>
       <div class="summary-v small">${s.done} de ${s.all} actividades realizadas</div>
-      <div class="summary-v small">${s.pend} pendientes por atender</div>
-      <div class="summary-v small">Filtro actual: <b>${escapeHtml(status || 'todas')}</b></div>
+      <div class="summary-v small">${s.pend ? `${s.pend} pendiente${s.pend === 1 ? '' : 's'} por atender` : 'Sin pendientes por atender'}</div>
+      <div class="summary-v small">Vista: <b>${escapeHtml(status || 'todas')}</b></div>
     </div>
     <div class="summary-card">
       <div class="summary-k">Sesión</div>
@@ -509,10 +677,15 @@ function render() {
   renderProfileLine();
   renderSummary(all);
   renderPager(full.length);
+  if (els.resultsLabel) {
+    const first = full.length ? start + 1 : 0;
+    const last = Math.min(start + list.length, full.length);
+    els.resultsLabel.textContent = `Mostrando ${first}–${last} de ${full.length} actividades`;
+  }
 
   if (!els.rows) return;
   if (!list.length) {
-    els.rows.innerHTML = `<tr><td colspan="8" class="empty">Sin registros con esos filtros.</td></tr>`;
+    els.rows.innerHTML = `<tr><td colspan="9" class="empty">Sin registros con esos filtros.</td></tr>`;
     return;
   }
 
@@ -520,26 +693,38 @@ function render() {
     .map((r) => {
       const date = safeStr(r.date);
       const desc = safeStr(r.desc);
+      const actionDetail = safeStr(r.action_detail);
       const loc = safeStr(r.location) || '—';
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
+      const equipmentParts = [
+        ['Tipo', r.equipment_type],
+        ['Patrimonio', r.inventory_number],
+        ['Mantenimiento', r.maintenance_type],
+        ['Detalle', r.maintenance_detail],
+        ['Serie', r.serial_number],
+      ].filter(([, value]) => safeStr(value));
+      const equipment = equipmentParts.length
+        ? equipmentParts.map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · ')
+        : '—';
       const createdBy = safeStr(r.created_by) || '—';
       const st = safeStr(r.status).toLowerCase();
       const canComplete = st !== 'completado';
 
       return `
         <tr>
-          <td class="td-date">${date || '—'}</td>
-          <td class="td-activity">${escapeHtml(desc) || '—'}</td>
-          <td class="td-location">${escapeHtml(loc)}</td>
-          <td class="td-area">${escapeHtml(area)}</td>
-          <td class="td-assigned">${escapeHtml(assigned)}</td>
-          <td class="td-created">${escapeHtml(createdBy)}</td>
-          <td class="td-status">${statusBadge(st)}</td>
-          <td class="td-actions">
+          <td class="td-date" data-label="Fecha">${escapeHtml(formatDateHuman(date))}</td>
+          <td class="td-activity" data-label="Actividad">${escapeHtml(desc) || '—'}${actionDetail ? `<div class="activity-detail">${escapeHtml(actionDetail)}</div>` : ''}</td>
+          <td class="td-equipment" data-label="Equipo">${escapeHtml(equipment)}</td>
+          <td class="td-location" data-label="Ubicación">${escapeHtml(loc)}</td>
+          <td class="td-area" data-label="Comisión Académica">${escapeHtml(area)}</td>
+          <td class="td-assigned" data-label="Responsable(s)">${escapeHtml(assigned)}</td>
+          <td class="td-created" data-label="Registró">${escapeHtml(createdBy)}</td>
+          <td class="td-status" data-label="Estado">${statusBadge(st)}</td>
+          <td class="td-actions" data-label="Acciones">
             <div class="row-actions">
-              ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${r.id}">Completar</button>` : ''}
-              <button class="btn btn-ghost" type="button" data-action="edit" data-id="${r.id}">Editar</button>
+              ${canComplete ? `<button class="btn btn-ghost" type="button" data-action="complete" data-id="${escapeHtml(r.id)}">Completar</button>` : ''}
+              <button class="btn btn-ghost" type="button" data-action="edit" data-id="${escapeHtml(r.id)}">Editar</button>
             </div>
           </td>
         </tr>
@@ -578,18 +763,94 @@ function escapeHtml(text) {
     .replaceAll("'", '&#039;');
 }
 
+function updateEquipmentFields() {
+  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
+  document.querySelectorAll('.equipment-field').forEach((field) => {
+    field.hidden = !isEquipment;
+  });
+}
+
+function updateMaintenanceDetailField() {
+  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
+  const isOther = isEquipment && safeStr(els.fMaintenanceType.value) === 'Otro arreglo';
+  if (els.fMaintenanceDetail) els.fMaintenanceDetail.closest('.field').hidden = !isOther;
+}
+
 function openModalForNew() {
   els.modalTitle.textContent = 'Nueva actividad';
   els.fId.value = '';
   els.fDate.value = todayISO();
   els.fStatus.value = 'pendiente';
   els.fDesc.value = '';
+  els.fActionDetail.value = '';
+  els.fEquipmentType.value = 'Normal';
+  els.fInventoryNumber.value = '';
+  els.fMaintenanceType.value = '';
+  els.fMaintenanceDetail.value = '';
+  els.fSerialNumber.value = '';
   els.fLocation.value = '';
   els.fArea.value = '';
   els.fAssigned.value = '';
   els.btnDelete.hidden = true;
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
+}
+
+function openBulkModal() {
+  const now = new Date();
+  if (els.bulkMonth) els.bulkMonth.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (els.bulkStatus) els.bulkStatus.value = 'pendiente';
+  if (els.bulkText) els.bulkText.value = '';
+  els.bulkModal?.showModal();
+  setTimeout(() => els.bulkText?.focus(), 50);
+}
+
+function addBulkRecords() {
+  const user = getCurrentUser();
+  const profile = loadProfile(user);
+  const month = safeStr(els.bulkMonth?.value);
+  const range = setMonthToRange(month);
+  const lines = safeStr(els.bulkText?.value)
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').trim())
+    .filter(Boolean);
+  if (!range || !lines.length) return false;
+
+  const status = safeStr(els.bulkStatus?.value) === 'completado' ? 'completado' : 'pendiente';
+  const now = new Date().toISOString();
+  const records = loadRecords();
+  lines.forEach((rawDesc, index) => {
+    const isDone = /\blisto\b/i.test(rawDesc);
+    const desc = rawDesc.replace(/\blisto\b/gi, '').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim() || rawDesc;
+    const lineStatus = isDone ? 'completado' : status;
+    records.push({
+      id: `${uid()}_${index}`,
+      created_at: now,
+      updated_at: now,
+      updated_by: user?.name || null,
+      created_by: safeStr(profile.full_name) || safeStr(user?.name) || '—',
+      date: range.start,
+      status: lineStatus,
+      desc,
+      action_detail: '',
+      equipment_type: '',
+      inventory_number: '',
+      maintenance_type: '',
+      maintenance_detail: '',
+      serial_number: '',
+      location: '',
+      area: safeStr(profile.area),
+      assigned_to: '',
+      completed_at: lineStatus === 'completado' ? now : null,
+    });
+  });
+  saveRecords(records);
+  uiState.page = 1;
+  render();
+  toast(`${lines.length} actividades agregadas.`);
+  return true;
 }
 
 function openModalForEdit(id) {
@@ -601,10 +862,18 @@ function openModalForEdit(id) {
   els.fDate.value = rec.date || todayISO();
   els.fStatus.value = rec.status || 'pendiente';
   els.fDesc.value = rec.desc || '';
+  els.fActionDetail.value = rec.action_detail || '';
+  els.fEquipmentType.value = rec.equipment_type || 'Normal';
+  els.fInventoryNumber.value = rec.inventory_number || '';
+  els.fMaintenanceType.value = rec.maintenance_type || '';
+  els.fMaintenanceDetail.value = rec.maintenance_detail || '';
+  els.fSerialNumber.value = rec.serial_number || '';
   els.fLocation.value = rec.location || '';
   els.fArea.value = rec.area || '';
   els.fAssigned.value = rec.assigned_to || '';
   els.btnDelete.hidden = false;
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
 }
@@ -616,6 +885,13 @@ function upsertFromForm() {
   const date = safeStr(els.fDate.value) || todayISO();
   const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
   const desc = safeStr(els.fDesc.value);
+  const action_detail = safeStr(els.fActionDetail.value);
+  const selectedType = safeStr(els.fEquipmentType.value);
+  const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
+  const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
+  const maintenance_type = equipment_type ? safeStr(els.fMaintenanceType.value) : '';
+  const maintenance_detail = maintenance_type === 'Otro arreglo' ? safeStr(els.fMaintenanceDetail.value) : '';
+  const serial_number = equipment_type ? safeStr(els.fSerialNumber.value) : '';
   const location = safeStr(els.fLocation.value);
   const area = safeStr(els.fArea.value);
   const assigned_to = safeStr(els.fAssigned.value);
@@ -640,6 +916,12 @@ function upsertFromForm() {
     date,
     status,
     desc,
+    action_detail,
+    equipment_type,
+    inventory_number,
+    maintenance_type,
+    maintenance_detail,
+    serial_number,
     location,
     area,
     assigned_to,
@@ -685,6 +967,11 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   const list = filteredRecords(loadRecords());
   const { start, end, status } = getFilters();
   const stats = summarizeRecords(list);
+  const hasEquipment = list.some((record) =>
+    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
+      .map(safeStr)
+      .some(Boolean),
+  );
   const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}`;
 
@@ -708,6 +995,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         ? `
           <col style="width:104px">
           <col style="width:auto">
+          ${hasEquipment ? '<col style="width:230px">' : ''}
           <col style="width:200px">
           <col style="width:230px">
           <col style="width:210px">
@@ -717,6 +1005,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         : `
           <col style="width:104px">
           <col style="width:auto">
+          ${hasEquipment ? '<col style="width:190px">' : ''}
           <col style="width:170px">
           <col style="width:190px">
           <col style="width:180px">
@@ -730,7 +1019,14 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
         return `
           <tr>
             <td>${escapeHtml(r.date || '')}</td>
-            <td>${escapeHtml(r.desc || '')}</td>
+            <td>${escapeHtml(r.desc || '')}${r.action_detail ? `<br><small>Detalle: ${escapeHtml(r.action_detail)}</small>` : ''}</td>
+            ${hasEquipment ? `<td>${escapeHtml([
+              ['Tipo', r.equipment_type],
+              ['Patrimonio', r.inventory_number],
+              ['Mantenimiento', r.maintenance_type],
+              ['Detalle', r.maintenance_detail],
+              ['Serie', r.serial_number],
+            ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '))}</td>` : ''}
             <td>${escapeHtml(r.location || '')}</td>
             <td>${escapeHtml(r.area || '')}</td>
             <td>${escapeHtml(r.assigned_to || '')}</td>
@@ -749,18 +1045,18 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   <title>Reporte Bitácora</title>
   <style>
     ${pageCSS}
-    body{font-family:Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #ddd;border-radius:12px;padding:14px}
+    body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a;background:#fff}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #cfe0df;border-left:6px solid #176b63;border-radius:8px;padding:16px;background:#f3f7f6}
     .logos{display:flex;align-items:center;gap:12px}
     .logos img{height:38px;width:auto;max-width:160px;object-fit:contain}
-    .h-title{font-weight:900;font-size:18px}
-    .h-sub{color:#444;margin-top:4px;font-size:12px}
+    .h-title{font-weight:900;font-size:20px;color:#12564f}
+    .h-sub{color:#587075;margin-top:5px;font-size:12px}
     .tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .tag{border:1px solid #ddd;background:#f7f7f7;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+    .tag{border:1px solid #cfe0df;background:#e9f2f0;border-radius:5px;padding:6px 10px;font-size:11px;font-weight:800;color:#176b63}
     table{width:100%;border-collapse:collapse;margin-top:14px;table-layout:fixed}
-    th,td{border-bottom:1px solid #eee;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
-    th{background:#f2f2f2;font-size:12px;color:#333}
-    tbody tr:nth-child(even){background:#fafafa}
+    th,td{border:1px solid #dce7e8;padding:10px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
+    th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+    tbody tr:nth-child(even){background:#f7faf9}
     thead{display:table-header-group}
     tr{break-inside:avoid;page-break-inside:avoid}
     td:nth-child(1),td:nth-child(7){white-space:nowrap}
@@ -768,10 +1064,10 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
     .meta{margin-top:10px;font-size:12px;color:#333}
     .meta b{color:#111}
     .footer{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .sig{border:1px dashed #bbb;border-radius:12px;padding:12px}
+    .sig{border:1px dashed #9fb9b7;border-radius:8px;padding:12px;background:#fbfdfc}
     .sig-line{margin-top:32px;border-top:2px solid #111;padding-top:8px;font-weight:900}
     .sig-meta{font-size:12px;color:#333;margin-top:2px}
-    @media print{body{margin:0}.logos img{height:32px;max-width:140px}}
+    @media print{body{margin:0}.logos img{height:32px;max-width:140px}.header{break-inside:avoid}}
   </style>
 </head>
 <body>
@@ -810,6 +1106,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       <tr>
         <th>Fecha</th>
         <th>Actividad</th>
+        ${hasEquipment ? '<th>Equipo</th>' : ''}
         <th>Ubicación</th>
         <th>Comisión Académica</th>
         <th>Responsable(s)</th>
@@ -818,7 +1115,7 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
       </tr>
     </thead>
     <tbody>
-      ${rows || '<tr><td colspan=\"7\">Sin registros.</td></tr>'}
+      ${rows || `<tr><td colspan=\"${hasEquipment ? 8 : 7}\">Sin registros.</td></tr>`}
     </tbody>
   </table>
 
@@ -840,10 +1137,11 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   } catch {
     // fallback: CSV
     const out = [
-      ['Fecha', 'Actividad', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+      ['Fecha', 'Actividad', ...(hasEquipment ? ['Equipo'] : []), 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
       ...list.map((r) => [
         r.date || '',
-        r.desc || '',
+        r.action_detail ? `${r.desc || ''}\nDetalle: ${r.action_detail}` : r.desc || '',
+        ...(hasEquipment ? [[r.equipment_type, r.inventory_number, r.maintenance_type, r.maintenance_detail, r.serial_number].map(safeStr).filter(Boolean).join(' · ')] : []),
         r.location || '',
         r.area || '',
         r.assigned_to || '',
@@ -856,12 +1154,61 @@ async function exportExcel({ orientation = 'portrait' } = {}) {
   }
 }
 
+function exportEventsExcel() {
+  const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
+  const rows = events.map((event) => `
+    <tr>
+      <td>${escapeHtml(formatDateHuman(event.date))}</td>
+      <td><strong>${escapeHtml(event.title || '—')}</strong></td>
+      <td>${escapeHtml(event.notes || '—')}</td>
+      <td>${escapeHtml(event.created_at ? formatDateHuman(event.created_at) : '—')}</td>
+    </tr>
+  `).join('');
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Eventos · Bitácora Digital</title>
+    <style>
+      body{font-family:Segoe UI,Arial,sans-serif;margin:18px;color:#20353a}
+      .header{border-left:6px solid #176b63;border:1px solid #cfe0df;border-left-width:6px;border-radius:8px;padding:16px;background:#f3f7f6}
+      h1{margin:0;color:#12564f;font-size:20px}p{margin:5px 0 0;color:#587075;font-size:12px}
+      table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #dce7e8;padding:10px;text-align:left;vertical-align:top}th{background:#176b63;color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em}tbody tr:nth-child(even){background:#f7faf9}
+    </style></head><body><div class="header"><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p></div>
+    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th><th>Registrado</th></tr></thead><tbody>${rows || '<tr><td colspan="4">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`;
+  downloadHTML(`bitacora_eventos_${todayISO()}`, html);
+  toast('Eventos exportados a Excel por separado.');
+}
+
+function printEvents() {
+  const events = loadEvents().sort((a, b) => safeStr(a.date).localeCompare(safeStr(b.date)));
+  const popup = window.open('', '_blank');
+  if (!popup) {
+    alert('Permite las ventanas emergentes para imprimir los eventos.');
+    return;
+  }
+  popup.opener = null;
+  const rows = events.map((event) => `
+    <tr>
+      <td>${escapeHtml(formatDateHuman(event.date))}</td>
+      <td>${escapeHtml(event.title || '—')}</td>
+      <td>${escapeHtml(event.notes || '—')}</td>
+    </tr>
+  `).join('');
+  popup.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Reporte de eventos</title>
+    <style>body{font-family:Segoe UI,Arial,sans-serif;color:#203239;margin:28px}h1{margin:0 0 5px;font-size:22px}p{color:#647980;font-size:12px;margin:0 0 18px}table{width:100%;border-collapse:collapse}th,td{padding:10px;border:1px solid #d9e3e6;text-align:left;vertical-align:top}th{background:#edf4f4;font-size:11px;text-transform:uppercase;letter-spacing:.05em}td{font-size:12px}@media print{body{margin:0}}</style>
+    </head><body><h1>Bitácora Digital · Eventos</h1><p>UMSNH · Comisión Académica de Servicios Informáticos · Generado: ${escapeHtml(nowHuman())}</p>
+    <table><thead><tr><th>Fecha</th><th>Evento</th><th>Notas</th></tr></thead><tbody>${rows || '<tr><td colspan="3">Sin eventos registrados.</td></tr>'}</tbody></table></body></html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
 function applyPrintOrientation(orientation) {
   // Limpieza previa
   document.body.classList.remove('print-landscape');
+  document.body.classList.remove('print-without-equipment');
   document.getElementById('print-orientation-style')?.remove();
 
-  if (orientation !== 'landscape') return () => {};
+  if (orientation !== 'landscape') {
+    return () => document.body.classList.remove('print-without-equipment');
+  }
 
   document.body.classList.add('print-landscape');
   const style = document.createElement('style');
@@ -871,6 +1218,7 @@ function applyPrintOrientation(orientation) {
 
   return () => {
     document.body.classList.remove('print-landscape');
+    document.body.classList.remove('print-without-equipment');
     document.getElementById('print-orientation-style')?.remove();
   };
 }
@@ -880,6 +1228,12 @@ function printCurrent({ orientation = 'portrait' } = {}) {
   preparePrintHeader(folio);
   preparePrintFooter(folio);
   const cleanup = applyPrintOrientation(orientation);
+  const hasEquipment = filteredRecords(loadRecords()).some((record) =>
+    [record.equipment_type, record.inventory_number, record.maintenance_type, record.maintenance_detail, record.serial_number]
+      .map(safeStr)
+      .some(Boolean),
+  );
+  document.body.classList.toggle('print-without-equipment', !hasEquipment);
   window.addEventListener('afterprint', cleanup, { once: true });
   window.print();
   // Fallback (algunos navegadores no disparan afterprint)
@@ -1030,7 +1384,7 @@ function renderEvents() {
       return `
         <div class="event-item">
           <div>
-            <div class="event-date">${d}</div>
+            <div class="event-date">${escapeHtml(d)}</div>
             <div class="event-meta">${e.date === todayISO() ? 'Hoy' : 'Próximo'}</div>
           </div>
           <div>
@@ -1038,7 +1392,7 @@ function renderEvents() {
             ${notes ? `<div class="event-meta">${escapeHtml(notes)}</div>` : ''}
           </div>
           <div class="event-actions">
-            <button class="btn btn-ghost" type="button" data-ev-action="edit" data-ev-id="${e.id}">Editar</button>
+            <button class="btn btn-ghost" type="button" data-ev-action="edit" data-ev-id="${escapeHtml(e.id)}">Editar</button>
           </div>
         </div>
       `;
@@ -1131,11 +1485,13 @@ function toggleReportsMenu() {
 function closeUserMenu() {
   if (!els.usermenuMenu) return;
   els.usermenuMenu.hidden = true;
+  els.userchip?.setAttribute('aria-expanded', 'false');
 }
 
 function toggleUserMenu() {
   if (!els.usermenuMenu) return;
   els.usermenuMenu.hidden = !els.usermenuMenu.hidden;
+  els.userchip?.setAttribute('aria-expanded', String(!els.usermenuMenu.hidden));
 }
 
 function closeFabMenu() {
@@ -1188,6 +1544,16 @@ document.addEventListener('keydown', (e) => {
     closeUserMenu();
     closeFabMenu();
   }
+  if (els.app?.hidden || e.defaultPrevented) return;
+  const target = e.target;
+  const typing = target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    els.filterQ?.focus();
+  } else if (e.altKey && e.key.toLowerCase() === 'n' && !typing && !els.modal?.open && !els.eventModal?.open && !els.profileModal?.open) {
+    e.preventDefault();
+    openModalForNew();
+  }
 });
 
 els.userchip?.addEventListener('click', (e) => {
@@ -1221,6 +1587,10 @@ els.btnNew.addEventListener('click', () => {
   setActiveNav('btn-new');
   openModalForNew();
 });
+els.btnBulk?.addEventListener('click', () => {
+  closeFabMenu();
+  openBulkModal();
+});
 els.btnExport.addEventListener('click', () => {
   closeReportsMenu();
   closeFabMenu();
@@ -1236,11 +1606,28 @@ els.btnExportLandscape?.addEventListener('click', () => {
   closeFabMenu();
   exportExcel({ orientation: 'landscape' });
 });
+els.btnExportEvents?.addEventListener('click', () => {
+  closeFabMenu();
+  exportEventsExcel();
+});
 els.btnPrintLandscape?.addEventListener('click', () => {
   closeReportsMenu();
   closeFabMenu();
   printCurrent({ orientation: 'landscape' });
 });
+els.btnPrintEvents?.addEventListener('click', () => {
+  closeFabMenu();
+  printEvents();
+});
+els.btnBackup?.addEventListener('click', () => {
+  closeFabMenu();
+  downloadBackup();
+});
+els.btnRestore?.addEventListener('click', () => {
+  closeFabMenu();
+  els.backupFile?.click();
+});
+els.backupFile?.addEventListener('change', () => restoreBackup(els.backupFile.files?.[0]));
 els.btnProfile?.addEventListener('click', () => {
   closeReportsMenu();
   setActiveNav('btn-profile');
@@ -1278,7 +1665,15 @@ els.btnThisMonth?.addEventListener('click', () => {
   const now = new Date();
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const y = now.getFullYear();
-  const month = `${y}-${m}`;
+  const currentMonth = `${y}-${m}`;
+  const records = loadRecords();
+  const hasCurrentRecords = records.some((record) => safeStr(record.date).slice(0, 7) === currentMonth);
+  const latestMonth = records
+    .map((record) => safeStr(record.date).slice(0, 7))
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  const month = hasCurrentRecords ? currentMonth : (latestMonth || currentMonth);
   uiState.page = 1;
   if (els.filterMonth) els.filterMonth.value = month;
   const r = setMonthToRange(month);
@@ -1309,10 +1704,12 @@ els.filterMonth.addEventListener('change', () => {
   render();
 });
 els.filterStart.addEventListener('change', () => {
+  els.filterMonth.value = '';
   uiState.page = 1;
   render();
 });
 els.filterEnd.addEventListener('change', () => {
+  els.filterMonth.value = '';
   uiState.page = 1;
   render();
 });
@@ -1324,6 +1721,12 @@ els.filterQ.addEventListener('input', () => {
     render();
   }, 120);
 });
+
+els.fEquipmentType.addEventListener('change', () => {
+  updateEquipmentFields();
+  updateMaintenanceDetailField();
+});
+els.fMaintenanceType.addEventListener('change', updateMaintenanceDetailField);
 
 els.form.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -1368,6 +1771,11 @@ els.pager?.addEventListener('click', (e) => {
   else uiState.page = Math.min(Math.max(1, Number(v) || 1), pages);
   render();
 });
+els.pageSize?.addEventListener('change', () => {
+  uiState.pageSize = Number(els.pageSize.value) || 10;
+  uiState.page = 1;
+  render();
+});
 
 document.addEventListener('click', (e) => {
   const btn = e.target?.closest?.('button[data-ev-action][data-ev-id]');
@@ -1401,6 +1809,13 @@ els.btnEventDelete?.addEventListener('click', () => {
   toast('Evento eliminado.');
 });
 
+els.bulkForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!addBulkRecords()) return;
+  els.bulkModal?.close();
+});
+els.btnBulkCancel?.addEventListener('click', () => els.bulkModal?.close());
+
 function showAppForUser(user) {
   if (els.login) els.login.hidden = true;
   if (els.app) els.app.hidden = false;
@@ -1410,17 +1825,10 @@ function showAppForUser(user) {
 
   ensureProfileDefaults(user);
 
-  // Defaults: rango del mes actual
-  const now = new Date();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const y = now.getFullYear();
-  const month = `${y}-${m}`;
-  if (els.filterMonth) els.filterMonth.value = month;
-  const r = setMonthToRange(month);
-  if (r) {
-    if (els.filterStart) els.filterStart.value = r.start;
-    if (els.filterEnd) els.filterEnd.value = r.end;
-  }
+  // Inicio sin filtros: todo lo cargado queda visible desde el primer acceso.
+  if (els.filterMonth) els.filterMonth.value = '';
+  if (els.filterStart) els.filterStart.value = '';
+  if (els.filterEnd) els.filterEnd.value = '';
 
   render();
 }
@@ -1438,11 +1846,9 @@ function showLogin() {
 
 // Inicio
 (() => {
-  const user = getCurrentUser();
-  if (user) {
-    showAppForUser(user);
-    return;
-  }
+  seedJulyNotes();
+  // La sesión es deliberadamente temporal: cada carga vuelve a pedir acceso.
+  clearCurrentUser();
   showLogin();
 })();
 

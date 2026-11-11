@@ -3,9 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bitácora Digital - Actividades</title>
+  <title>Bitácora Digital | Mantenimiento UMSNH</title>
+  <meta name="description" content="Registro y seguimiento de actividades de mantenimiento de la UMSNH." />
   <meta name="theme-color" content="#eaf4fc" />
-  <link rel="stylesheet" href="./css/simple.css?v=21" />
+  <link rel="stylesheet" href="./css/simple.css?v=57" />
+  <link rel="stylesheet" href="./css/final-ui.css?v=7" />
+  <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=1" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -31,8 +35,9 @@
       </div>
 
       <div class="login-main">
+        <div class="login-main-kicker">Acceso al sistema</div>
         <div class="login-main-title">Inicia sesión</div>
-        <div class="login-main-sub">Elige tu usuario para continuar.</div>
+        <div class="login-main-sub">Selecciona tu usuario para continuar con la bitácora.</div>
 
         <form id="login-form" class="login-form">
           <label class="field">
@@ -56,7 +61,7 @@
           <button class="btn" type="submit">Entrar</button>
 
           <details class="login-hint">
-            <summary>Ver contraseña de demostración</summary>
+            <summary>Acceso de demostración</summary>
             <div>Contraseña: <code>123456789</code></div>
           </details>
         </form>
@@ -73,6 +78,7 @@
             <img class="brand-logo brand-logo--fcca" src="./assets/logo_fcca.png" alt="" />
           </div>
           <div class="brand-text">
+            <div class="brand-kicker">PLATAFORMA DE SERVICIOS</div>
             <div class="title">Sistema de Bitácora Digital</div>
             <div class="subtitle">UMSNH - Comisión Académica de Servicios Informáticos · FCCA</div>
             <div class="profileline" id="profileline" hidden></div>
@@ -80,14 +86,14 @@
         </div>
 
         <nav class="topnav" aria-label="Navegación">
-          <button class="navlink is-active" type="button" id="btn-home">Dashboard</button>
-          <button class="navlink" type="button" id="btn-profile">Perfil</button>
-          <button class="navlink" type="button" id="btn-events">Eventos</button>
+          <button class="navlink is-active" type="button" id="btn-home"><span class="nav-icon" aria-hidden="true">▦</span><span>Dashboard</span></button>
+          <button class="navlink" type="button" id="btn-profile"><span class="nav-icon" aria-hidden="true">◉</span><span>Perfil</span></button>
+          <button class="navlink" type="button" id="btn-events"><span class="nav-icon" aria-hidden="true">◷</span><span>Eventos</span></button>
         </nav>
 
         <div class="top-actions">
           <div class="usermenu" id="usermenu" hidden>
-            <button class="userchip" type="button" id="userchip">
+            <button class="userchip" type="button" id="userchip" aria-haspopup="true" aria-expanded="false">
               <span class="userchip-dot" aria-hidden="true"></span>
               <span id="username">Usuario</span>
               <span class="userchip-caret" aria-hidden="true">▾</span>
@@ -107,16 +113,15 @@
       <section class="print-header" id="print-header" hidden aria-hidden="true"></section>
       <section class="print-footer" id="print-footer" hidden aria-hidden="true"></section>
 
-      <section class="page-heading" aria-labelledby="page-title">
-        <div>
-          <div class="eyebrow">Control de mantenimiento</div>
-          <h1 id="page-title">Actividades registradas</h1>
-        </div>
-        <p>Filtra, consulta y prepara tus reportes.</p>
-      </section>
-
       <section class="panel">
         <div class="panel-head">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">Control de mantenimiento</div>
+              <h1 class="section-title">Actividades registradas</h1>
+            </div>
+            <div class="section-note">Filtra, consulta y prepara tus reportes</div>
+          </div>
           <div class="filters filters-compact" aria-label="Filtros de fecha y búsqueda">
             <label class="field">
               <span>Período</span>
@@ -132,7 +137,7 @@
             </label>
             <label class="field field-wide">
               <span>Buscar</span>
-              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." />
+              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." title="Atajo: Ctrl/Cmd + K" />
             </label>
           </div>
 
@@ -165,6 +170,7 @@
               <tr>
                 <th>Fecha</th>
                 <th>Actividad</th>
+                <th>Equipo</th>
                 <th>Ubicación</th>
                 <th>Comisión Académica</th>
                 <th>Responsable(s)</th>
@@ -174,12 +180,23 @@
               </tr>
             </thead>
             <tbody id="rows">
-              <tr><td colspan="8" class="empty">Sin registros todavía.</td></tr>
+              <tr><td colspan="9" class="empty">Sin registros todavía.</td></tr>
             </tbody>
           </table>
         </div>
 
-        <div class="pager" id="pager" aria-label="Paginación"></div>
+        <div class="table-footer">
+          <span class="results-label" id="results-label" aria-live="polite">0 actividades</span>
+          <label class="page-size-control" for="page-size">Mostrar
+            <select id="page-size" aria-label="Actividades por página">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            por página
+          </label>
+          <div class="pager" id="pager" aria-label="Paginación"></div>
+        </div>
       </section>
 
       <section class="panel panel-events" aria-label="Próximos eventos">
@@ -201,18 +218,37 @@
     <!-- Acciones rápidas (burbuja lateral fija) -->
     <div class="fab" id="fab" aria-label="Acciones rápidas">
       <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-expanded="false">
-        Acciones ▾
+        Acciones rápidas <span aria-hidden="true">⌄</span>
       </button>
       <div class="fab-menu" id="fab-menu" hidden>
-        <button class="fab-item fab-item-primary" type="button" id="btn-new">Nueva Actividad</button>
-        <div class="fab-sep" role="separator" aria-hidden="true"></div>
-        <div class="fab-group">Reportes</div>
-        <button class="fab-item" type="button" id="btn-export">Excel (Vertical)</button>
-        <button class="fab-item" type="button" id="btn-export-landscape">Excel (Horizontal)</button>
-        <button class="fab-item" type="button" id="btn-print">Imprimir (Vertical)</button>
-        <button class="fab-item" type="button" id="btn-print-landscape">Imprimir (Horizontal)</button>
+        <button class="fab-item fab-item-primary" type="button" id="btn-new"><span class="action-symbol" aria-hidden="true">+</span>Nueva actividad</button>
+        <button class="fab-item" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span>Captura rápida</button>
+        <details class="fab-section">
+          <summary>Reportes</summary>
+          <div class="fab-section-items">
+            <button class="fab-item" type="button" id="btn-export">Excel · actividades</button>
+            <button class="fab-item" type="button" id="btn-export-events">Excel · eventos</button>
+            <button class="fab-item" type="button" id="btn-print">Imprimir · actividades</button>
+            <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
+          </div>
+        </details>
+        <details class="fab-section">
+          <summary>Más formatos</summary>
+          <div class="fab-section-items">
+            <button class="fab-item" type="button" id="btn-export-landscape">Excel · horizontal</button>
+            <button class="fab-item" type="button" id="btn-print-landscape">Imprimir · horizontal</button>
+          </div>
+        </details>
+        <details class="fab-section">
+          <summary>Respaldo</summary>
+          <div class="fab-section-items">
+            <button class="fab-item" type="button" id="btn-backup">Descargar respaldo</button>
+            <button class="fab-item" type="button" id="btn-restore">Restaurar respaldo</button>
+          </div>
+        </details>
       </div>
     </div>
+    <input type="file" id="backup-file" accept="application/json,.json" hidden />
 
     <!-- Modal actividad -->
     <dialog class="modal" id="modal">
@@ -228,6 +264,7 @@
         <input type="hidden" id="f-id" />
 
         <div class="grid">
+          <div class="form-section-label field-wide">Actividad</div>
           <label class="field">
             <span>Fecha</span>
             <input type="date" id="f-date" required />
@@ -240,9 +277,51 @@
             </select>
           </label>
           <label class="field field-wide">
-            <span>Actividad</span>
-            <textarea id="f-desc" rows="3" placeholder="Ej. Formateo del laboratorio 2 (edificio X). Computadora 6." required></textarea>
+            <span>Qué se va a hacer</span>
+            <textarea id="f-desc" rows="3" placeholder="Ej. Formatear, instalar software o reparar el equipo." required></textarea>
           </label>
+          <label class="field field-wide">
+            <span>Detalle específico del arreglo (opcional)</span>
+            <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
+          </label>
+          <label class="field">
+            <span>Tipo de actividad</span>
+            <select id="f-equipment-type">
+              <option value="Normal">Actividad normal</option>
+              <option value="Computadora">Computadora</option>
+              <option value="Impresora">Impresora</option>
+            </select>
+          </label>
+          <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
+          <label class="field equipment-field" hidden>
+            <span>Número de patrimonio</span>
+            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
+          </label>
+          <label class="field equipment-field" hidden>
+            <span>Tipo de mantenimiento o arreglo</span>
+            <select id="f-maintenance-type">
+              <option value="">No especificado</option>
+              <option value="Preventivo">Preventivo</option>
+              <option value="Correctivo">Correctivo</option>
+              <option value="Formateo">Formateo</option>
+              <option value="Reparación">Reparación</option>
+              <option value="Limpieza interna">Limpieza interna</option>
+              <option value="Instalación">Instalación</option>
+              <option value="Configuración">Configuración</option>
+              <option value="Cambio de componente">Cambio de componente</option>
+              <option value="Diagnóstico">Diagnóstico</option>
+              <option value="Otro arreglo">Otro arreglo</option>
+            </select>
+          </label>
+          <label class="field equipment-field" hidden>
+            <span>Número de serie</span>
+            <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
+          </label>
+          <label class="field field-wide equipment-field" hidden>
+            <span>Especificar otro arreglo (opcional)</span>
+            <input type="text" id="f-maintenance-detail" placeholder="Ej. Cambiar rodillo, ajustar bandeja o reemplazar memoria." />
+          </label>
+          <div class="field field-wide form-section-label">Ubicación y responsables</div>
           <label class="field">
             <span>Ubicación</span>
             <input type="text" id="f-location" placeholder="Ej. Edificio X · Laboratorio 2" />
@@ -341,9 +420,46 @@
         </div>
       </form>
     </dialog>
+
+    <!-- Captura masiva desde notas del pizarrón -->
+    <dialog class="modal" id="bulk-modal">
+      <form method="dialog" class="modal-card" id="bulk-form">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Captura rápida</div>
+            <div class="modal-sub">Pega una actividad por línea. El texto se conserva tal como fue escrito.</div>
+          </div>
+          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="grid">
+          <label class="field">
+            <span>Mes de registro</span>
+            <input type="month" id="bulk-month" required />
+          </label>
+          <label class="field">
+            <span>Estado inicial</span>
+            <select id="bulk-status">
+              <option value="pendiente">Pendiente</option>
+              <option value="completado">Realizada</option>
+            </select>
+          </label>
+          <label class="field field-wide">
+            <span>Actividades</span>
+            <textarea id="bulk-text" rows="10" placeholder="Laptop Dell: formateo\nCPU Lenovo: formateo y limpieza\nAntena del AIV 12: revisión" required></textarea>
+            <small class="field-help">Las líneas que incluyan “listo” se guardarán como Realizadas automáticamente.</small>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-ghost" value="cancel" type="button" id="btn-bulk-cancel">Cancelar</button>
+          <button class="btn" type="submit">Agregar actividades</button>
+        </div>
+      </form>
+    </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=21"></script>
+  <script type="module" src="./js/simple.js?v=57"></script>
 
   <script>
     // Service Worker (opcional)
@@ -351,7 +467,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=21').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=57').catch(() => {});
       } catch {}
     })();
   </script>

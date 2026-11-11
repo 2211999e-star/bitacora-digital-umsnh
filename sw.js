@@ -2,12 +2,13 @@
  * Cache básico para index + assets del modo simple.
  */
 
-const CACHE_VERSION = 'bitacora-simple-v21';
+const CACHE_VERSION = 'bitacora-simple-v57';
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './css/simple.css',
+  './css/reference-design.css',
   './js/simple.js',
   './assets/logo_umich.png',
   './assets/logo_fcca.png',
