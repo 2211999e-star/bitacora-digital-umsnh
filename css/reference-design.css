@@ -394,6 +394,38 @@ body{
 }
 .event-meta{color:#687d90}
 
+/* Dashboard refinements to match the supplied activities screen */
+#app .topbar-inner{
+  width:min(1450px,calc(100% - 48px));
+}
+#app .container{
+  width:min(1380px,calc(100% - 48px));
+  max-width:1380px;
+}
+#app main>.panel .panel-head{
+  padding:32px;
+}
+#app main>.panel .section-heading{
+  margin-bottom:26px;
+}
+#app main>.panel .filters-compact{
+  padding:18px;
+  background:#fff;
+}
+#app main>.panel .filter-row{
+  margin-top:14px;
+}
+#app main>.panel .tab{
+  min-height:42px;
+}
+#app .summary-card{
+  min-height:184px;
+  padding:19px;
+}
+#app .summary-progress strong{
+  color:#c85e43;
+}
+
 @media (min-width:761px) and (max-width:920px){
   .login-card{grid-template-columns:1.05fr .95fr}
   .login-side,.login-main{padding:34px}
