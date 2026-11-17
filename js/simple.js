@@ -3,6 +3,13 @@ const USER_KEY = 'bitacora_simple_v1_user';
 const PROFILE_KEY_PREFIX = 'bitacora_simple_v1_profile_';
 const EVENTS_KEY = 'bitacora_simple_v1_events';
 const SEED_KEY = 'bitacora_simple_v1_whiteboard_seed_v2';
+const API_URL = typeof window.BITACORA_API_URL === 'string' ? window.BITACORA_API_URL.trim() : '';
+
+let serverSessionActive = false;
+let serverRevision = 0;
+let stateSyncTimer = null;
+let stateSyncInFlight = false;
+let stateSyncAgain = false;
 
 const JULY_NOTES = [
   ['Laptop Dell: formateo', 'completado'],
@@ -77,6 +84,7 @@ function clearCurrentUser() {
 }
 
 function seedJulyNotes() {
+  if (API_URL) return;
   const now = new Date().toISOString();
   const initialRecords = JULY_NOTES.map(([desc, status], index) => ({
     id: `julio-2026-${String(index + 1).padStart(2, '0')}`,
@@ -158,6 +166,7 @@ function loadRecords() {
 
 function saveRecords(records) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records || []));
+  scheduleServerSync();
 }
 
 function loadProfile(user) {
@@ -188,6 +197,7 @@ function saveProfile(user, profile) {
   };
   const key = profileKeyFor(user?.id);
   localStorage.setItem(key, JSON.stringify(next));
+  scheduleServerSync();
 }
 
 function ensureProfileDefaults(user) {
@@ -224,6 +234,233 @@ function loadEvents() {
 
 function saveEvents(events) {
   localStorage.setItem(EVENTS_KEY, JSON.stringify(events || []));
+  scheduleServerSync();
+}
+
+function setSyncStatus(message, isError = false) {
+  const status = document.getElementById('sync-status');
+  if (!status) return;
+  status.hidden = !message;
+  status.textContent = message;
+  status.classList.toggle('is-error', isError);
+}
+
+async function apiRequest(action, options = {}) {
+  const response = await fetch(`${API_URL}?action=${encodeURIComponent(action)}`, {
+    credentials: 'same-origin',
+    cache: 'no-store',
+    ...options,
+  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error('La API no respondió con JSON. Revisa la configuración de PHP en Apache.');
+  }
+  if (!response.ok) throw new Error(payload?.error || `Error del servidor (${response.status}).`);
+  return payload;
+}
+
+function readLocalServerState() {
+  const profiles = {};
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (!key?.startsWith(PROFILE_KEY_PREFIX)) continue;
+    const username = key.slice(PROFILE_KEY_PREFIX.length);
+    try {
+      const profile = JSON.parse(localStorage.getItem(key) || 'null');
+      if (profile && typeof profile === 'object' && !Array.isArray(profile)) profiles[username] = profile;
+    } catch {
+      // Omite perfiles locales con JSON inválido durante la migración.
+    }
+  }
+  return { records: loadRecords(), events: loadEvents(), profiles };
+}
+
+function replaceLocalProfiles(profiles) {
+  const keysToRemove = [];
+  for (let index = 0; index < localStorage.length; index += 1) {
+    const key = localStorage.key(index);
+    if (key?.startsWith(PROFILE_KEY_PREFIX)) keysToRemove.push(key);
+  }
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  Object.entries(profiles || {}).forEach(([username, profile]) => {
+    if (!/^[a-z0-9][a-z0-9_-]{2,31}$/i.test(username) || !profile || typeof profile !== 'object') return;
+    localStorage.setItem(profileKeyFor(username), JSON.stringify(profile));
+  });
+}
+
+function applyServerState(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records || []));
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(state.events || []));
+  replaceLocalProfiles(state.profiles);
+}
+
+function scheduleServerSync() {
+  if (!API_URL || !serverSessionActive) return;
+  setSyncStatus('Cambios locales pendientes de sincronización…');
+  window.clearTimeout(stateSyncTimer);
+  stateSyncTimer = window.setTimeout(() => {
+    syncServerState();
+  }, 400);
+}
+
+async function syncServerState() {
+  if (!API_URL || !serverSessionActive) return true;
+  window.clearTimeout(stateSyncTimer);
+  if (stateSyncInFlight) {
+    stateSyncAgain = true;
+    return false;
+  }
+  stateSyncInFlight = true;
+  let success = true;
+  try {
+    do {
+      stateSyncAgain = false;
+      const state = readLocalServerState();
+      const result = await apiRequest('state', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...state, revision: serverRevision }),
+      });
+      serverRevision = result.revision;
+    } while (stateSyncAgain);
+    setSyncStatus('Sincronizado con el servidor.');
+  } catch (error) {
+    success = false;
+    setSyncStatus(error.message, true);
+  } finally {
+    stateSyncInFlight = false;
+  }
+  return success;
+}
+
+async function loginToServer(username, password) {
+  const result = await apiRequest('login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  const state = result.state;
+  serverRevision = Number(state?.revision) || 0;
+  serverSessionActive = true;
+
+  const local = readLocalServerState();
+  const hasLocalData = local.records.length > 0 || local.events.length > 0 || Object.keys(local.profiles).length > 0;
+  const serverIsEmpty = serverRevision === 0
+    && (state.records?.length || 0) === 0
+    && (state.events?.length || 0) === 0
+    && Object.keys(state.profiles || {}).length === 0;
+  if (serverIsEmpty && hasLocalData && confirm('La base de datos está vacía y este navegador tiene datos locales. ¿Quieres copiarlos al servidor para iniciar la bitácora compartida?')) {
+    applyServerState(local);
+    if (!await syncServerState()) {
+      serverSessionActive = false;
+      throw new Error('No se pudieron migrar los datos locales. No se guardaron en el servidor.');
+    }
+  } else {
+    applyServerState(state);
+  }
+  return result.user;
+}
+
+function setUsersMessage(message, isError = false) {
+  const element = document.getElementById('users-message');
+  if (!element) return;
+  element.hidden = !message;
+  element.textContent = message;
+  element.classList.toggle('is-error', isError);
+}
+
+function renderAdminUsers(users) {
+  const list = document.getElementById('users-list');
+  if (!list) return;
+  if (!users.length) {
+    list.textContent = 'No hay cuentas registradas.';
+    return;
+  }
+  list.innerHTML = users.map((user) => `
+    <article class="admin-user-row">
+      <div class="admin-user-info">
+        <strong>${escapeHtml(user.display_name)}</strong>
+        <span>@${escapeHtml(user.username)}${user.role ? ` · ${escapeHtml(user.role)}` : ''}</span>
+      </div>
+      <form class="admin-password-form" data-user-password-form>
+        <input type="hidden" name="username" value="${escapeHtml(user.username)}" />
+        <label class="field">
+          <span>Nueva contraseña</span>
+          <input type="password" name="password" minlength="12" maxlength="1024" autocomplete="new-password" placeholder="Mínimo 12 caracteres" required />
+        </label>
+        <button class="btn btn-ghost" type="submit">Cambiar contraseña</button>
+      </form>
+    </article>
+  `).join('');
+}
+
+async function loadAdminUsers() {
+  setUsersMessage('Cargando cuentas…');
+  try {
+    const result = await apiRequest('users');
+    renderAdminUsers(Array.isArray(result.users) ? result.users : []);
+    setUsersMessage('');
+  } catch (error) {
+    setUsersMessage(error.message || 'No se pudieron cargar las cuentas.', true);
+  }
+}
+
+function openUserAdministration() {
+  if (!API_URL || !getCurrentUser()?.is_admin) return;
+  document.getElementById('users-modal')?.showModal();
+  setUsersMessage('');
+  loadAdminUsers();
+}
+
+async function createManagedUser(form) {
+  const formData = new FormData(form);
+  const submit = form.querySelector('button[type="submit"]');
+  if (submit) submit.disabled = true;
+  setUsersMessage('');
+  try {
+    const result = await apiRequest('users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: formData.get('username'),
+        display_name: formData.get('display_name'),
+        role: formData.get('role'),
+        password: formData.get('password'),
+      }),
+    });
+    form.reset();
+    await loadAdminUsers();
+    setUsersMessage(result.message || 'Usuario agregado.');
+  } catch (error) {
+    setUsersMessage(error.message || 'No se pudo agregar el usuario.', true);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
+}
+
+async function changeManagedPassword(form) {
+  const formData = new FormData(form);
+  const submit = form.querySelector('button[type="submit"]');
+  if (submit) submit.disabled = true;
+  setUsersMessage('');
+  try {
+    const result = await apiRequest('user-password', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: formData.get('username'),
+        password: formData.get('password'),
+      }),
+    });
+    form.reset();
+    setUsersMessage(result.message || 'Contraseña actualizada.');
+  } catch (error) {
+    setUsersMessage(error.message || 'No se pudo cambiar la contraseña.', true);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
 }
 
 function downloadBlob(filename, blob) {
@@ -445,7 +682,7 @@ function downloadBackup() {
     exported_at: new Date().toISOString(),
     records: loadRecords(),
     events: loadEvents(),
-    profiles: Object.fromEntries(Object.values(USERS).map((user) => [user.id, loadProfile(user)])),
+    profiles: readLocalServerState().profiles,
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
   downloadBlob(`respaldo_bitacora_${todayISO()}.json`, blob);
@@ -473,16 +710,16 @@ async function restoreBackup(file) {
 
     saveRecords(backup.records);
     saveEvents(backup.events);
-    Object.entries(backup.profiles || {}).forEach(([id, profile]) => {
-      if (!USERS[id] || !profile || typeof profile !== 'object') return;
-      saveProfile(USERS[id], profile);
-    });
+    replaceLocalProfiles(backup.profiles);
+    if (API_URL && serverSessionActive && !await syncServerState()) {
+      throw new Error('El respaldo quedó en este navegador, pero no se sincronizó con el servidor.');
+    }
     uiState.page = 1;
     render();
-    toast('Respaldo restaurado correctamente.');
+    toast(API_URL ? 'Respaldo restaurado y sincronizado con el servidor.' : 'Respaldo restaurado correctamente.');
   } catch (error) {
     console.error('No se pudo restaurar el respaldo:', error);
-    alert('No se pudo restaurar. Verifica que seleccionaste un respaldo válido de esta aplicación.');
+    alert(error.message || 'No se pudo restaurar. Verifica que seleccionaste un respaldo válido de esta aplicación.');
   } finally {
     if (els.backupFile) els.backupFile.value = '';
   }
@@ -568,6 +805,7 @@ const els = {
   usermenuMeta: document.getElementById('usermenu-meta'),
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
+  btnAdminUsers: document.getElementById('btn-admin-users'),
   profileLine: document.getElementById('profileline'),
   btnHome: document.getElementById('btn-home'),
   btnReports: document.getElementById('btn-reports'),
@@ -640,6 +878,10 @@ const els = {
   pArea: document.getElementById('p-area'),
   pRole: document.getElementById('p-role'),
   btnProfileCancel: document.getElementById('btn-profile-cancel'),
+  usersModal: document.getElementById('users-modal'),
+  btnUsersClose: document.getElementById('btn-users-close'),
+  userCreateForm: document.getElementById('user-create-form'),
+  usersList: document.getElementById('users-list'),
 
   // Eventos
   eventsList: document.getElementById('events-list'),
@@ -684,6 +926,10 @@ function toast(msg) {
   el.classList.add('is-show');
   window.clearTimeout(__toastTimer);
   __toastTimer = window.setTimeout(() => el.classList.remove('is-show'), 1500);
+}
+
+function toastSaved(message) {
+  toast(API_URL ? `${message} Guardado localmente; sincronizando con el servidor…` : message);
 }
 
 function getFilters() {
@@ -1017,7 +1263,7 @@ function addBulkRecords() {
   saveRecords(records);
   uiState.page = 1;
   render();
-  toast(`${lines.length} actividades agregadas.`);
+  toastSaved(`${lines.length} actividades agregadas.`);
   return true;
 }
 
@@ -1379,7 +1625,7 @@ function saveProfileFromForm() {
   };
   saveProfile(user, next);
   renderProfileLine();
-  toast('Perfil guardado.');
+  toastSaved('Perfil guardado.');
 }
 
 function preparePrintHeader(folio) {
@@ -1738,14 +1984,39 @@ els.btnProfile?.addEventListener('click', () => {
   setActiveNav('btn-profile');
   openProfile();
 });
+els.btnAdminUsers?.addEventListener('click', () => {
+  els.usermenuMenu.hidden = true;
+  els.userchip?.setAttribute('aria-expanded', 'false');
+  openUserAdministration();
+});
+els.btnUsersClose?.addEventListener('click', () => els.usersModal?.close());
+els.userCreateForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  createManagedUser(els.userCreateForm);
+});
+els.usersList?.addEventListener('submit', (event) => {
+  const form = event.target?.closest?.('[data-user-password-form]');
+  if (!form) return;
+  event.preventDefault();
+  changeManagedPassword(form);
+});
 els.btnEvents?.addEventListener('click', () => {
   closeReportsMenu();
   setActiveNav('btn-events');
   // Solo baja a la sección de eventos (sin popup)
   document.querySelector('.panel-events')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
 });
-els.btnLogout?.addEventListener('click', () => {
+els.btnLogout?.addEventListener('click', async () => {
   clearCurrentUser();
+  if (API_URL) {
+    try {
+      await apiRequest('logout', { method: 'POST' });
+    } catch (error) {
+      console.error('No se pudo cerrar la sesión remota:', error);
+      alert('No se pudo cerrar la sesión en el servidor. Cierra el navegador y revisa la conexión si el problema continúa.');
+    }
+  }
+  serverSessionActive = false;
   location.reload();
 });
 els.btnClear.addEventListener('click', () => {
@@ -1838,7 +2109,7 @@ els.form.addEventListener('submit', (e) => {
   if (!upsertFromForm()) return;
   els.modal.close();
   render();
-  toast('Guardado.');
+  toastSaved('Actividad guardada.');
 });
 
 els.btnCancel.addEventListener('click', () => els.modal.close());
@@ -1847,7 +2118,7 @@ els.btnDelete.addEventListener('click', () => {
   deleteFromForm();
   els.modal.close();
   render();
-  toast('Eliminado.');
+  toastSaved('Actividad eliminada.');
 });
 
 document.addEventListener('click', (e) => {
@@ -1860,7 +2131,7 @@ document.addEventListener('click', (e) => {
     markCompleted(id);
     uiState.page = 1;
     render();
-    toast('Marcado como realizada.');
+    toastSaved('Actividad marcada como realizada.');
   }
 });
 
@@ -1903,7 +2174,7 @@ els.eventForm?.addEventListener('submit', (e) => {
   if (!upsertEventFromForm()) return;
   els.eventModal?.close();
   renderEvents();
-  toast('Evento guardado.');
+  toastSaved('Evento guardado.');
 });
 els.btnEventCancel?.addEventListener('click', () => els.eventModal?.close());
 els.btnEventDelete?.addEventListener('click', () => {
@@ -1911,7 +2182,7 @@ els.btnEventDelete?.addEventListener('click', () => {
   deleteEventFromForm();
   els.eventModal?.close();
   renderEvents();
-  toast('Evento eliminado.');
+  toastSaved('Evento eliminado.');
 });
 
 els.bulkForm?.addEventListener('submit', (e) => {
@@ -1927,6 +2198,7 @@ function showAppForUser(user) {
   if (els.usermenu) els.usermenu.hidden = false;
   if (els.username) els.username.textContent = user?.name || 'Usuario';
   if (els.btnLogout) els.btnLogout.hidden = false;
+  if (els.btnAdminUsers) els.btnAdminUsers.hidden = !API_URL || !user?.is_admin;
 
   ensureProfileDefaults(user);
 
@@ -1952,6 +2224,11 @@ function showLogin() {
 // Inicio
 (() => {
   seedJulyNotes();
+  if (API_URL) {
+    const hint = document.querySelector('.login-hint');
+    if (hint) hint.hidden = true;
+    setSyncStatus('');
+  }
   // La sesión es deliberadamente temporal: cada carga vuelve a pedir acceso.
   clearCurrentUser();
   showLogin();
@@ -1961,14 +2238,27 @@ els.loginForm?.addEventListener('submit', (e) => {
   e.preventDefault();
   const key = safeStr(els.loginUser?.value).toLowerCase();
   const pass = safeStr(els.loginPass?.value);
-  if (pass !== '123456789') {
-    alert('Contraseña incorrecta.');
-    els.loginPass?.focus();
-    return;
-  }
-  const user = USERS[key] || USERS.kevin;
-  setCurrentUser(user);
-  showAppForUser(user);
+  const submitButton = els.loginForm.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.disabled = true;
+  (async () => {
+    try {
+      let user;
+      if (API_URL) {
+        user = await loginToServer(key, pass);
+      } else {
+        if (pass !== '123456789') throw new Error('Contraseña incorrecta.');
+        user = USERS[key];
+        if (!user) throw new Error('En el modo local solo están disponibles Iván y Kevin.');
+      }
+      setCurrentUser(user);
+      showAppForUser(user);
+    } catch (error) {
+      alert(error.message || 'No se pudo iniciar sesión.');
+      els.loginPass?.focus();
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  })();
 });
 
 els.loginShowPass?.addEventListener('change', () => {

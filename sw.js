@@ -2,7 +2,7 @@
  * Cache básico para index + assets del modo simple.
  */
 
-const CACHE_VERSION = 'bitacora-simple-v69';
+const CACHE_VERSION = 'bitacora-simple-v70';
 
 const PRECACHE_URLS = [
   './',
@@ -10,6 +10,7 @@ const PRECACHE_URLS = [
   './css/simple.css',
   './css/reference-design.css',
   './js/simple.js',
+  './js/config.js',
   './assets/logo_umich.png',
   './assets/logo_fcca.png',
 ];
@@ -43,6 +44,7 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.includes('/api/')) return;
 
   event.respondWith(
     (async () => {

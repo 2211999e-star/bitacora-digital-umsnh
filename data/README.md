@@ -1,6 +1,6 @@
 # Datos de la bitacora
 
-Esta carpeta es la fuente organizada de registros para una futura sincronizacion con una base de datos en la nube.
+Esta carpeta conserva registros transcritos de las fotografias del pizarron. La aplicacion incluye una API propia para sincronizar los datos con MariaDB en instalaciones Ubuntu/Apache.
 
 ## Archivos
 
@@ -21,4 +21,4 @@ Esta carpeta es la fuente organizada de registros para una futura sincronizacion
 }
 ```
 
-La aplicacion actualmente copia los registros iniciales a `localStorage` para funcionar sin servidor. Esta carpeta deja una fuente estable para migrar despues a Supabase, Firebase o una API propia.
+En GitHub Pages los registros iniciales se copian a `localStorage` para que la demostracion funcione sin servidor. En el modo MariaDB no se insertan automaticamente; migra los datos existentes con la opcion de respaldo de la aplicacion.

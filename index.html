@@ -9,12 +9,12 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=10" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=11" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
 
-  <!-- Login simple (local) -->
+  <!-- Inicio de sesión local o en servidor, según js/config.js -->
   <section class="login" id="login" hidden>
     <div class="login-card">
       <div class="login-side">
@@ -37,15 +37,12 @@
       <div class="login-main">
         <div class="login-main-kicker">Acceso al sistema</div>
         <div class="login-main-title">Inicia sesión</div>
-        <div class="login-main-sub">Selecciona tu usuario para continuar con la bitácora.</div>
+        <div class="login-main-sub">Escribe tu nombre de usuario para continuar con la bitácora.</div>
 
         <form id="login-form" class="login-form">
           <label class="field">
             <span>Usuario</span>
-            <select id="login-user" required>
-              <option value="ivan">Iván</option>
-              <option value="kevin">Kevin</option>
-            </select>
+            <input type="text" id="login-user" autocomplete="username" minlength="3" maxlength="32" placeholder="Ej. ivan" required />
           </label>
 
           <label class="field">
@@ -70,6 +67,7 @@
   </section>
 
   <div id="app" hidden>
+    <div id="sync-status" class="sync-status" role="status" aria-live="polite" hidden></div>
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
@@ -101,6 +99,7 @@
             <div class="usermenu-menu" id="usermenu-menu" hidden>
               <div class="usermenu-title" id="usermenu-title">—</div>
               <div class="usermenu-meta" id="usermenu-meta">—</div>
+              <button class="btn btn-ghost reports-item" type="button" id="btn-admin-users" hidden>Administrar usuarios</button>
               <button class="btn btn-ghost reports-item" type="button" id="btn-logout">Cerrar sesión</button>
             </div>
           </div>
@@ -413,6 +412,48 @@
       </form>
     </dialog>
 
+    <dialog class="modal" id="users-modal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Administrar usuarios</div>
+            <div class="modal-sub">Solo Iván puede crear cuentas y cambiar sus contraseñas. Los cambios se guardan en MariaDB.</div>
+          </div>
+          <button class="icon-btn" type="button" id="btn-users-close" aria-label="Cerrar">✕</button>
+        </div>
+
+        <form id="user-create-form">
+          <div class="grid">
+            <label class="field">
+              <span>Nombre de usuario</span>
+              <input type="text" id="new-user-username" name="username" minlength="3" maxlength="32" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{2,31}" autocomplete="off" required />
+            </label>
+            <label class="field">
+              <span>Nombre para mostrar</span>
+              <input type="text" id="new-user-name" name="display_name" maxlength="120" required />
+            </label>
+            <label class="field">
+              <span>Rol / cargo</span>
+              <input type="text" id="new-user-role" name="role" maxlength="160" />
+            </label>
+            <label class="field">
+              <span>Contraseña inicial</span>
+              <input type="password" id="new-user-password" name="password" minlength="12" maxlength="1024" autocomplete="new-password" required />
+            </label>
+          </div>
+          <div class="modal-actions">
+            <button class="btn" type="submit">Agregar usuario</button>
+          </div>
+        </form>
+
+        <p id="users-message" role="status" aria-live="polite" hidden></p>
+        <section aria-labelledby="users-list-title">
+          <h3 id="users-list-title">Cuentas registradas</h3>
+          <div id="users-list"></div>
+        </section>
+      </div>
+    </dialog>
+
     <!-- Evento -->
     <dialog class="modal" id="event-modal">
       <form method="dialog" class="modal-card" id="event-form">
@@ -487,7 +528,8 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=63"></script>
+  <script src="./js/config.js?v=1"></script>
+  <script type="module" src="./js/simple.js?v=65"></script>
 
   <script>
     // Service Worker (opcional)
@@ -495,7 +537,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=69').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=70').catch(() => {});
       } catch {}
     })();
   </script>

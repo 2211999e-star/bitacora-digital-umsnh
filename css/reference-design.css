@@ -2197,3 +2197,86 @@ body{
     transition:none;
   }
 }
+
+#sync-status{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:9999;
+  max-width:min(420px,calc(100vw - 32px));
+  padding:10px 14px;
+  border:1px solid #b8d7f0;
+  border-radius:12px;
+  background:#eff8ff;
+  color:#164e78;
+  box-shadow:0 8px 24px rgba(15,46,74,.14);
+  font-size:13px;
+}
+
+#sync-status.is-error{
+  border-color:#efb8b8;
+  background:#fff1f1;
+  color:#9b2424;
+}
+
+#users-modal .modal-card{
+  max-width:760px;
+}
+
+#user-create-form .modal-actions{
+  justify-content:flex-start;
+  padding-top:12px;
+}
+
+#users-list{
+  display:grid;
+  gap:12px;
+  margin-top:12px;
+}
+
+.admin-user-row{
+  display:grid;
+  grid-template-columns:minmax(150px,1fr) minmax(280px,1.4fr);
+  gap:14px;
+  align-items:center;
+  padding:14px;
+  border:1px solid #dce8f1;
+  border-radius:12px;
+  background:#f8fbfd;
+}
+
+.admin-user-info{
+  display:grid;
+  gap:4px;
+  overflow-wrap:anywhere;
+}
+
+.admin-user-info span{
+  color:#657b8e;
+  font-size:13px;
+}
+
+.admin-password-form{
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+}
+
+.admin-password-form .field{
+  flex:1;
+  min-width:0;
+}
+
+#users-message.is-error{
+  color:#9b2424;
+}
+
+@media(max-width:640px){
+  .admin-user-row{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .admin-password-form{
+    align-items:stretch;
+    flex-direction:column;
+  }
+}
