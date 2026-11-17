@@ -66,24 +66,11 @@ const USERS = {
 
 const PREVENTIVE_TASKS = [
   'Limpieza interna',
-  'Limpieza externa',
-  'Revisión de componentes',
-  'Actualización de sistema y programas',
+  'Limpieza de software',
+  'Actualización de sistema',
   'Revisión de antivirus',
-  'Optimización del equipo',
-  'Revisión de conexiones y cableado',
-  'Respaldo preventivo',
-];
-
-const CORRECTIVE_TASKS = [
-  'Diagnóstico de falla',
-  'Reparación de componente',
-  'Cambio de componente',
-  'Reinstalación de sistema o programa',
-  'Recuperación de información',
-  'Corrección de conexión o red',
-  'Reparación de impresora',
-  'Corrección de configuración',
+  'Revisión de disco',
+  'Otros',
 ];
 
 const GENERAL_ACTIVITIES = [
@@ -187,6 +174,28 @@ function todayISO() {
 
 function safeStr(v) {
   return String(v ?? '').trim();
+}
+
+function nestedValue(record, group, key, legacyKey = '') {
+  return safeStr(record?.[group]?.[key] || (legacyKey ? record?.[legacyKey] : ''));
+}
+
+function recordCategory(record) {
+  const saved = safeStr(record?.tipoRegistro || record?.record_type).toLowerCase();
+  if (['general', 'preventivo', 'correctivo', 'recoleccion'].includes(saved)) return saved;
+  const legacy = safeStr(record?.maintenance_type).toLowerCase();
+  if (legacy.includes('correctivo')) return 'correctivo';
+  if (legacy.includes('preventivo')) return 'preventivo';
+  if (legacy && legacy !== 'sin especificar') return 'preventivo';
+  return 'general';
+}
+
+function isCompletedStatus(status) {
+  return ['completada', 'completado'].includes(safeStr(status).toLowerCase());
+}
+
+function isCancelledStatus(status) {
+  return safeStr(status).toLowerCase() === 'cancelada';
 }
 
 function profileKeyFor(userId) {
@@ -803,21 +812,36 @@ function formatDateHuman(dateISO) {
 function matchesSearch(rec, q) {
   const query = safeStr(q).toLowerCase();
   if (!query) return true;
+  const equipment = rec.equipo || {};
+  const maintenance = rec.mantenimiento || {};
+  const location = rec.ubicacion || {};
   const hay = [
     rec.desc,
     rec.action_detail,
-    rec.location,
-    rec.area,
-    rec.assigned_to,
+    rec.location || location.lugar,
+    rec.area || location.area,
+    rec.assigned_to || rec.tecnicos,
+    rec.responsable_area || location.responsableArea,
+    rec.recogidoPor,
     rec.equipment_type,
+    rec.device_type || equipment.tipo,
+    rec.tipoRegistro,
     rec.general_activity,
-    rec.inventory_number,
-    rec.equipment_description,
+    rec.tipoActividadGeneral,
+    rec.inventory_number || equipment.clavePatrimonio,
+    rec.equipment_description || equipment.descripcion,
     rec.brand,
+    equipment.marca,
     rec.model,
+    equipment.modelo,
     rec.maintenance_type,
     rec.maintenance_detail,
+    maintenance.falla,
+    maintenance.diagnostico,
+    maintenance.solucion,
+    maintenance.refacciones,
     rec.serial_number,
+    equipment.numeroSerie,
     rec.created_by,
     rec.status,
     rec.date,
@@ -830,8 +854,26 @@ function matchesSearch(rec, q) {
 
 function statusBadge(status) {
   const st = safeStr(status).toLowerCase();
-  if (st === 'completado') return `<span class="badge ok">Realizada</span>`;
-  return `<span class="badge todo">Pendiente</span>`;
+  const labels = {
+    pendiente: ['Pendiente', 'todo'],
+    en_proceso: ['En proceso', 'progress'],
+    completada: ['Completada', 'ok'],
+    completado: ['Realizada', 'ok'],
+    cancelada: ['Cancelada', 'cancelled'],
+  };
+  const [label, className] = labels[st] || ['Pendiente', 'todo'];
+  return `<span class="badge ${className}">${label}</span>`;
+}
+
+function statusLabel(status) {
+  const st = safeStr(status).toLowerCase();
+  return ({
+    pendiente: 'Pendiente',
+    en_proceso: 'En proceso',
+    completada: 'Completada',
+    completado: 'Realizada',
+    cancelada: 'Cancelada',
+  })[st] || 'Pendiente';
 }
 
 function sortNewest(a, b) {
@@ -913,25 +955,52 @@ const els = {
   fStatus: document.getElementById('f-status'),
   fDesc: document.getElementById('f-desc'),
   fActionDetail: document.getElementById('f-action-detail'),
-  fEquipmentType: document.getElementById('f-equipment-type'),
+  fEquipmentType: document.getElementById('f-record-type'),
+  fDeviceType: document.getElementById('f-device-type'),
   fEquipmentDescription: document.getElementById('f-equipment-description'),
   fBrand: document.getElementById('f-brand'),
   fModel: document.getElementById('f-model'),
   maintenanceSection: document.getElementById('maintenance-section'),
-  maintenanceSectionTitle: document.getElementById('maintenance-section-title'),
   generalActivitySection: document.getElementById('general-activity-section'),
   fGeneralActivity: document.getElementById('f-general-activity'),
   generalActivityCustomField: document.getElementById('general-activity-custom-field'),
   fGeneralActivityCustom: document.getElementById('f-general-activity-custom'),
   fInventoryNumber: document.getElementById('f-inventory-number'),
-  fMaintenanceType: document.getElementById('f-maintenance-type'),
-  fMaintenanceTask: document.getElementById('f-maintenance-task'),
-  fMaintenanceDetail: document.getElementById('f-maintenance-detail'),
-  maintenanceCustomField: document.getElementById('maintenance-custom-field'),
   fSerialNumber: document.getElementById('f-serial-number'),
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
   fAssigned: document.getElementById('f-assigned'),
+  equipmentSection: document.getElementById('equipment-section'),
+  preventiveFields: document.getElementById('preventive-fields'),
+  correctiveFields: document.getElementById('corrective-fields'),
+  collectionSection: document.getElementById('collection-section'),
+  locationSection: document.getElementById('location-section'),
+  observationsField: document.getElementById('observations-field'),
+  fPreventiveOther: document.getElementById('f-preventive-other'),
+  fPreventiveOtherDetail: document.getElementById('f-preventive-other-detail'),
+  preventiveOtherField: document.getElementById('preventive-other-field'),
+  fNextMaintenance: document.getElementById('f-next-maintenance'),
+  fReportedFailure: document.getElementById('f-reported-failure'),
+  fDiagnosis: document.getElementById('f-diagnosis'),
+  fSolution: document.getElementById('f-solution'),
+  fParts: document.getElementById('f-parts'),
+  fObservations: document.getElementById('f-observations'),
+  retireEquipmentField: document.getElementById('retire-equipment-field'),
+  fRetireEquipment: document.getElementById('f-retire-equipment'),
+  fCollectedBy: document.getElementById('f-collected-by'),
+  fCollectedDate: document.getElementById('f-collected-date'),
+  fDeliveryDate: document.getElementById('f-delivery-date'),
+  fReceivedBy: document.getElementById('f-received-by'),
+  collectedDateField: document.getElementById('collected-date-field'),
+  deliveryDateField: document.getElementById('delivery-date-field'),
+  receivedByField: document.getElementById('received-by-field'),
+  fAreaResponsible: document.getElementById('f-area-responsible'),
+  fAreaRole: document.getElementById('f-area-role'),
+  fAreaContact: document.getElementById('f-area-contact'),
+  inventoryWarning: document.getElementById('inventory-warning'),
+  btnSave: document.getElementById('btn-save'),
+  saveHint: document.getElementById('save-hint'),
+  btnModalClose: document.getElementById('btn-modal-close'),
 
   // Perfil
   profileModal: document.getElementById('profile-modal'),
@@ -973,6 +1042,7 @@ const uiState = {
   pageSize: 10,
 };
 
+let formInitialSnapshot = '';
 let __toastTimer = null;
 function toast(msg) {
   const text = safeStr(msg);
@@ -1010,14 +1080,25 @@ function getFilters() {
 
 function matchesRecordType(record, type) {
   if (!type) return true;
-  const recordType = safeStr(record.equipment_type)
-    || (record.maintenance_type ? 'Mantenimiento' : 'Normal');
-  return recordType === type;
+  const category = recordCategory(record);
+  const equipmentType = safeStr(record?.equipo?.tipo || record.device_type || record.equipment_type);
+  if (type === 'Normal') return category === 'general';
+  if (type === 'Mantenimiento') return category === 'preventivo' || category === 'correctivo';
+  if (type === 'Computadora') return equipmentType === 'Computadora';
+  if (type === 'Impresora') return equipmentType === 'Impresora';
+  return equipmentType === type || category === type.toLowerCase();
 }
 
 function matchesMaintenance(record, maintenance) {
   if (!maintenance) return true;
   return safeStr(record.maintenance_type).toLowerCase() === maintenance.toLowerCase();
+}
+
+function matchesStatus(record, status) {
+  const saved = safeStr(record.status).toLowerCase();
+  if (status === 'pendiente') return ['pendiente', 'en_proceso'].includes(saved);
+  if (status === 'completado') return isCompletedStatus(saved);
+  return saved === status;
 }
 
 function updateCounts(records) {
@@ -1029,8 +1110,8 @@ function updateCounts(records) {
     .filter((r) => matchesMaintenance(r, maintenance));
 
   const all = base.length;
-  const pend = base.filter((r) => safeStr(r.status).toLowerCase() !== 'completado').length;
-  const done = base.filter((r) => safeStr(r.status).toLowerCase() === 'completado').length;
+  const pend = base.filter((r) => ['pendiente', 'en_proceso'].includes(safeStr(r.status).toLowerCase())).length;
+  const done = base.filter((r) => isCompletedStatus(r.status)).length;
 
   if (els.countAll) els.countAll.textContent = String(all);
   if (els.countPend) els.countPend.textContent = String(pend);
@@ -1040,7 +1121,7 @@ function updateCounts(records) {
 function filteredRecords(records) {
   const { start, end, q, status, recordType, maintenance } = getFilters();
   return (records || [])
-    .filter((r) => (status ? safeStr(r.status).toLowerCase() === status : true))
+    .filter((r) => (status ? matchesStatus(r, status) : true))
     .filter((r) => (start || end ? inRange(r.date, start, end) : true))
     .filter((r) => matchesSearch(r, q))
     .filter((r) => matchesRecordType(r, recordType))
@@ -1050,8 +1131,8 @@ function filteredRecords(records) {
 
 function summarizeRecords(list) {
   const all = (list || []).length;
-  const pend = (list || []).filter((r) => safeStr(r.status).toLowerCase() !== 'completado').length;
-  const done = (list || []).filter((r) => safeStr(r.status).toLowerCase() === 'completado').length;
+  const pend = (list || []).filter((r) => ['pendiente', 'en_proceso'].includes(safeStr(r.status).toLowerCase())).length;
+  const done = (list || []).filter((r) => isCompletedStatus(r.status)).length;
   return { all, pend, done };
 }
 
@@ -1209,7 +1290,7 @@ function render() {
         : '—';
       const createdBy = safeStr(r.created_by) || '—';
       const st = safeStr(r.status).toLowerCase();
-      const canComplete = st !== 'completado';
+      const canComplete = !isCompletedStatus(st) && !isCancelledStatus(st);
 
       return `
         <tr>
@@ -1275,23 +1356,80 @@ function maintenanceSummary(record) {
   return [maintenance, general].filter(Boolean).join(' | ') || type;
 }
 
-function updateEquipmentFields() {
-  const type = safeStr(els.fEquipmentType.value);
-  const isEquipment = ['Computadora', 'Impresora'].includes(type);
-  const isMaintenance = type !== 'Normal';
-  if (els.generalActivitySection) els.generalActivitySection.hidden = type !== 'Normal';
-  if (els.maintenanceSection) els.maintenanceSection.hidden = !isMaintenance;
-  if (els.maintenanceSectionTitle) els.maintenanceSectionTitle.hidden = !isMaintenance;
-  if (els.fMaintenanceType) els.fMaintenanceType.required = isMaintenance;
-  if (els.fMaintenanceTask) els.fMaintenanceTask.required = isMaintenance;
-  document.querySelectorAll('.equipment-field').forEach((field) => {
-    field.hidden = !isEquipment;
-  });
-  if (!isMaintenance) {
-    els.fMaintenanceType.value = '';
-    els.fMaintenanceDetail.value = '';
-    updateMaintenanceTaskOptions();
+function formCategory() {
+  return safeStr(els.fEquipmentType?.value) || 'general';
+}
+
+function isEquipmentRecord() {
+  return formCategory() !== 'general';
+}
+
+function isMaintenanceRecord() {
+  return ['preventivo', 'correctivo'].includes(formCategory());
+}
+
+function addMonthsToDate(dateValue, months) {
+  const [year, month, day] = safeStr(dateValue || todayISO()).split('-').map(Number);
+  if (!year || !month || !day) return todayISO();
+  const targetMonth = new Date(year, month - 1 + months, 1);
+  const lastDay = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate();
+  targetMonth.setDate(Math.min(day, lastDay));
+  return `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, '0')}-${String(targetMonth.getDate()).padStart(2, '0')}`;
+}
+
+function updateFormSections() {
+  const category = formCategory();
+  const isGeneral = category === 'general';
+  const isPreventive = category === 'preventivo';
+  const isCorrective = category === 'correctivo';
+  const isCollection = category === 'recoleccion';
+  const equipmentRequired = !isGeneral;
+  const wasPreventive = els.preventiveFields && !els.preventiveFields.hidden;
+
+  if (els.generalActivitySection) els.generalActivitySection.hidden = !isGeneral;
+  if (els.equipmentSection) els.equipmentSection.hidden = isGeneral;
+  if (els.maintenanceSection) els.maintenanceSection.hidden = !isMaintenanceRecord();
+  if (els.preventiveFields) {
+    els.preventiveFields.hidden = !isPreventive;
+    els.preventiveFields.disabled = !isPreventive;
   }
+  if (els.correctiveFields) {
+    els.correctiveFields.hidden = !isCorrective;
+    els.correctiveFields.disabled = !isCorrective;
+  }
+  if (els.observationsField) els.observationsField.hidden = !isMaintenanceRecord();
+  if (els.fGeneralActivity) els.fGeneralActivity.required = isGeneral;
+  if (els.fInventoryNumber) els.fInventoryNumber.required = equipmentRequired;
+  if (els.fDeviceType) els.fDeviceType.required = equipmentRequired;
+  if (els.fReportedFailure) els.fReportedFailure.required = isCorrective;
+
+  if (els.retireEquipmentField) els.retireEquipmentField.hidden = !isCorrective;
+  if (els.fRetireEquipment) {
+    els.fRetireEquipment.disabled = !isCorrective;
+    if (isCollection) els.fRetireEquipment.value = 'si';
+  }
+  const hasRetirement = isCorrective && (
+    safeStr(els.fRetireEquipment?.value) === 'si'
+    || Boolean(safeStr(els.fCollectedBy?.value))
+  );
+  const showCollection = isCollection || hasRetirement;
+  const showCollectionSection = isCollection || isCorrective;
+  if (els.collectionSection) els.collectionSection.hidden = !showCollectionSection;
+  if (els.fCollectedBy) els.fCollectedBy.disabled = !showCollectionSection;
+  if (els.fCollectedDate) els.fCollectedDate.disabled = !showCollection;
+  if (els.fDeliveryDate) els.fDeliveryDate.disabled = !showCollection;
+  if (els.fReceivedBy) els.fReceivedBy.disabled = !showCollection;
+  if (els.collectedDateField) els.collectedDateField.hidden = !showCollection;
+  if (els.deliveryDateField) els.deliveryDateField.hidden = !showCollection;
+  if (els.receivedByField) els.receivedByField.hidden = !showCollection;
+  if (els.locationSection) els.locationSection.hidden = false;
+  if (els.preventiveOtherField) els.preventiveOtherField.hidden = !Boolean(els.fPreventiveOther?.checked);
+  if (els.fPreventiveOtherDetail) els.fPreventiveOtherDetail.required = isPreventive && Boolean(els.fPreventiveOther?.checked);
+  if (isPreventive && !wasPreventive && els.fNextMaintenance && !els.fNextMaintenance.value) {
+    els.fNextMaintenance.value = addMonthsToDate(els.fDate?.value || todayISO(), 6);
+  }
+
+  syncActivityFormState();
 }
 
 function updateGeneralActivityOptions(selectedValue = '') {
@@ -1314,73 +1452,140 @@ function updateGeneralActivityOptions(selectedValue = '') {
 }
 
 function updateGeneralActivityCustomField() {
-  const isCustom = els.fGeneralActivity?.value === '__custom__';
+  const isCustom = formCategory() === 'general' && els.fGeneralActivity?.value === '__custom__';
   if (els.generalActivityCustomField) els.generalActivityCustomField.hidden = !isCustom;
   if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.required = isCustom;
+  syncActivityFormState();
 }
 
-function updateMaintenanceTaskOptions(selectedValue = '') {
-  if (!els.fMaintenanceTask) return;
-  const category = safeStr(els.fMaintenanceType?.value);
-  const tasks = category === 'Preventivo'
-    ? PREVENTIVE_TASKS
-    : category === 'Correctivo'
-      ? CORRECTIVE_TASKS
-      : [];
-  if (!tasks.length) {
-    els.fMaintenanceTask.innerHTML = '<option value="">Primero selecciona preventivo o correctivo</option>';
-    els.fMaintenanceTask.disabled = true;
-    updateMaintenanceDetailField();
-    return;
+function populateDatalist(id, values) {
+  const list = document.getElementById(id);
+  if (!list) return;
+  const unique = [...new Set(values.map(safeStr).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  list.replaceChildren(...unique.map((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    return option;
+  }));
+}
+
+function updateFormSuggestions() {
+  const records = loadRecords();
+  populateDatalist('inventory-suggestions', records.map((record) => nestedValue(record, 'equipo', 'clavePatrimonio', 'inventory_number')));
+  populateDatalist('brand-suggestions', records.map((record) => nestedValue(record, 'equipo', 'marca', 'brand')));
+  populateDatalist('location-suggestions', records.map((record) => nestedValue(record, 'ubicacion', 'lugar', 'location')));
+  populateDatalist('responsible-suggestions', records.map((record) => nestedValue(record, 'ubicacion', 'responsableArea', 'responsable_area'))
+    .concat(records.map((record) => safeStr(record.recibidoPor))));
+  populateDatalist('technician-suggestions', records.map((record) => safeStr(record.tecnicos || record.assigned_to))
+    .concat(records.map((record) => safeStr(record.recogidoPor))));
+}
+
+function formSnapshot() {
+  return JSON.stringify([...els.form.querySelectorAll('input,select,textarea')]
+    .filter((field) => field.type !== 'file')
+    .map((field) => [field.id || field.name, field.type === 'checkbox' ? field.checked : field.value]));
+}
+
+function setFieldError(fieldId, message, reveal) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(`error-${fieldId.replace(/^f-/, '')}`);
+  if (field) {
+    if (message && reveal) field.setAttribute('aria-invalid', 'true');
+    else field.removeAttribute('aria-invalid');
   }
-  const savedTasks = [...new Set(loadRecords()
-    .filter((record) => safeStr(record.maintenance_type) === category)
-    .map((record) => safeStr(record.maintenance_detail))
-    .filter((task) => task && !tasks.includes(task)))];
-  const availableTasks = [...tasks, ...savedTasks];
-  if (els.fMaintenanceDetail) els.fMaintenanceDetail.value = '';
-  els.fMaintenanceTask.disabled = false;
-  els.fMaintenanceTask.innerHTML = [
-    '<option value="">Selecciona el tipo de mantenimiento</option>',
-    ...availableTasks.map((task) => `<option value="${escapeHtml(task)}">${escapeHtml(task)}</option>`),
-    '<option value="__custom__">Agregar y guardar otro tipo…</option>',
-  ].join('');
-  const isKnown = availableTasks.includes(selectedValue);
-  els.fMaintenanceTask.value = isKnown ? selectedValue : (selectedValue ? '__custom__' : '');
-  if (!isKnown && selectedValue && els.fMaintenanceDetail) els.fMaintenanceDetail.value = selectedValue;
-  updateMaintenanceDetailField();
+  if (error) {
+    error.textContent = reveal ? message : '';
+    error.hidden = !reveal || !message;
+  }
 }
 
-function updateMaintenanceDetailField() {
-  const isOther = safeStr(els.fMaintenanceTask?.value) === '__custom__';
-  if (els.maintenanceCustomField) els.maintenanceCustomField.hidden = !isOther;
-  if (els.fMaintenanceDetail) els.fMaintenanceDetail.required = isOther;
+function validateActivityForm(showErrors = false) {
+  const category = formCategory();
+  const isGeneral = category === 'general';
+  const isEquipment = !isGeneral;
+  const isCorrective = category === 'correctivo';
+  const requiredValues = [
+    ['f-date', safeStr(els.fDate?.value), 'Selecciona la fecha.'],
+    ['f-desc', safeStr(els.fDesc?.value), 'Escribe la descripción de la actividad.'],
+    ...(isGeneral ? [['f-general-activity', safeStr(els.fGeneralActivity?.value), 'Selecciona el tipo de actividad general.']] : []),
+    ...(isEquipment ? [
+      ['f-inventory-number', safeStr(els.fInventoryNumber?.value), 'La clave de patrimonio es obligatoria.'],
+      ['f-device-type', safeStr(els.fDeviceType?.value), 'Selecciona el tipo de equipo.'],
+    ] : []),
+    ...(isCorrective ? [['f-reported-failure', safeStr(els.fReportedFailure?.value), 'Describe la falla reportada.']] : []),
+    ...(isGeneral && safeStr(els.fGeneralActivity?.value) === '__custom__'
+      ? [['f-general-activity-custom', safeStr(els.fGeneralActivityCustom?.value), 'Escribe la actividad general.']]
+      : []),
+    ...(category === 'preventivo' && els.fPreventiveOther?.checked
+      ? [['f-preventive-other-detail', safeStr(els.fPreventiveOtherDetail?.value), 'Especifica las otras tareas preventivas.']]
+      : []),
+  ];
+  const errors = new Map(requiredValues.filter(([, value]) => !value).map(([fieldId, , message]) => [fieldId, message]));
+  const collectedDate = safeStr(els.fCollectedDate?.value);
+  const deliveryDate = safeStr(els.fDeliveryDate?.value);
+  if (!els.fCollectedDate?.disabled && collectedDate && deliveryDate && deliveryDate < collectedDate) {
+    errors.set('f-delivery-date', 'La fecha de entrega no puede ser anterior a la recolección.');
+  }
+
+  const fields = [...els.form.querySelectorAll('[id^="f-"]')];
+  fields.forEach((field) => {
+    const reveal = showErrors || field.dataset.touched === 'true';
+    setFieldError(field.id, errors.get(field.id) || '', reveal);
+  });
+  return errors.size === 0;
+}
+
+function updateInventoryDuplicateWarning() {
+  if (!els.inventoryWarning) return;
+  const key = safeStr(els.fInventoryNumber?.value).toLowerCase();
+  const currentId = safeStr(els.fId?.value);
+  const duplicates = key
+    ? loadRecords().filter((record) => record.id !== currentId
+      && nestedValue(record, 'equipo', 'clavePatrimonio', 'inventory_number').toLowerCase() === key)
+    : [];
+  els.inventoryWarning.hidden = formCategory() === 'general' || duplicates.length === 0;
+  els.inventoryWarning.textContent = duplicates.length
+    ? `Aviso: esta clave ya aparece en ${duplicates.length} registro${duplicates.length === 1 ? '' : 's'}. Se guardará como historial del mismo equipo.`
+    : '';
+}
+
+function syncActivityFormState() {
+  if (!els.form || !els.btnSave) return;
+  const valid = validateActivityForm();
+  els.btnSave.disabled = !valid;
+  if (els.saveHint) {
+    els.saveHint.textContent = valid
+      ? 'Listo para guardar.'
+      : 'Completa los campos obligatorios para guardar.';
+  }
+  updateInventoryDuplicateWarning();
+}
+
+function closeActivityModal() {
+  if (!els.modal?.open) return;
+  if (formSnapshot() !== formInitialSnapshot
+    && !confirm('Hay cambios sin guardar. ¿Quieres cerrar y descartarlos?')) return;
+  els.modal.close();
 }
 
 function openModalForNew() {
+  els.form.reset();
   els.modalTitle.textContent = 'Nueva actividad';
   els.fId.value = '';
   els.fDate.value = todayISO();
   els.fStatus.value = 'pendiente';
-  els.fDesc.value = '';
-  els.fActionDetail.value = '';
-  els.fEquipmentType.value = 'Normal';
-  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
-  updateGeneralActivityOptions();
-  els.fEquipmentDescription.value = '';
-  els.fBrand.value = '';
-  els.fModel.value = '';
-  els.fInventoryNumber.value = '';
-  els.fMaintenanceType.value = '';
-  els.fMaintenanceDetail.value = '';
-  updateMaintenanceTaskOptions();
-  els.fSerialNumber.value = '';
-  els.fLocation.value = '';
-  els.fArea.value = '';
-  els.fAssigned.value = '';
+  els.fRetireEquipment.value = 'no';
   els.btnDelete.hidden = true;
-  updateEquipmentFields();
-  updateMaintenanceDetailField();
+  els.form.querySelectorAll('[data-touched]').forEach((field) => delete field.dataset.touched);
+  els.form.querySelectorAll('.field-error').forEach((field) => {
+    field.textContent = '';
+    field.hidden = true;
+  });
+  updateFormSuggestions();
+  updateGeneralActivityOptions();
+  updateFormSections();
+  updateInventoryDuplicateWarning();
+  formInitialSnapshot = formSnapshot();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
 }
@@ -1447,84 +1652,151 @@ function openModalForEdit(id) {
   const records = loadRecords();
   const rec = records.find((r) => r.id === id);
   if (!rec) return;
+  els.form.reset();
   els.modalTitle.textContent = 'Editar actividad';
   els.fId.value = rec.id;
   els.fDate.value = rec.date || todayISO();
-  els.fStatus.value = rec.status || 'pendiente';
+  const savedStatus = safeStr(rec.status).toLowerCase();
+  els.fStatus.value = savedStatus === 'completado' ? 'completada'
+    : ['pendiente', 'en_proceso', 'completada', 'cancelada'].includes(savedStatus) ? savedStatus : 'pendiente';
   els.fDesc.value = rec.desc || '';
-  els.fActionDetail.value = rec.action_detail || '';
-  const legacyHasMaintenance = Boolean(rec.maintenance_type || rec.maintenance_detail);
-  els.fEquipmentType.value = rec.equipment_type
-    || (legacyHasMaintenance ? 'Mantenimiento' : 'Normal');
-  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
-  updateGeneralActivityOptions(rec.general_activity || '');
-  els.fEquipmentDescription.value = rec.equipment_description || '';
-  els.fBrand.value = rec.brand || '';
-  els.fModel.value = rec.model || '';
-  els.fInventoryNumber.value = rec.inventory_number || '';
-  const maintenanceCategory = ['Preventivo', 'Correctivo'].includes(rec.maintenance_type) ? rec.maintenance_type : '';
-  const legacyMaintenance = rec.maintenance_type && !maintenanceCategory ? rec.maintenance_type : '';
-  els.fMaintenanceType.value = maintenanceCategory;
-  els.fMaintenanceDetail.value = rec.maintenance_detail || legacyMaintenance;
-  updateMaintenanceTaskOptions(rec.maintenance_detail || legacyMaintenance);
-  els.fSerialNumber.value = rec.serial_number || '';
-  els.fLocation.value = rec.location || '';
-  els.fArea.value = rec.area || '';
-  els.fAssigned.value = rec.assigned_to || '';
+  els.fActionDetail.value = rec.detalle || rec.action_detail || '';
+  els.fEquipmentType.value = recordCategory(rec);
+  els.fGeneralActivityCustom.value = '';
+  const generalActivity = safeStr(rec.tipoActividadGeneral || rec.general_activity);
+  updateGeneralActivityOptions(generalActivity);
+
+  const equipment = rec.equipo || {};
+  const savedEquipmentType = safeStr(equipment.tipo || rec.device_type || rec.equipment_type);
+  els.fDeviceType.value = ['Computadora', 'Laptop', 'Impresora', 'Monitor', 'No-break', 'Red', 'Otro'].includes(savedEquipmentType)
+    ? savedEquipmentType
+    : '';
+  els.fEquipmentDescription.value = safeStr(equipment.descripcion || rec.equipment_description);
+  els.fBrand.value = safeStr(equipment.marca || rec.brand);
+  els.fModel.value = safeStr(equipment.modelo || rec.model);
+  els.fInventoryNumber.value = safeStr(equipment.clavePatrimonio || rec.inventory_number);
+  els.fSerialNumber.value = safeStr(equipment.numeroSerie || rec.serial_number);
+
+  const maintenance = rec.mantenimiento || {};
+  const savedTasks = Array.isArray(maintenance.tareas) ? maintenance.tareas : [];
+  const legacyMaintenanceDetail = safeStr(rec.maintenance_detail);
+  document.querySelectorAll('input[name="preventive-task"]').forEach((checkbox) => {
+    checkbox.checked = savedTasks.includes(checkbox.value);
+  });
+  if (!savedTasks.length && legacyMaintenanceDetail && PREVENTIVE_TASKS.includes(legacyMaintenanceDetail)) {
+    const task = [...document.querySelectorAll('input[name="preventive-task"]')]
+      .find((checkbox) => checkbox.value === legacyMaintenanceDetail);
+    if (task) task.checked = true;
+  }
+  const otherTask = safeStr(maintenance.otrasTareas)
+    || (!savedTasks.length && legacyMaintenanceDetail && !PREVENTIVE_TASKS.includes(legacyMaintenanceDetail) ? legacyMaintenanceDetail : '');
+  els.fPreventiveOther.checked = Boolean(otherTask);
+  els.fPreventiveOtherDetail.value = otherTask;
+  els.fNextMaintenance.value = safeStr(maintenance.proximoMantenimiento || rec.proximo_mantenimiento);
+  els.fReportedFailure.value = safeStr(maintenance.falla || rec.falla_reportada);
+  els.fDiagnosis.value = safeStr(maintenance.diagnostico || rec.diagnostico);
+  els.fSolution.value = safeStr(maintenance.solucion || rec.solucion_aplicada);
+  els.fParts.value = safeStr(maintenance.refacciones || rec.refacciones);
+  els.fObservations.value = safeStr(maintenance.observaciones || rec.observaciones);
+  if (recordCategory(rec) === 'preventivo' && !els.fNextMaintenance.value) {
+    els.fNextMaintenance.value = addMonthsToDate(els.fDate.value, 6);
+  }
+
+  const location = rec.ubicacion || {};
+  els.fLocation.value = safeStr(location.lugar || rec.location);
+  els.fArea.value = safeStr(location.area || rec.area);
+  els.fAreaResponsible.value = safeStr(location.responsableArea || rec.responsable_area);
+  els.fAreaRole.value = safeStr(location.cargo || rec.responsable_cargo);
+  els.fAreaContact.value = safeStr(location.contacto || rec.responsable_contacto);
+  els.fAssigned.value = safeStr(rec.tecnicos || rec.assigned_to);
+  els.fRetireEquipment.value = recCategoryIsCollection(rec) || rec.retiradoEquipo ? 'si' : 'no';
+  els.fCollectedBy.value = safeStr(rec.recogidoPor);
+  els.fCollectedDate.value = safeStr(rec.fechaRecoleccion);
+  els.fDeliveryDate.value = safeStr(rec.fechaEntrega);
+  els.fReceivedBy.value = safeStr(rec.recibidoPor);
   els.btnDelete.hidden = false;
-  updateEquipmentFields();
-  updateMaintenanceDetailField();
+  els.form.querySelectorAll('[data-touched]').forEach((field) => delete field.dataset.touched);
+  els.form.querySelectorAll('.field-error').forEach((field) => {
+    field.textContent = '';
+    field.hidden = true;
+  });
+  updateFormSuggestions();
+  updateFormSections();
+  updateInventoryDuplicateWarning();
+  formInitialSnapshot = formSnapshot();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
 }
 
+function recCategoryIsCollection(record) {
+  return recordCategory(record) === 'recoleccion';
+}
+
 function upsertFromForm() {
+  if (!validateActivityForm(true)) {
+    els.form.querySelector('[aria-invalid="true"]:not(:disabled)')?.focus();
+    return false;
+  }
   const user = getCurrentUser();
   const profile = loadProfile(user);
   const id = safeStr(els.fId.value) || uid();
   const date = safeStr(els.fDate.value) || todayISO();
-  const status = safeStr(els.fStatus.value).toLowerCase() === 'completado' ? 'completado' : 'pendiente';
+  const status = safeStr(els.fStatus.value).toLowerCase();
   const desc = safeStr(els.fDesc.value);
-  const action_detail = safeStr(els.fActionDetail.value);
-  const selectedType = safeStr(els.fEquipmentType.value);
-  const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
-  const equipment_description = equipment_type ? safeStr(els.fEquipmentDescription.value) : '';
-  const brand = equipment_type ? safeStr(els.fBrand.value) : '';
-  const model = equipment_type ? safeStr(els.fModel.value) : '';
-  const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
-  const isMaintenanceRecord = selectedType !== 'Normal';
-  const maintenance_type = isMaintenanceRecord ? safeStr(els.fMaintenanceType.value) : '';
-  const maintenanceTask = isMaintenanceRecord ? safeStr(els.fMaintenanceTask.value) : '';
-  const maintenance_detail = maintenanceTask === '__custom__'
-    ? safeStr(els.fMaintenanceDetail.value)
-    : isMaintenanceRecord ? maintenanceTask : '';
+  const detail = safeStr(els.fActionDetail.value);
+  const tipoRegistro = formCategory();
+  const isGeneral = tipoRegistro === 'general';
+  const isEquipment = !isGeneral;
+  const isPreventive = tipoRegistro === 'preventivo';
+  const isCorrective = tipoRegistro === 'correctivo';
+  const isCollection = tipoRegistro === 'recoleccion';
+  const deviceType = isEquipment ? safeStr(els.fDeviceType.value) : '';
+  const equipmentDescription = isEquipment ? safeStr(els.fEquipmentDescription.value) : '';
+  const brand = isEquipment ? safeStr(els.fBrand.value) : '';
+  const model = isEquipment ? safeStr(els.fModel.value) : '';
+  const inventoryNumber = isEquipment ? safeStr(els.fInventoryNumber.value) : '';
+  const serialNumber = isEquipment ? safeStr(els.fSerialNumber.value) : '';
+  const maintenanceTasks = isPreventive
+    ? [...document.querySelectorAll('input[name="preventive-task"]:checked')].map((checkbox) => checkbox.value)
+    : [];
+  const otherTasks = isPreventive && els.fPreventiveOther.checked ? safeStr(els.fPreventiveOtherDetail.value) : '';
+  const maintenanceType = isPreventive ? 'Preventivo' : isCorrective ? 'Correctivo' : '';
+  const failure = isCorrective ? safeStr(els.fReportedFailure.value) : '';
+  const diagnosis = isCorrective ? safeStr(els.fDiagnosis.value) : '';
+  const solution = isCorrective ? safeStr(els.fSolution.value) : '';
+  const parts = isCorrective ? safeStr(els.fParts.value) : '';
+  const observations = isMaintenanceRecord() ? safeStr(els.fObservations.value) : '';
+  const maintenanceDetail = isPreventive
+    ? maintenanceTasks.map((task) => task === 'Otros' ? otherTasks : task).filter(Boolean).join(', ')
+    : failure;
   const selectedGeneralActivity = safeStr(els.fGeneralActivity?.value);
-  const general_activity = selectedType !== 'Normal'
+  const generalActivity = !isGeneral
     ? ''
     : selectedGeneralActivity === '__custom__'
       ? safeStr(els.fGeneralActivityCustom?.value)
       : selectedGeneralActivity;
-  const serial_number = equipment_type ? safeStr(els.fSerialNumber.value) : '';
   const location = safeStr(els.fLocation.value);
   const area = safeStr(els.fArea.value);
-  const assigned_to = safeStr(els.fAssigned.value);
-
-  if (!desc) {
-    els.fDesc.focus();
-    return false;
-  }
-  if (isMaintenanceRecord && !maintenance_type) {
-    els.fMaintenanceType.focus();
-    return false;
-  }
-  if (isMaintenanceRecord && (!maintenanceTask || (maintenanceTask === '__custom__' && !maintenance_detail))) {
-    (maintenanceTask === '__custom__' ? els.fMaintenanceDetail : els.fMaintenanceTask).focus();
-    return false;
-  }
-  if (selectedType === 'Normal' && selectedGeneralActivity === '__custom__' && !general_activity) {
-    els.fGeneralActivityCustom.focus();
-    return false;
-  }
+  const areaResponsible = safeStr(els.fAreaResponsible.value);
+  const areaRole = safeStr(els.fAreaRole.value);
+  const areaContact = safeStr(els.fAreaContact.value);
+  const technicians = safeStr(els.fAssigned.value);
+  const retired = isCollection || (isCorrective && (
+    safeStr(els.fRetireEquipment.value) === 'si' || Boolean(safeStr(els.fCollectedBy.value))
+  ));
+  const collectedBy = retired ? safeStr(els.fCollectedBy.value) : '';
+  const collectedDate = retired ? safeStr(els.fCollectedDate.value) : '';
+  const deliveryDate = retired ? safeStr(els.fDeliveryDate.value) : '';
+  const receivedBy = retired ? safeStr(els.fReceivedBy.value) : '';
+  const equipment_type = isGeneral ? 'Normal' : isCollection ? 'Recolección' : deviceType;
+  const equipment_description = equipmentDescription;
+  const inventory_number = inventoryNumber;
+  const serial_number = serialNumber;
+  const maintenance_type = maintenanceType;
+  const maintenance_detail = maintenanceDetail;
+  const general_activity = generalActivity;
+  const action_detail = detail;
+  const assigned_to = technicians;
 
   const records = loadRecords();
   const now = new Date().toISOString();
@@ -1542,6 +1814,39 @@ function upsertFromForm() {
     status,
     desc,
     action_detail,
+    tipoRegistro,
+    tipoActividadGeneral: generalActivity,
+    equipo: {
+      clavePatrimonio: inventoryNumber,
+      tipo: deviceType,
+      marca: brand,
+      modelo: model,
+      numeroSerie: serialNumber,
+      descripcion: equipmentDescription,
+    },
+    mantenimiento: {
+      tareas: maintenanceTasks,
+      otrasTareas: otherTasks,
+      proximoMantenimiento: isPreventive ? safeStr(els.fNextMaintenance.value) : '',
+      falla: failure,
+      diagnostico: diagnosis,
+      solucion: solution,
+      refacciones: parts,
+      observaciones: observations,
+    },
+    ubicacion: {
+      lugar: location,
+      area,
+      responsableArea: areaResponsible,
+      cargo: areaRole,
+      contacto: areaContact,
+    },
+    tecnicos: technicians,
+    recogidoPor: collectedBy,
+    fechaRecoleccion: collectedDate,
+    fechaEntrega: deliveryDate,
+    recibidoPor: receivedBy,
+    retiradoEquipo: retired,
     general_activity,
     equipment_type,
     equipment_description,
@@ -1556,7 +1861,7 @@ function upsertFromForm() {
     assigned_to,
     created_by: base.created_by || displayName,
     updated_by: user?.name || base.updated_by || null,
-    completed_at: status === 'completado' ? (base.completed_at || now) : null,
+    completed_at: isCompletedStatus(status) ? (base.completed_at || now) : null,
     updated_at: now,
   };
 
@@ -1582,7 +1887,7 @@ function markCompleted(id) {
   const now = new Date().toISOString();
   records[idx] = {
     ...records[idx],
-    status: 'completado',
+    status: 'completada',
     completed_at: records[idx].completed_at || now,
     updated_by: user?.name || records[idx].updated_by || null,
     updated_at: now,
@@ -1621,7 +1926,7 @@ function exportExcel({ orientation = 'portrait' } = {}) {
       safeStr(record.area),
       safeStr(record.assigned_to),
       safeStr(record.created_by),
-      record.status === 'completado' ? 'Realizada' : 'Pendiente',
+      statusLabel(record.status),
     ]),
   ];
   const summaryRows = [
@@ -2334,15 +2639,47 @@ els.filterMaintenance?.addEventListener('change', () => {
 });
 
 els.fEquipmentType.addEventListener('change', () => {
-  updateEquipmentFields();
+  if (formCategory() !== 'recoleccion') els.fRetireEquipment.value = 'no';
   updateGeneralActivityCustomField();
+  updateFormSections();
+  validateActivityForm(true);
 });
-els.fGeneralActivity?.addEventListener('change', updateGeneralActivityCustomField);
-els.fMaintenanceType.addEventListener('change', () => {
-  els.fMaintenanceDetail.value = '';
-  updateMaintenanceTaskOptions();
+els.fGeneralActivity?.addEventListener('change', () => {
+  updateGeneralActivityCustomField();
+  validateActivityForm(true);
+  syncActivityFormState();
 });
-els.fMaintenanceTask.addEventListener('change', updateMaintenanceDetailField);
+els.fPreventiveOther?.addEventListener('change', () => {
+  updateFormSections();
+  validateActivityForm(true);
+});
+els.fRetireEquipment?.addEventListener('change', () => {
+  updateFormSections();
+  validateActivityForm(true);
+});
+els.fCollectedBy?.addEventListener('input', () => {
+  updateFormSections();
+  validateActivityForm(true);
+});
+els.fDate?.addEventListener('change', () => {
+  if (formCategory() === 'preventivo' && !els.fNextMaintenance.value) {
+    els.fNextMaintenance.value = addMonthsToDate(els.fDate.value, 6);
+  }
+  syncActivityFormState();
+});
+els.fInventoryNumber?.addEventListener('input', updateInventoryDuplicateWarning);
+els.form.addEventListener('input', (event) => {
+  if (event.target instanceof HTMLElement) event.target.dataset.touched = 'true';
+  syncActivityFormState();
+});
+els.form.addEventListener('change', (event) => {
+  if (event.target instanceof HTMLElement) event.target.dataset.touched = 'true';
+  syncActivityFormState();
+});
+els.form.addEventListener('focusout', (event) => {
+  if (event.target instanceof HTMLElement) event.target.dataset.touched = 'true';
+  syncActivityFormState();
+});
 
 els.form.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -2352,7 +2689,15 @@ els.form.addEventListener('submit', (e) => {
   toastSaved('Actividad guardada.');
 });
 
-els.btnCancel.addEventListener('click', () => els.modal.close());
+els.btnCancel.addEventListener('click', closeActivityModal);
+els.btnModalClose?.addEventListener('click', closeActivityModal);
+els.modal.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  closeActivityModal();
+});
+els.modal.addEventListener('click', (event) => {
+  if (event.target === els.modal) closeActivityModal();
+});
 els.btnDelete.addEventListener('click', () => {
   if (!confirm('¿Eliminar este registro?')) return;
   deleteFromForm();

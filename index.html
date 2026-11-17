@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=15" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=17" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -302,13 +302,13 @@
 
     <!-- Modal actividad -->
     <dialog class="modal" id="modal">
-      <form method="dialog" class="modal-card" id="form">
+      <form method="dialog" class="modal-card" id="form" novalidate>
         <div class="modal-head">
           <div>
             <div class="modal-title" id="modal-title">Nueva actividad</div>
-            <div class="modal-sub">Elige el formato y completa sus datos. Los campos de equipo aparecen al seleccionar computadora o impresora.</div>
+            <div class="modal-sub">Selecciona el tipo de registro. El formulario mostrará únicamente los campos correspondientes.</div>
           </div>
-          <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
+          <button class="icon-btn" type="button" id="btn-modal-close" aria-label="Cerrar formulario">✕</button>
         </div>
 
         <input type="hidden" id="f-id" />
@@ -316,109 +316,229 @@
         <div class="grid">
           <div class="form-section-label field-wide">1 · Tipo de registro</div>
           <label class="field field-wide">
-            <span>¿Qué vas a registrar?</span>
-            <select id="f-equipment-type">
-              <option value="Normal">Actividad general</option>
-              <option value="Mantenimiento">Mantenimiento (sin equipo identificado)</option>
-              <option value="Computadora">Mantenimiento de computadora</option>
-              <option value="Impresora">Mantenimiento de impresora</option>
+            <span>Tipo de registro <b class="required-mark" aria-hidden="true">*</b></span>
+            <select id="f-record-type" required>
+              <option value="general">Actividad general</option>
+              <option value="preventivo">Mantenimiento preventivo</option>
+              <option value="correctivo">Mantenimiento correctivo</option>
+              <option value="recoleccion">Recolección / recepción de equipo</option>
             </select>
-            <small class="field-hint">En mantenimiento elige preventivo o correctivo; son opciones excluyentes.</small>
+            <small class="field-error" id="error-record-type" aria-live="polite"></small>
           </label>
 
           <div class="form-section-label field-wide">2 · Datos de la actividad</div>
           <label class="field">
-            <span>Fecha</span>
+            <span>Fecha <b class="required-mark" aria-hidden="true">*</b></span>
             <input type="date" id="f-date" required />
+            <small class="field-error" id="error-date" aria-live="polite"></small>
           </label>
           <label class="field">
-            <span>Estado</span>
-            <select id="f-status">
+            <span>Estado <b class="required-mark" aria-hidden="true">*</b></span>
+            <select id="f-status" required>
               <option value="pendiente">Pendiente</option>
-              <option value="completado">Realizada</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="completada">Completada</option>
+              <option value="cancelada">Cancelada</option>
             </select>
+            <small class="field-error" id="error-status" aria-live="polite"></small>
           </label>
           <label class="field field-wide">
-            <span>Qué se va a hacer</span>
-            <textarea id="f-desc" rows="3" placeholder="Ej. Formatear, instalar software o reparar el equipo." required></textarea>
+            <span>Descripción de la actividad <b class="required-mark" aria-hidden="true">*</b></span>
+            <textarea id="f-desc" rows="3" placeholder="Describe la actividad o el problema reportado." required></textarea>
+            <small class="field-error" id="error-desc" aria-live="polite"></small>
           </label>
           <label class="field field-wide">
-            <span>Detalle específico del arreglo (opcional)</span>
-            <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
+            <span>Detalle / trabajo realizado</span>
+            <textarea id="f-action-detail" rows="2" placeholder="Detalle adicional, trabajo realizado o información del servicio."></textarea>
+            <small class="field-error" id="error-action-detail" aria-live="polite"></small>
           </label>
           <section class="field field-wide activity-options" id="general-activity-section" hidden>
             <label class="field">
-              <span>Tipo de actividad general</span>
-              <select id="f-general-activity"></select>
+              <span>Tipo de actividad general <b class="required-mark" aria-hidden="true">*</b></span>
+              <select id="f-general-activity" required></select>
+              <small class="field-error" id="error-general-activity" aria-live="polite"></small>
             </label>
             <label class="field" id="general-activity-custom-field" hidden>
-              <span>Escribe la actividad general</span>
+              <span>Escribe la actividad general <b class="required-mark" aria-hidden="true">*</b></span>
               <input type="text" id="f-general-activity-custom" maxlength="160" placeholder="Agrega una opción propia" />
+              <small class="field-error" id="error-general-activity-custom" aria-live="polite"></small>
             </label>
           </section>
-          <div class="field field-wide form-section-label equipment-field" hidden>Identificación del equipo</div>
-          <label class="field equipment-field" hidden>
-            <span>Clave de patrimonio</span>
-            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
-          </label>
-          <label class="field field-wide equipment-field" hidden>
-            <span>Descripción del equipo</span>
-            <input type="text" id="f-equipment-description" maxlength="240" placeholder="Ej. Computadora de escritorio del laboratorio 2" />
-          </label>
-          <div class="field field-wide form-section-label maintenance-section-title" id="maintenance-section-title" hidden>Clasificación del mantenimiento</div>
+          <section class="field field-wide activity-options equipment-section" id="equipment-section" hidden>
+            <div class="form-section-label field-wide">3 · Datos del equipo</div>
+            <label class="field">
+              <span>Clave de patrimonio <b class="required-mark" aria-hidden="true">*</b></span>
+              <input type="text" id="f-inventory-number" list="inventory-suggestions" maxlength="100" autocomplete="off" placeholder="Ej. UM-12345" required />
+              <small class="field-error" id="error-inventory-number" aria-live="polite"></small>
+              <small class="field-hint" id="inventory-warning" role="status" hidden></small>
+            </label>
+            <label class="field">
+              <span>Tipo de equipo <b class="required-mark" aria-hidden="true">*</b></span>
+              <select id="f-device-type" required>
+                <option value="">Selecciona el equipo</option>
+                <option>Computadora</option>
+                <option>Laptop</option>
+                <option>Impresora</option>
+                <option>Monitor</option>
+                <option>No-break</option>
+                <option>Red</option>
+                <option>Otro</option>
+              </select>
+              <small class="field-error" id="error-device-type" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Marca</span>
+              <input type="text" id="f-brand" list="brand-suggestions" maxlength="100" autocomplete="off" placeholder="Ej. HP" />
+              <small class="field-error" id="error-brand" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Modelo</span>
+              <input type="text" id="f-model" maxlength="120" placeholder="Ej. ProDesk 400 G6" />
+              <small class="field-error" id="error-model" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Número de serie</span>
+              <input type="text" id="f-serial-number" maxlength="120" placeholder="Ej. ABC123456" />
+              <small class="field-error" id="error-serial-number" aria-live="polite"></small>
+            </label>
+            <label class="field field-wide">
+              <span>Descripción del equipo</span>
+              <textarea id="f-equipment-description" rows="2" maxlength="240" placeholder="Ej. PC de escritorio, 8 GB RAM, SSD 480 GB"></textarea>
+              <small class="field-error" id="error-equipment-description" aria-live="polite"></small>
+            </label>
+          </section>
+
           <section class="field field-wide activity-options maintenance-options" id="maintenance-section" hidden>
-            <label class="field">
-              <span>Selecciona solo una opción</span>
-              <select id="f-maintenance-type" required>
-                <option value="" selected disabled>Elige preventivo o correctivo</option>
-                <option value="Preventivo">Mantenimiento preventivo</option>
-                <option value="Correctivo">Mantenimiento correctivo</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Tipo de mantenimiento</span>
-              <select id="f-maintenance-task" disabled required>
-                <option value="">Primero selecciona preventivo o correctivo</option>
-              </select>
-            </label>
-            <label class="field" id="maintenance-custom-field" hidden>
-              <span>Especifica otro tipo de mantenimiento</span>
-              <input type="text" id="f-maintenance-detail" maxlength="160" placeholder="Escribe el tipo de mantenimiento" />
+            <div class="form-section-label field-wide">4 · Mantenimiento</div>
+            <small class="field-hint maintenance-exclusion-hint">Preventivo y correctivo son excluyentes.</small>
+            <fieldset class="field field-wide conditional-section" id="preventive-fields" hidden disabled>
+              <legend>Tareas preventivas</legend>
+              <label class="check-field"><input type="checkbox" name="preventive-task" value="Limpieza interna" /> Limpieza interna</label>
+              <label class="check-field"><input type="checkbox" name="preventive-task" value="Limpieza de software" /> Limpieza de software</label>
+              <label class="check-field"><input type="checkbox" name="preventive-task" value="Actualización de sistema" /> Actualización de sistema</label>
+              <label class="check-field"><input type="checkbox" name="preventive-task" value="Revisión de antivirus" /> Revisión de antivirus</label>
+              <label class="check-field"><input type="checkbox" name="preventive-task" value="Revisión de disco" /> Revisión de disco</label>
+              <label class="check-field check-field-other"><input type="checkbox" id="f-preventive-other" name="preventive-task" value="Otros" /> Otros</label>
+              <small class="field-error" id="error-preventive-other" aria-live="polite"></small>
+              <label class="field field-wide" id="preventive-other-field" hidden>
+                <span>Especifica otras tareas <b class="required-mark" aria-hidden="true">*</b></span>
+                <input type="text" id="f-preventive-other-detail" maxlength="240" />
+                <small class="field-error" id="error-preventive-other-detail" aria-live="polite"></small>
+              </label>
+              <label class="field">
+                <span>Próximo mantenimiento sugerido</span>
+                <input type="date" id="f-next-maintenance" />
+                <small class="field-error" id="error-next-maintenance" aria-live="polite"></small>
+              </label>
+            </fieldset>
+            <fieldset class="field field-wide conditional-section" id="corrective-fields" hidden disabled>
+              <legend>Atención correctiva</legend>
+              <label class="field field-wide">
+                <span>Falla reportada <b class="required-mark" aria-hidden="true">*</b></span>
+                <textarea id="f-reported-failure" rows="2" placeholder="Describe la falla reportada por el usuario." required></textarea>
+                <small class="field-error" id="error-reported-failure" aria-live="polite"></small>
+              </label>
+              <label class="field">
+                <span>Diagnóstico</span>
+                <textarea id="f-diagnosis" rows="2"></textarea>
+                <small class="field-error" id="error-diagnosis" aria-live="polite"></small>
+              </label>
+              <label class="field">
+                <span>Solución aplicada</span>
+                <textarea id="f-solution" rows="2"></textarea>
+                <small class="field-error" id="error-solution" aria-live="polite"></small>
+              </label>
+              <label class="field field-wide">
+                <span>Refacciones o piezas cambiadas</span>
+                <textarea id="f-parts" rows="2"></textarea>
+                <small class="field-error" id="error-parts" aria-live="polite"></small>
+              </label>
+            </fieldset>
+            <label class="field field-wide" id="observations-field" hidden>
+              <span>Observaciones</span>
+              <textarea id="f-observations" rows="2"></textarea>
+              <small class="field-error" id="error-observations" aria-live="polite"></small>
             </label>
           </section>
-          <div class="field field-wide form-section-label equipment-field" hidden>Marca, modelo y serie</div>
-          <label class="field equipment-field" hidden>
-            <span>Marca</span>
-            <input type="text" id="f-brand" maxlength="100" placeholder="Ej. HP" />
-          </label>
-          <label class="field equipment-field" hidden>
-            <span>Modelo</span>
-            <input type="text" id="f-model" maxlength="120" placeholder="Ej. ProDesk 400 G6" />
-          </label>
-          <label class="field equipment-field" hidden>
-            <span>Número de serie</span>
-            <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
-          </label>
-          <div class="field field-wide form-section-label">Ubicación y responsables</div>
-          <label class="field">
-            <span>Ubicación</span>
-            <input type="text" id="f-location" placeholder="Ej. Edificio X · Laboratorio 2" />
-          </label>
-          <label class="field">
-            <span>Comisión Académica</span>
-            <input type="text" id="f-area" placeholder="Ej. Comisión Académica de Servicios Informáticos" />
-          </label>
-          <label class="field field-wide">
-            <span>Responsable(s)</span>
-            <input type="text" id="f-assigned" placeholder="Ej. Yair / Luis, Gera y Miguel" />
-          </label>
+
+          <section class="field field-wide collection-section" id="collection-section" hidden>
+            <div class="form-section-label field-wide">5 · Recolección y entrega</div>
+            <label class="field" id="retire-equipment-field" hidden>
+              <span>¿Se retiró el equipo?</span>
+              <select id="f-retire-equipment">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+              </select>
+              <small class="field-error" id="error-retire-equipment" aria-live="polite"></small>
+            </label>
+            <label class="field" id="collected-by-field">
+              <span>Quién recogió el equipo</span>
+              <input type="text" id="f-collected-by" list="technician-suggestions" autocomplete="off" />
+              <small class="field-error" id="error-collected-by" aria-live="polite"></small>
+            </label>
+            <label class="field" id="collected-date-field">
+              <span>Fecha de recolección</span>
+              <input type="date" id="f-collected-date" />
+              <small class="field-error" id="error-collected-date" aria-live="polite"></small>
+            </label>
+            <label class="field" id="delivery-date-field">
+              <span>Fecha de entrega</span>
+              <input type="date" id="f-delivery-date" />
+              <small class="field-error" id="error-delivery-date" aria-live="polite"></small>
+            </label>
+            <label class="field" id="received-by-field">
+              <span>Recibido por (conformidad)</span>
+              <input type="text" id="f-received-by" list="responsible-suggestions" autocomplete="off" />
+              <small class="field-error" id="error-received-by" aria-live="polite"></small>
+            </label>
+          </section>
+
+          <section class="field field-wide location-section" id="location-section">
+            <div class="form-section-label field-wide">6 · Ubicación y responsables</div>
+            <label class="field">
+              <span>Ubicación / lugar de procedencia</span>
+              <input type="text" id="f-location" list="location-suggestions" autocomplete="off" placeholder="Ej. Edificio X · Laboratorio 2" />
+              <small class="field-error" id="error-location" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Área o departamento</span>
+              <input type="text" id="f-area" placeholder="Ej. Servicios Informáticos" />
+              <small class="field-error" id="error-area" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Responsable del área</span>
+              <input type="text" id="f-area-responsible" list="responsible-suggestions" autocomplete="off" />
+              <small class="field-error" id="error-area-responsible" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Cargo (opcional)</span>
+              <input type="text" id="f-area-role" />
+              <small class="field-error" id="error-area-role" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Teléfono o correo (opcional)</span>
+              <input type="text" id="f-area-contact" />
+              <small class="field-error" id="error-area-contact" aria-live="polite"></small>
+            </label>
+            <label class="field">
+              <span>Técnico(s) que atendieron</span>
+              <input type="text" id="f-assigned" list="technician-suggestions" autocomplete="off" placeholder="Ej. Yair / Luis, Gera y Miguel" />
+              <small class="field-error" id="error-assigned" aria-live="polite"></small>
+            </label>
+          </section>
         </div>
 
         <div class="modal-actions">
           <button class="btn btn-ghost" value="cancel" type="button" id="btn-cancel">Cancelar</button>
           <button class="btn btn-danger" type="button" id="btn-delete" hidden>Eliminar</button>
-          <button class="btn" type="submit" id="btn-save">Guardar</button>
+          <span class="save-hint" id="save-hint" aria-live="polite">Completa los campos obligatorios para guardar.</span>
+          <button class="btn" type="submit" id="btn-save" disabled>Guardar</button>
         </div>
+        <datalist id="inventory-suggestions"></datalist>
+        <datalist id="brand-suggestions"></datalist>
+        <datalist id="location-suggestions"></datalist>
+        <datalist id="responsible-suggestions"></datalist>
+        <datalist id="technician-suggestions"></datalist>
       </form>
     </dialog>
 
@@ -580,7 +700,7 @@
   </div>
 
   <script src="./js/config.js?v=1"></script>
-  <script type="module" src="./js/simple.js?v=68"></script>
+  <script type="module" src="./js/simple.js?v=70"></script>
 
   <script>
     // Service Worker (opcional)

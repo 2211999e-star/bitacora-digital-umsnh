@@ -3,9 +3,11 @@
 Sistema **ultra simple** para registrar actividades de mantenimiento/soporte como bitácora.
 
 ## Qué hace
-- Guardar actividades como **Pendiente** o **Realizada**
-- Registrar equipos con clave de patrimonio, descripción, marca, modelo y número de serie
-- Clasificar cada registro como **Preventivo** o **Correctivo** y seleccionar el tipo correspondiente
+- Guardar actividades con estado **Pendiente**, **En proceso**, **Completada** o **Cancelada**
+- Capturar **Actividad general**, **Mantenimiento preventivo**, **Mantenimiento correctivo** o **Recolección / recepción de equipo**
+- Registrar clave patrimonial, tipo, marca, modelo, serie y descripción del equipo
+- Documentar checklist preventivo, próximo mantenimiento, falla, diagnóstico, solución y refacciones
+- Capturar ubicación, responsable del área, técnicos y datos de recolección / entrega
 - Elegir una actividad general de la lista o escribir una opción personalizada
 - Administrar cuentas desde la sección **Usuarios** al iniciar como Iván (con PHP/MariaDB habilitados)
 - Marcar una actividad como **completada**
@@ -19,8 +21,8 @@ Sistema **ultra simple** para registrar actividades de mantenimiento/soporte com
 
 ## Cómo usar
 1. Entra a la página
-2. Clic en **Nueva actividad**; primero selecciona actividad general o un formato de mantenimiento
-3. Completa los datos de actividad. Para computadora o impresora también aparecen patrimonio, descripción, preventivo/correctivo, tipo, marca, modelo y serie
+2. Clic en **Nueva actividad** y selecciona uno de los cuatro tipos de registro
+3. Completa los campos visibles; preventivo y correctivo son excluyentes y las secciones cambian según el tipo
 4. Guarda
 5. Usa **Excel** o **Imprimir** con los filtros que necesites
 6. Abre **Atajos** para captura múltiple, impresión, exportación o respaldo. Restaurar una copia reemplaza los registros y eventos actuales.
@@ -80,7 +82,7 @@ Los cambios aparecen inicialmente como locales y el indicador del sistema inform
 
 Al iniciar sesión como `ivan`, selecciona **Usuarios** en la navegación para crear cuentas y cambiar contraseñas. Las altas y cambios se escriben directamente en la tabla `users` de MariaDB; las cuentas creadas desde el panel no reciben permisos de administración. Solo una cuenta marcada `is_admin` en la base de datos puede usar estas operaciones.
 
-El formulario separa los formatos **Actividad general** y **Mantenimiento**. En los mantenimientos de computadora o impresora se captura clave patrimonial, descripción, clasificación preventiva/correctiva, tipo específico, marca, modelo y serie. Las actividades generales tienen catálogo independiente. Los filtros permiten combinar fechas, formato, clasificación y búsqueda por esos datos; las exportaciones incluyen los campos del equipo. Las opciones personalizadas se guardan en los registros y se ofrecen en los siguientes formularios compartidos. En GitHub Pages Iván verá la sección **Usuarios**, pero aparecerá como no disponible hasta conectar la API del servidor.
+El formulario separa **Actividad general**, **Mantenimiento preventivo**, **Mantenimiento correctivo** y **Recolección / recepción**. Los campos se guardan tanto en la estructura JSON `tipoRegistro` / `equipo` / `mantenimiento` / `ubicacion` como en las propiedades planas que usa la versión anterior, para conservar compatibilidad con los registros, listados y sincronización existentes. Las opciones de marca, ubicación, responsable y técnicos se sugieren a partir de registros guardados. La API persiste el estado completo en `app_state.state_json`; no se requieren columnas SQL nuevas ni migraciones, y los registros existentes no se eliminan. La búsqueda, las exportaciones y la presentación ampliada de la tabla se completarán en la etapa C. En GitHub Pages Iván verá la sección **Usuarios**, pero aparecerá como no disponible hasta conectar la API del servidor.
 
 Para llevar datos del sitio anterior, descarga primero **Acciones → Descargar respaldo** desde el navegador antiguo. Entra al servidor, inicia sesión y usa **Acciones → Restaurar respaldo**. Restaurar reemplaza el estado compartido completo.
 

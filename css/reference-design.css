@@ -801,6 +801,16 @@ body{
   background:#fff6dc;
   color:#806522;
 }
+#app .badge.progress{
+  border-color:#b9d7e8;
+  background:#e9f5fc;
+  color:#245d7e;
+}
+#app .badge.cancelled{
+  border-color:#e4c9c9;
+  background:#fbefef;
+  color:#855454;
+}
 #app .pager,#app .table-footer{
   border-color:#d3e2ec;
   background:#f5faff;
@@ -2532,15 +2542,142 @@ body{
   font-size:11px;
   line-height:1.45;
 }
-#app #form #f-equipment-type{
+#app #form .field{
+  color:#36546a;
+}
+#app #form #f-record-type{
   border-color:#a9c8dc;
   background:#f8fcff;
   font-weight:750;
 }
 #app #form .activity-options{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:14px;
   border-color:#cfe0eb;
   border-radius:15px;
   background:linear-gradient(145deg,#f6faff,#eef6fb);
+}
+#app #form .activity-options[hidden],
+#app #form .conditional-section[hidden],
+#app #form .collection-section[hidden],
+#app #form .general-activity-section[hidden]{
+  display:none;
+}
+#app #form .activity-options .field{
+  min-width:0;
+  color:#36546a;
+}
+#app #form .field-hint{
+  grid-column:1/-1;
+}
+#app #form .field-error{
+  display:block;
+  min-height:0;
+  margin-top:1px;
+  color:#a42626;
+  font-size:11px;
+  font-weight:650;
+  line-height:1.35;
+}
+#app #form .field-error[hidden]{
+  display:none;
+}
+#app #form [aria-invalid="true"]{
+  border-color:#b52f2f;
+  box-shadow:0 0 0 3px rgba(181,47,47,.1);
+}
+#app #form .required-mark{
+  color:#c53131;
+  font-size:14px;
+  font-weight:900;
+}
+#app #form .conditional-section{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  min-width:0;
+  margin:0;
+  padding:15px;
+  border:1px solid #d5e4ed;
+  border-radius:12px;
+  background:#fff;
+}
+#app #form .conditional-section legend{
+  padding:0 6px;
+  color:#315d78;
+  font-size:12px;
+  font-weight:850;
+}
+#app #form .conditional-section[disabled]{
+  display:none;
+}
+#app #form .check-field{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:38px;
+  padding:7px 9px;
+  border:1px solid #dbe7ef;
+  border-radius:9px;
+  background:#f8fbfd;
+  color:#36546a;
+  font-size:12px;
+  font-weight:650;
+}
+#app #form .check-field input{
+  flex:0 0 17px;
+  width:17px;
+  height:17px;
+  min-height:0;
+  margin:0;
+  accent-color:#176b9b;
+}
+#app #form .conditional-section .field-wide{
+  grid-column:1/-1;
+}
+#app #form .collection-section,
+#app #form .location-section{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+  gap:14px;
+  min-width:0;
+  margin:0;
+  padding:16px;
+  border:1px solid #dce8f1;
+  border-radius:15px;
+  background:linear-gradient(145deg,#f8fbfd,#f3f8fc);
+}
+#app #form .collection-section .field,
+#app #form .location-section .field{
+  min-width:0;
+  color:#36546a;
+}
+#app #form .collection-section .form-section-label,
+#app #form .location-section .form-section-label{
+  grid-column:1/-1;
+}
+#app #form .maintenance-exclusion-hint{
+  margin-top:-6px;
+  color:#5f7485;
+}
+#app #form .modal-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+#app #form .save-hint{
+  flex:1;
+  color:#6b8193;
+  font-size:11px;
+}
+#app #form #btn-save:disabled{
+  cursor:not-allowed;
+  opacity:.5;
+  box-shadow:none;
+  transform:none;
 }
 #app #form .modal-actions{
   position:sticky;
@@ -2603,6 +2740,34 @@ body{
   #app #form .grid{
     gap:12px;
     padding:14px 15px;
+  }
+  #app #form .activity-options,
+  #app #form .conditional-section,
+  #app #form .collection-section,
+  #app #form .location-section{
+    grid-template-columns:minmax(0,1fr);
+    gap:11px;
+    padding:13px;
+  }
+  #app #form .activity-options .field-wide,
+  #app #form .conditional-section .field-wide,
+  #app #form .collection-section .form-section-label,
+  #app #form .location-section .form-section-label{
+    grid-column:1;
+  }
+  #app #form .modal-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #app #form .save-hint{
+    grid-column:1/-1;
+    grid-row:1;
+  }
+  #app #form #btn-save{
+    grid-column:2;
+  }
+  #app #form #btn-delete[hidden]{
+    display:none;
   }
   #app #form .modal-actions{
     padding:11px 15px;
