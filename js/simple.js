@@ -895,9 +895,13 @@ const els = {
   userchip: document.getElementById('userchip'),
   usermenuMenu: document.getElementById('usermenu-menu'),
   usermenuTitle: document.getElementById('usermenu-title'),
-  usermenuMeta: document.getElementById('usermenu-meta'),
+  usermenuEmail: document.getElementById('usermenu-email'),
+  usermenuMatricula: document.getElementById('usermenu-matricula'),
+  usermenuRole: document.getElementById('usermenu-role'),
+  userInitials: document.getElementById('user-initials'),
   username: document.getElementById('username'),
   btnLogout: document.getElementById('btn-logout'),
+  btnMenuSettings: document.getElementById('btn-menu-settings'),
   btnAdminUsers: document.getElementById('btn-admin-users'),
   profileLine: document.getElementById('profileline'),
   btnHome: document.getElementById('btn-home'),
@@ -913,6 +917,7 @@ const els = {
   form: document.getElementById('form'),
   modalTitle: document.getElementById('modal-title'),
   btnNew: document.getElementById('btn-new'),
+  btnFullRecord: document.getElementById('btn-full-record'),
   btnBulk: document.getElementById('btn-bulk'),
   btnExport: document.getElementById('btn-export'),
   btnExportLandscape: document.getElementById('btn-export-landscape'),
@@ -1001,6 +1006,18 @@ const els = {
   btnSave: document.getElementById('btn-save'),
   saveHint: document.getElementById('save-hint'),
   btnModalClose: document.getElementById('btn-modal-close'),
+  quickModal: document.getElementById('quick-modal'),
+  quickForm: document.getElementById('quick-form'),
+  qDate: document.getElementById('q-date'),
+  qStatus: document.getElementById('q-status'),
+  qGeneralActivity: document.getElementById('q-general-activity'),
+  qGeneralActivityCustomField: document.getElementById('q-general-activity-custom-field'),
+  qGeneralActivityCustom: document.getElementById('q-general-activity-custom'),
+  qDesc: document.getElementById('q-desc'),
+  btnQuickSave: document.getElementById('btn-quick-save'),
+  quickSaveHint: document.getElementById('quick-save-hint'),
+  btnQuickClose: document.getElementById('btn-quick-close'),
+  btnQuickCancel: document.getElementById('btn-quick-cancel'),
 
   // Perfil
   profileModal: document.getElementById('profile-modal'),
@@ -1043,6 +1060,7 @@ const uiState = {
 };
 
 let formInitialSnapshot = '';
+let quickInitialSnapshot = '';
 let autoSuggestedNextMaintenance = '';
 let __toastTimer = null;
 function toast(msg) {
@@ -1437,22 +1455,32 @@ function updateFormSections() {
   syncActivityFormState();
 }
 
-function updateGeneralActivityOptions(selectedValue = '') {
-  if (!els.fGeneralActivity) return;
-  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
+function savedGeneralActivities() {
   const savedOptions = [...new Set(loadRecords()
-    .map((record) => safeStr(record.general_activity))
+    .map((record) => safeStr(record.tipoActividadGeneral || record.general_activity))
     .filter((activity) => activity && !GENERAL_ACTIVITIES.includes(activity)))];
-  const activities = [...GENERAL_ACTIVITIES, ...savedOptions];
+  return [...GENERAL_ACTIVITIES, ...savedOptions];
+}
+
+function populateGeneralActivitySelect(select, selectedValue = '') {
+  if (!select) return '';
+  const activities = savedGeneralActivities();
   const options = [
     '<option value="">Selecciona una actividad general</option>',
     ...activities.map((activity) => `<option value="${escapeHtml(activity)}">${escapeHtml(activity)}</option>`),
     '<option value="__custom__">Agregar y guardar otra actividad…</option>',
   ];
-  els.fGeneralActivity.innerHTML = options.join('');
+  select.innerHTML = options.join('');
   const isKnown = activities.includes(selectedValue);
-  els.fGeneralActivity.value = isKnown ? selectedValue : (selectedValue ? '__custom__' : '');
-  if (!isKnown && selectedValue && els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = selectedValue;
+  select.value = isKnown ? selectedValue : (selectedValue ? '__custom__' : '');
+  return !isKnown && selectedValue ? selectedValue : '';
+}
+
+function updateGeneralActivityOptions(selectedValue = '') {
+  if (!els.fGeneralActivity) return;
+  if (els.fGeneralActivityCustom) {
+    els.fGeneralActivityCustom.value = populateGeneralActivitySelect(els.fGeneralActivity, selectedValue);
+  }
   updateGeneralActivityCustomField();
 }
 
@@ -1593,6 +1621,127 @@ function openModalForNew() {
   formInitialSnapshot = formSnapshot();
   els.modal.showModal();
   setTimeout(() => els.fDesc.focus(), 50);
+}
+
+function quickFormSnapshot() {
+  return JSON.stringify([...els.quickForm.querySelectorAll('input,select,textarea')]
+    .map((field) => [field.id, field.value]));
+}
+
+function updateQuickActivityCustomField() {
+  const isCustom = els.qGeneralActivity?.value === '__custom__';
+  if (els.qGeneralActivityCustomField) els.qGeneralActivityCustomField.hidden = !isCustom;
+  if (els.qGeneralActivityCustom) els.qGeneralActivityCustom.required = isCustom;
+}
+
+function validateQuickActivity(showErrors = false) {
+  const selectedActivity = safeStr(els.qGeneralActivity?.value);
+  const requiredValues = [
+    ['q-date', safeStr(els.qDate?.value), 'Selecciona la fecha.'],
+    ['q-status', safeStr(els.qStatus?.value), 'Selecciona el estado.'],
+    ['q-general-activity', selectedActivity, 'Selecciona el tipo de actividad general.'],
+    ['q-desc', safeStr(els.qDesc?.value), 'Escribe la descripción de la actividad.'],
+    ...(selectedActivity === '__custom__'
+      ? [['q-general-activity-custom', safeStr(els.qGeneralActivityCustom?.value), 'Escribe el tipo de actividad general.']]
+      : []),
+  ];
+  const errors = new Map(requiredValues.filter(([, value]) => !value).map(([fieldId, , message]) => [fieldId, message]));
+  [...els.quickForm.querySelectorAll('[id^="q-"]')].forEach((field) => {
+    const reveal = showErrors || field.dataset.touched === 'true';
+    setFieldError(field.id, errors.get(field.id) || '', reveal);
+  });
+  return errors.size === 0;
+}
+
+function syncQuickActivityFormState() {
+  if (!els.quickForm || !els.btnQuickSave) return;
+  const valid = validateQuickActivity();
+  els.btnQuickSave.disabled = !valid;
+  if (els.quickSaveHint) {
+    els.quickSaveHint.textContent = valid
+      ? 'Listo para guardar.'
+      : 'Completa los campos obligatorios para guardar.';
+  }
+}
+
+function openQuickActivityModal() {
+  els.quickForm.reset();
+  els.qDate.value = todayISO();
+  els.qStatus.value = 'pendiente';
+  els.qGeneralActivityCustom.value = populateGeneralActivitySelect(els.qGeneralActivity);
+  updateQuickActivityCustomField();
+  els.quickForm.querySelectorAll('[data-touched]').forEach((field) => delete field.dataset.touched);
+  els.quickForm.querySelectorAll('.field-error').forEach((field) => {
+    field.textContent = '';
+    field.hidden = true;
+  });
+  syncQuickActivityFormState();
+  quickInitialSnapshot = quickFormSnapshot();
+  els.quickModal.showModal();
+  setTimeout(() => els.qDesc.focus(), 50);
+}
+
+function closeQuickActivityModal() {
+  if (!els.quickModal?.open) return;
+  if (quickFormSnapshot() !== quickInitialSnapshot
+    && !confirm('Hay cambios sin guardar. ¿Quieres cerrar y descartarlos?')) return;
+  els.quickModal.close();
+}
+
+function saveQuickActivity() {
+  if (!validateQuickActivity(true)) {
+    els.quickForm.querySelector('[aria-invalid="true"]')?.focus();
+    return false;
+  }
+  const user = getCurrentUser();
+  const profile = loadProfile(user);
+  const now = new Date().toISOString();
+  const selectedActivity = safeStr(els.qGeneralActivity.value);
+  const generalActivity = selectedActivity === '__custom__'
+    ? safeStr(els.qGeneralActivityCustom.value)
+    : selectedActivity;
+  const status = safeStr(els.qStatus.value);
+  const record = {
+    id: uid(),
+    created_at: now,
+    updated_at: now,
+    created_by: safeStr(profile.full_name) || safeStr(user?.name) || '—',
+    updated_by: user?.name || null,
+    date: safeStr(els.qDate.value),
+    status,
+    desc: safeStr(els.qDesc.value),
+    action_detail: '',
+    tipoRegistro: 'general',
+    tipoActividadGeneral: generalActivity,
+    equipo: { clavePatrimonio: '', tipo: '', marca: '', modelo: '', numeroSerie: '', descripcion: '' },
+    mantenimiento: { tareas: [], otrasTareas: '', proximoMantenimiento: '', falla: '', diagnostico: '', solucion: '', refacciones: '', observaciones: '' },
+    ubicacion: { lugar: '', area: '', responsableArea: '', cargo: '', contacto: '' },
+    tecnicos: '',
+    recogidoPor: '',
+    fechaRecoleccion: '',
+    fechaEntrega: '',
+    recibidoPor: '',
+    retiradoEquipo: false,
+    general_activity: generalActivity,
+    equipment_type: 'Normal',
+    equipment_description: '',
+    brand: '',
+    model: '',
+    inventory_number: '',
+    maintenance_type: '',
+    maintenance_detail: '',
+    serial_number: '',
+    location: '',
+    area: '',
+    assigned_to: '',
+    completed_at: isCompletedStatus(status) ? now : null,
+  };
+  saveRecords([...loadRecords(), record]);
+  uiState.page = 1;
+  els.quickModal.close();
+  render();
+  toastSaved('Actividad guardada.');
+  return true;
 }
 
 function openBulkModal() {
@@ -2374,6 +2523,7 @@ function closeUserMenu() {
 
 function toggleUserMenu() {
   if (!els.usermenuMenu) return;
+  closeFabMenu();
   els.usermenuMenu.hidden = !els.usermenuMenu.hidden;
   els.userchip?.setAttribute('aria-expanded', String(!els.usermenuMenu.hidden));
 }
@@ -2386,22 +2536,41 @@ function closeFabMenu() {
 
 function toggleFabMenu() {
   if (!els.fabMenu || !els.fabToggle) return;
+  closeUserMenu();
   const nextHidden = !els.fabMenu.hidden ? true : false;
   els.fabMenu.hidden = nextHidden;
   els.fabToggle.setAttribute('aria-expanded', nextHidden ? 'false' : 'true');
 }
 
+function userInitials(name) {
+  const parts = safeStr(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'U';
+  const first = parts[0];
+  const last = parts.length > 1 ? parts[parts.length - 1] : '';
+  return `${first[0]}${last ? last[0] : first[1] || ''}`.toLocaleUpperCase();
+}
+
 function renderUserMenuInfo() {
   const user = getCurrentUser();
   const p = loadProfile(user);
-  if (els.usermenuTitle) els.usermenuTitle.textContent = safeStr(p.full_name) || safeStr(user?.name) || '—';
-  if (els.usermenuMeta) {
-    const parts = [];
-    if (p.role) parts.push(`Rol: ${p.role}`);
-    if (p.email) parts.push(`Correo: ${p.email}`);
-    if (p.matricula) parts.push(`Matrícula: ${p.matricula}`);
-    els.usermenuMeta.textContent = parts.join(' · ') || '—';
+  const displayName = safeStr(p.full_name) || safeStr(user?.name) || '—';
+  if (els.usermenuTitle) els.usermenuTitle.textContent = displayName;
+  if (els.username) els.username.textContent = safeStr(user?.name) || 'Usuario';
+  if (els.userInitials) els.userInitials.textContent = userInitials(displayName);
+  if (els.userchip) {
+    els.userchip.title = displayName;
+    els.userchip.setAttribute('aria-label', `Abrir menú de usuario de ${displayName}`);
   }
+  const details = [
+    [els.usermenuEmail, p.email ? `Correo: ${p.email}` : ''],
+    [els.usermenuMatricula, p.matricula ? `Matrícula: ${p.matricula}` : ''],
+    [els.usermenuRole, p.role ? `Rol: ${p.role}` : ''],
+  ];
+  details.forEach(([element, value]) => {
+    if (!element) return;
+    element.textContent = value;
+    element.hidden = !value;
+  });
 }
 
 els.btnHome?.addEventListener('click', () => {
@@ -2463,6 +2632,18 @@ els.fabClose?.addEventListener('click', () => {
   els.fabToggle?.focus();
 });
 
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  if (els.fabMenu && !els.fabMenu.hidden) {
+    closeFabMenu();
+    els.fabToggle?.focus();
+  }
+  if (els.usermenuMenu && !els.usermenuMenu.hidden) {
+    closeUserMenu();
+    els.userchip?.focus();
+  }
+});
+
 document.addEventListener('click', (e) => {
   if (!els.fabMenu || els.fabMenu.hidden) return;
   const inside = e.target?.closest?.('#fab-menu') || e.target?.closest?.('#fab-toggle');
@@ -2472,8 +2653,39 @@ document.addEventListener('click', (e) => {
 els.btnNew.addEventListener('click', () => {
   closeReportsMenu();
   closeFabMenu();
-  setActiveNav('btn-new');
+  setActiveNav('btn-home');
+  openQuickActivityModal();
+});
+els.btnFullRecord?.addEventListener('click', () => {
+  closeReportsMenu();
+  closeFabMenu();
+  setActiveNav('btn-home');
   openModalForNew();
+});
+els.qGeneralActivity?.addEventListener('change', () => {
+  updateQuickActivityCustomField();
+  syncQuickActivityFormState();
+});
+els.quickForm?.addEventListener('input', (event) => {
+  if (event.target instanceof HTMLElement) event.target.dataset.touched = 'true';
+  syncQuickActivityFormState();
+});
+els.quickForm?.addEventListener('change', (event) => {
+  if (event.target instanceof HTMLElement) event.target.dataset.touched = 'true';
+  syncQuickActivityFormState();
+});
+els.quickForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  saveQuickActivity();
+});
+els.btnQuickCancel?.addEventListener('click', closeQuickActivityModal);
+els.btnQuickClose?.addEventListener('click', closeQuickActivityModal);
+els.quickModal?.addEventListener('cancel', (event) => {
+  event.preventDefault();
+  closeQuickActivityModal();
+});
+els.quickModal?.addEventListener('click', (event) => {
+  if (event.target === els.quickModal) closeQuickActivityModal();
 });
 els.btnBulk?.addEventListener('click', () => {
   closeFabMenu();
@@ -2518,6 +2730,12 @@ els.btnRestore?.addEventListener('click', () => {
 els.backupFile?.addEventListener('change', () => restoreBackup(els.backupFile.files?.[0]));
 els.btnProfile?.addEventListener('click', () => {
   closeReportsMenu();
+  closeUserMenu();
+  setActiveNav('btn-profile');
+  openProfile();
+});
+els.btnMenuSettings?.addEventListener('click', () => {
+  closeUserMenu();
   setActiveNav('btn-profile');
   openProfile();
 });
@@ -2544,6 +2762,7 @@ els.btnEvents?.addEventListener('click', () => {
   document.querySelector('.panel-events')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
 });
 els.btnLogout?.addEventListener('click', async () => {
+  closeUserMenu();
   clearCurrentUser();
   if (API_URL) {
     try {
@@ -2758,12 +2977,13 @@ document.addEventListener('click', (e) => {
   if (action === 'edit') openEventForEdit(id);
 });
 
+els.btnProfileCancel?.addEventListener('click', () => els.profileModal?.close());
 els.profileForm?.addEventListener('submit', (e) => {
   e.preventDefault();
   saveProfileFromForm();
+  renderUserMenuInfo();
   els.profileModal?.close();
 });
-els.btnProfileCancel?.addEventListener('click', () => els.profileModal?.close());
 
 els.btnEventNew?.addEventListener('click', openEventForNew);
 els.eventForm?.addEventListener('submit', (e) => {
@@ -2798,6 +3018,7 @@ function showAppForUser(user) {
   if (els.btnAdminUsers) els.btnAdminUsers.hidden = !user?.is_admin;
 
   ensureProfileDefaults(user);
+  renderUserMenuInfo();
 
   // Inicio sin filtros: todo lo cargado queda visible desde el primer acceso.
   if (els.filterMonth) els.filterMonth.value = '';

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=17" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=23" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -84,23 +84,114 @@
         </div>
 
         <nav class="topnav" aria-label="Navegación">
-          <button class="navlink is-active" type="button" id="btn-home"><span class="nav-icon" aria-hidden="true">▦</span><span>Dashboard</span></button>
-          <button class="navlink" type="button" id="btn-profile"><span class="nav-icon" aria-hidden="true">◉</span><span>Perfil</span></button>
-          <button class="navlink" type="button" id="btn-events"><span class="nav-icon" aria-hidden="true">◷</span><span>Eventos</span></button>
-          <button class="navlink" type="button" id="btn-admin-users" hidden><span class="nav-icon" aria-hidden="true">♙</span><span>Usuarios</span></button>
+          <button class="navlink is-active" type="button" id="btn-home"><svg class="line-icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg><span>Dashboard</span></button>
+          <button class="navlink" type="button" id="btn-profile"><svg class="line-icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M5 21a7 7 0 0 1 14 0" /></svg><span>Perfil</span></button>
+          <button class="navlink" type="button" id="btn-events"><svg class="line-icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /></svg><span>Eventos</span></button>
+          <button class="navlink" type="button" id="btn-admin-users" hidden><svg class="line-icon nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M20 8v6M23 11h-6" /></svg><span>Usuarios</span></button>
         </nav>
 
         <div class="top-actions">
-          <div class="usermenu" id="usermenu" hidden>
-            <button class="userchip" type="button" id="userchip" aria-haspopup="true" aria-expanded="false">
-              <span class="userchip-dot" aria-hidden="true"></span>
-              <span id="username">Usuario</span>
-              <span class="userchip-caret" aria-hidden="true">▾</span>
+          <button class="header-action header-action-primary" type="button" id="btn-new">
+            <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            <span>Nueva actividad</span>
+          </button>
+          <button class="header-action" type="button" id="btn-full-record" title="Registro completo de actividad o mantenimiento" aria-label="Registro completo de actividad o mantenimiento">
+            <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M8 13h8M8 17h8" /></svg>
+            <span>Registro completo</span>
+          </button>
+          <div class="header-menu-wrap" id="fab">
+            <button class="header-action" type="button" id="fab-toggle" aria-label="Más acciones" title="Más acciones" aria-haspopup="true" aria-controls="fab-menu" aria-expanded="false">
+              <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><path d="M5 12h.01M12 12h.01M19 12h.01" /></svg>
+              <span>Más acciones</span>
             </button>
-            <div class="usermenu-menu" id="usermenu-menu" hidden>
+            <div class="fab-menu" id="fab-menu" role="group" aria-label="Más acciones" hidden>
+              <div class="fab-menu-head">
+                <div>
+                  <div class="fab-menu-title">Más acciones</div>
+                  <div class="fab-menu-subtitle">Captura, impresión, exportación y respaldo</div>
+                </div>
+                <button class="fab-close" type="button" id="fab-close" aria-label="Cerrar acciones">
+                  <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12" /></svg>
+                </button>
+              </div>
+
+              <section class="fab-menu-group">
+                <div class="fab-menu-label">CAPTURA</div>
+                <button class="fab-item" type="button" id="btn-bulk">
+                  <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h8M3 6h.01M3 12h.01M3 18h.01M18 16v5M15.5 18.5h5" /></svg>
+                  <span>Agregar varias actividades</span>
+                </button>
+              </section>
+
+              <section class="fab-menu-group">
+                <div class="fab-menu-label">IMPRIMIR</div>
+                <div class="fab-print-grid">
+                  <button class="fab-item" type="button" id="btn-print">
+                    <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8" /></svg>
+                    <span>Vertical</span>
+                  </button>
+                  <button class="fab-item" type="button" id="btn-print-landscape">
+                    <svg class="line-icon icon-landscape" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8" /></svg>
+                    <span>Horizontal</span>
+                  </button>
+                </div>
+                <button class="fab-item" type="button" id="btn-print-events">
+                  <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h7" /></svg>
+                  <span>Imprimir eventos</span>
+                </button>
+              </section>
+
+              <details class="fab-section" open>
+                <summary><span>EXCEL (.XLSX)</span></summary>
+                <div class="fab-section-items">
+                  <button class="fab-item" type="button" id="btn-export">
+                    <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h11l5 5v13H4zM14 3v6h6M8 13v5M12 13v5M16 13v5M7 16h10" /></svg>
+                    <span>Actividades</span>
+                  </button>
+                  <button class="fab-item" type="button" id="btn-export-landscape">
+                    <svg class="line-icon icon-landscape" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h11l5 5v13H4zM14 3v6h6M8 13v5M12 13v5M16 13v5M7 16h10" /></svg>
+                    <span>Horizontal</span>
+                  </button>
+                  <button class="fab-item" type="button" id="btn-export-events">
+                    <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h11l5 5v13H4zM14 3v6h6M8 13h8M8 17h8" /><path d="M6 13h.01M6 17h.01" /></svg>
+                    <span>Eventos</span>
+                  </button>
+                </div>
+              </details>
+
+              <details class="fab-section">
+                <summary><span>RESPALDO</span></summary>
+                <div class="fab-section-items">
+                  <button class="fab-item" type="button" id="btn-backup">
+                    <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3M12 8v5M10 11l2 2 2-2" /></svg>
+                    <span>Descargar respaldo</span>
+                  </button>
+                  <button class="fab-item" type="button" id="btn-restore">
+                    <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3M12 16V9M10 11l2-2 2 2" /></svg>
+                    <span>Restaurar respaldo</span>
+                  </button>
+                </div>
+              </details>
+            </div>
+          </div>
+          <div class="usermenu" id="usermenu" hidden>
+            <button class="userchip" type="button" id="userchip" title="Abrir menú de usuario" aria-label="Abrir menú de usuario" aria-haspopup="true" aria-controls="usermenu-menu" aria-expanded="false">
+              <span class="user-avatar" id="user-initials" aria-hidden="true">U</span>
+              <span class="visually-hidden" id="username">Usuario</span>
+            </button>
+            <div class="usermenu-menu" id="usermenu-menu" role="group" aria-label="Menú de usuario" hidden>
               <div class="usermenu-title" id="usermenu-title">—</div>
-              <div class="usermenu-meta" id="usermenu-meta">—</div>
-              <button class="btn btn-ghost reports-item" type="button" id="btn-logout">Cerrar sesión</button>
+              <div class="usermenu-meta" id="usermenu-email" hidden></div>
+              <div class="usermenu-meta" id="usermenu-matricula" hidden></div>
+              <div class="usermenu-meta" id="usermenu-role" hidden></div>
+              <button class="usermenu-item" type="button" id="btn-menu-settings">
+                <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" /><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.8 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.8-1l-1.7.7-1.4-2.4L7.1 15a8 8 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.8-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.8 1l1.7-.7 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 2z" /></svg>
+                <span>Ajustes</span>
+              </button>
+              <button class="usermenu-item" type="button" id="btn-logout">
+                <svg class="line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>
+                <span>Cerrar sesión</span>
+              </button>
             </div>
           </div>
         </div>
@@ -245,60 +336,56 @@
       </section>
     </main>
 
-    <!-- Acceso directo para nuevas actividades y atajos secundarios -->
-    <div class="fab" id="fab" aria-label="Acciones rápidas">
-      <div class="fab-controls">
-        <button class="fab-btn fab-new-btn" type="button" id="btn-new">
-          <span class="action-symbol" aria-hidden="true">+</span>
-          <span><strong>Nueva actividad</strong><small>Registro completo de actividad o mantenimiento</small></span>
-        </button>
-        <button class="fab-btn fab-toggle" type="button" id="fab-toggle" aria-haspopup="true" aria-controls="fab-menu" aria-expanded="false">
-          <span aria-hidden="true">☰</span><span>Atajos</span><span class="fab-chevron" aria-hidden="true">⌄</span>
-        </button>
-      </div>
-      <div class="fab-menu" id="fab-menu" role="group" aria-label="Atajos para registro e impresión" hidden>
-        <div class="fab-menu-head">
-          <div>
-            <div class="fab-menu-title">Más acciones</div>
-            <div class="fab-menu-subtitle">Captura, impresión y respaldo</div>
-          </div>
-          <button class="fab-close" type="button" id="fab-close" aria-label="Cerrar acciones rápidas">×</button>
-        </div>
-
-        <div class="fab-menu-group">
-          <div class="fab-menu-label">CAPTURA MÚLTIPLE</div>
-          <div class="fab-action-grid">
-            <button class="fab-item fab-item-primary" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span><span>Agregar varias actividades</span></button>
-          </div>
-        </div>
-
-        <div class="fab-menu-group">
-          <div class="fab-menu-label">IMPRIMIR ACTIVIDADES</div>
-          <div class="fab-action-grid fab-print-grid">
-            <button class="fab-item fab-item-print" type="button" id="btn-print"><span class="action-symbol" aria-hidden="true">▤</span><span>Vertical</span></button>
-            <button class="fab-item fab-item-print" type="button" id="btn-print-landscape"><span class="action-symbol" aria-hidden="true">▤</span><span>Horizontal</span></button>
-          </div>
-        </div>
-
-        <details class="fab-section">
-          <summary>Exportar y reportes</summary>
-          <div class="fab-section-items">
-            <button class="fab-item" type="button" id="btn-export">Excel (.xlsx) · actividades</button>
-            <button class="fab-item" type="button" id="btn-export-landscape">Excel (.xlsx) · horizontal</button>
-            <button class="fab-item" type="button" id="btn-export-events">Excel (.xlsx) · eventos</button>
-            <button class="fab-item" type="button" id="btn-print-events">Imprimir · eventos</button>
-          </div>
-        </details>
-        <details class="fab-section">
-          <summary>Respaldo</summary>
-          <div class="fab-section-items">
-            <button class="fab-item" type="button" id="btn-backup">Descargar respaldo</button>
-            <button class="fab-item" type="button" id="btn-restore">Restaurar respaldo</button>
-          </div>
-        </details>
-      </div>
-    </div>
     <input type="file" id="backup-file" accept="application/json,.json" hidden />
+
+    <dialog class="modal" id="quick-modal">
+      <form method="dialog" class="modal-card" id="quick-form" novalidate>
+        <div class="modal-head">
+          <div>
+            <div class="modal-title">Nueva actividad</div>
+            <div class="modal-sub">Captura rápida de una actividad general. Para mantenimiento o datos de equipo, usa Registro completo.</div>
+          </div>
+          <button class="icon-btn" type="button" id="btn-quick-close" aria-label="Cerrar captura rápida">✕</button>
+        </div>
+        <div class="grid">
+          <label class="field">
+            <span>Fecha <b class="required-mark" aria-hidden="true">*</b></span>
+            <input type="date" id="q-date" required />
+            <small class="field-error" id="error-q-date" aria-live="polite"></small>
+          </label>
+          <label class="field">
+            <span>Estado <b class="required-mark" aria-hidden="true">*</b></span>
+            <select id="q-status" required>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_proceso">En proceso</option>
+              <option value="completada">Completada</option>
+              <option value="cancelada">Cancelada</option>
+            </select>
+            <small class="field-error" id="error-q-status" aria-live="polite"></small>
+          </label>
+          <label class="field field-wide">
+            <span>Tipo de actividad general <b class="required-mark" aria-hidden="true">*</b></span>
+            <select id="q-general-activity" required></select>
+            <small class="field-error" id="error-q-general-activity" aria-live="polite"></small>
+          </label>
+          <label class="field field-wide" id="q-general-activity-custom-field" hidden>
+            <span>Escribe la actividad general <b class="required-mark" aria-hidden="true">*</b></span>
+            <input type="text" id="q-general-activity-custom" maxlength="160" placeholder="Agrega una opción propia" />
+            <small class="field-error" id="error-q-general-activity-custom" aria-live="polite"></small>
+          </label>
+          <label class="field field-wide">
+            <span>Descripción de la actividad <b class="required-mark" aria-hidden="true">*</b></span>
+            <textarea id="q-desc" rows="4" maxlength="2000" placeholder="Describe brevemente el trabajo realizado o solicitado." required></textarea>
+            <small class="field-error" id="error-q-desc" aria-live="polite"></small>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" type="button" id="btn-quick-cancel">Cancelar</button>
+          <span class="save-hint" id="quick-save-hint" aria-live="polite">Completa los campos obligatorios para guardar.</span>
+          <button class="btn" type="submit" id="btn-quick-save" disabled>Guardar</button>
+        </div>
+      </form>
+    </dialog>
 
     <!-- Modal actividad -->
     <dialog class="modal" id="modal">
@@ -700,7 +787,7 @@
   </div>
 
   <script src="./js/config.js?v=1"></script>
-  <script type="module" src="./js/simple.js?v=71"></script>
+  <script type="module" src="./js/simple.js?v=72"></script>
 
   <script>
     // Service Worker (opcional)
@@ -708,7 +795,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=71').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=72').catch(() => {});
       } catch {}
     })();
   </script>
