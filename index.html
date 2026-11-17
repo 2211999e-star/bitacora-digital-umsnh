@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=14" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=15" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -245,25 +245,30 @@
       </section>
     </main>
 
-    <!-- Acciones rápidas (burbuja lateral fija) -->
+    <!-- Acceso directo para nuevas actividades y atajos secundarios -->
     <div class="fab" id="fab" aria-label="Acciones rápidas">
-      <button class="fab-btn" type="button" id="fab-toggle" aria-haspopup="true" aria-controls="fab-menu" aria-expanded="false">
-        Acciones rápidas <span aria-hidden="true">⌄</span>
-      </button>
+      <div class="fab-controls">
+        <button class="fab-btn fab-new-btn" type="button" id="btn-new">
+          <span class="action-symbol" aria-hidden="true">+</span>
+          <span><strong>Nueva actividad</strong><small>Registro completo de actividad o mantenimiento</small></span>
+        </button>
+        <button class="fab-btn fab-toggle" type="button" id="fab-toggle" aria-haspopup="true" aria-controls="fab-menu" aria-expanded="false">
+          <span aria-hidden="true">☰</span><span>Atajos</span><span class="fab-chevron" aria-hidden="true">⌄</span>
+        </button>
+      </div>
       <div class="fab-menu" id="fab-menu" role="group" aria-label="Atajos para registro e impresión" hidden>
         <div class="fab-menu-head">
           <div>
-            <div class="fab-menu-title">Atajos rápidos</div>
-            <div class="fab-menu-subtitle">Registro y reportes</div>
+            <div class="fab-menu-title">Más acciones</div>
+            <div class="fab-menu-subtitle">Captura, impresión y respaldo</div>
           </div>
           <button class="fab-close" type="button" id="fab-close" aria-label="Cerrar acciones rápidas">×</button>
         </div>
 
         <div class="fab-menu-group">
-          <div class="fab-menu-label">REGISTRO</div>
+          <div class="fab-menu-label">CAPTURA MÚLTIPLE</div>
           <div class="fab-action-grid">
-            <button class="fab-item fab-item-primary" type="button" id="btn-new"><span class="action-symbol" aria-hidden="true">+</span><span>Nueva actividad</span></button>
-            <button class="fab-item" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span><span>Captura rápida</span></button>
+            <button class="fab-item fab-item-primary" type="button" id="btn-bulk"><span class="action-symbol" aria-hidden="true">≡</span><span>Agregar varias actividades</span></button>
           </div>
         </div>
 
@@ -301,7 +306,7 @@
         <div class="modal-head">
           <div>
             <div class="modal-title" id="modal-title">Nueva actividad</div>
-            <div class="modal-sub">Clasifica el mantenimiento como preventivo o correctivo. La impresión respeta tus filtros.</div>
+            <div class="modal-sub">Elige el formato y completa sus datos. Los campos de equipo aparecen al seleccionar computadora o impresora.</div>
           </div>
           <button class="icon-btn" value="cancel" aria-label="Cerrar">✕</button>
         </div>
@@ -309,7 +314,19 @@
         <input type="hidden" id="f-id" />
 
         <div class="grid">
-          <div class="form-section-label field-wide">Actividad</div>
+          <div class="form-section-label field-wide">1 · Tipo de registro</div>
+          <label class="field field-wide">
+            <span>¿Qué vas a registrar?</span>
+            <select id="f-equipment-type">
+              <option value="Normal">Actividad general</option>
+              <option value="Mantenimiento">Mantenimiento (sin equipo identificado)</option>
+              <option value="Computadora">Mantenimiento de computadora</option>
+              <option value="Impresora">Mantenimiento de impresora</option>
+            </select>
+            <small class="field-hint">En mantenimiento elige preventivo o correctivo; son opciones excluyentes.</small>
+          </label>
+
+          <div class="form-section-label field-wide">2 · Datos de la actividad</div>
           <label class="field">
             <span>Fecha</span>
             <input type="date" id="f-date" required />
@@ -328,15 +345,6 @@
           <label class="field field-wide">
             <span>Detalle específico del arreglo (opcional)</span>
             <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
-          </label>
-          <label class="field">
-            <span>Formato de registro</span>
-            <select id="f-equipment-type">
-              <option value="Normal">Actividad general</option>
-              <option value="Mantenimiento">Mantenimiento (sin equipo identificado)</option>
-              <option value="Computadora">Computadora</option>
-              <option value="Impresora">Impresora</option>
-            </select>
           </label>
           <section class="field field-wide activity-options" id="general-activity-section" hidden>
             <label class="field">

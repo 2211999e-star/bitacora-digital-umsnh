@@ -2385,3 +2385,226 @@ body{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
+
+/* Primary activity entry stays visible; secondary shortcuts live in a separate menu. */
+#app .fab{
+  top:auto;
+  right:20px;
+  bottom:20px;
+  align-items:flex-end;
+  flex-direction:column;
+  gap:10px;
+  transform:none;
+}
+#app .fab-controls{
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+}
+#app .fab-new-btn{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:11px;
+  min-width:260px;
+  min-height:58px;
+  padding:10px 15px;
+  border:1px solid #155b83;
+  border-radius:15px;
+  background:linear-gradient(135deg,#237ca9,#155b83);
+  color:#fff;
+  text-align:left;
+}
+#app .fab-new-btn:hover{
+  border-color:#104c70;
+  background:linear-gradient(135deg,#1d6c95,#104c70);
+}
+#app .fab-new-btn .action-symbol{
+  display:grid;
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.28);
+  border-radius:10px;
+  background:rgba(255,255,255,.15);
+  font-size:23px;
+  font-weight:500;
+}
+#app .fab-new-btn strong,
+#app .fab-new-btn small{
+  display:block;
+}
+#app .fab-new-btn strong{
+  font-size:13px;
+  font-weight:850;
+}
+#app .fab-new-btn small{
+  margin-top:3px;
+  color:rgba(255,255,255,.82);
+  font-size:10px;
+  font-weight:500;
+}
+#app .fab-toggle{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-width:94px;
+  min-height:58px;
+  padding:10px 13px;
+  border:1px solid #c9dce9;
+  border-radius:15px;
+  background:#fff;
+  color:#23516e;
+  font-size:12px;
+  font-weight:800;
+}
+#app .fab-toggle:hover{
+  border-color:#9fc4dc;
+  background:#f2f8fc;
+}
+#app .fab-toggle .fab-chevron{
+  color:#71899a;
+  font-size:14px;
+}
+#app .fab-menu{
+  width:min(340px,calc(100vw - 28px));
+}
+#app #form.modal-card{
+  width:min(760px,calc(100vw - 36px));
+  max-height:min(88vh,860px);
+  overflow:auto;
+  border:1px solid #d5e3ed;
+  border-radius:20px;
+  box-shadow:0 24px 70px rgba(20,54,79,.28);
+}
+#app #form .modal-head{
+  position:sticky;
+  top:0;
+  z-index:3;
+  padding:18px 22px;
+  background:rgba(247,251,254,.97);
+  backdrop-filter:blur(14px);
+}
+#app #form .modal-title{
+  color:#183d58;
+  font-size:20px;
+  font-weight:850;
+}
+#app #form .modal-sub{
+  max-width:560px;
+  margin-top:4px;
+  font-size:12px;
+  line-height:1.5;
+}
+#app #form .grid{
+  gap:15px;
+  padding:20px 22px;
+}
+#app #form .grid>.field,
+#app #form .activity-options{
+  min-width:0;
+}
+#app #form .field>span,
+#app #form .field>small,
+#app #form .field>input,
+#app #form .field>select,
+#app #form .field>textarea{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+#app #form .form-section-label{
+  margin:3px 0 0;
+  padding:0 0 8px;
+  border-bottom:1px solid #e0eaf1;
+  color:#2c607f;
+  font-size:11px;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+#app #form .field-hint{
+  display:block;
+  margin-top:5px;
+  color:#6b8193;
+  font-size:11px;
+  line-height:1.45;
+}
+#app #form #f-equipment-type{
+  border-color:#a9c8dc;
+  background:#f8fcff;
+  font-weight:750;
+}
+#app #form .activity-options{
+  border-color:#cfe0eb;
+  border-radius:15px;
+  background:linear-gradient(145deg,#f6faff,#eef6fb);
+}
+#app #form .modal-actions{
+  position:sticky;
+  bottom:0;
+  z-index:3;
+  padding:13px 22px;
+  background:rgba(247,251,254,.97);
+  backdrop-filter:blur(14px);
+}
+
+@media(max-width:640px){
+  #app .fab{
+    right:12px;
+    bottom:calc(12px + env(safe-area-inset-bottom));
+    left:12px;
+    align-items:stretch;
+    gap:9px;
+  }
+  #app .fab-controls{
+    width:100%;
+    gap:8px;
+  }
+  #app .fab-new-btn{
+    flex:1;
+    min-width:0;
+    min-height:54px;
+    padding:9px 12px;
+    border-radius:14px;
+  }
+  #app .fab-new-btn small{
+    font-size:9px;
+  }
+  #app .fab-toggle{
+    flex:0 0 auto;
+    min-width:82px;
+    min-height:54px;
+    padding:8px 10px;
+    border-radius:14px;
+  }
+  #app .fab-menu{
+    width:100%;
+    max-height:calc(76dvh - env(safe-area-inset-bottom));
+    border-radius:17px;
+  }
+  #app #form.modal-card{
+    width:100%;
+    max-height:94dvh;
+    border-radius:20px 20px 0 0;
+  }
+  #app #form .modal-head{
+    padding:13px 15px;
+  }
+  #app #form .modal-title{
+    font-size:17px;
+  }
+  #app #form .modal-sub{
+    max-width:calc(100vw - 90px);
+    font-size:10px;
+  }
+  #app #form .grid{
+    gap:12px;
+    padding:14px 15px;
+  }
+  #app #form .modal-actions{
+    padding:11px 15px;
+  }
+}

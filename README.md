@@ -14,15 +14,16 @@ Sistema **ultra simple** para registrar actividades de mantenimiento/soporte com
 - Exportar reportes a **Excel (.xlsx)**
 - Imprimir la vista filtrada (día/mes) desde el botón **Imprimir**
 - Descargar y restaurar un respaldo `.json` con actividades, eventos y perfiles
+- Abrir **Nueva actividad** directamente y usar **Atajos** para captura múltiple, impresión, exportación y respaldo
 - Elegir cuántos registros mostrar por página y usar atajos de teclado
 
 ## Cómo usar
 1. Entra a la página
-2. Clic en **Nueva actividad**
-3. Llena: actividad, ubicación, área y responsable(s)
+2. Clic en **Nueva actividad**; primero selecciona actividad general o un formato de mantenimiento
+3. Completa los datos de actividad. Para computadora o impresora también aparecen patrimonio, descripción, preventivo/correctivo, tipo, marca, modelo y serie
 4. Guarda
 5. Usa **Excel** o **Imprimir** con los filtros que necesites
-6. Abre **Acciones → Descargar respaldo** para guardar una copia. Restaurar una copia reemplaza los registros y eventos actuales.
+6. Abre **Atajos** para captura múltiple, impresión, exportación o respaldo. Restaurar una copia reemplaza los registros y eventos actuales.
 
 ## Atajos
 - **Ctrl/Cmd + K**: enfocar búsqueda
