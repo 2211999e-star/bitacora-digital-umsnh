@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=11" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=12" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -87,6 +87,7 @@
           <button class="navlink is-active" type="button" id="btn-home"><span class="nav-icon" aria-hidden="true">▦</span><span>Dashboard</span></button>
           <button class="navlink" type="button" id="btn-profile"><span class="nav-icon" aria-hidden="true">◉</span><span>Perfil</span></button>
           <button class="navlink" type="button" id="btn-events"><span class="nav-icon" aria-hidden="true">◷</span><span>Eventos</span></button>
+          <button class="navlink" type="button" id="btn-admin-users" hidden><span class="nav-icon" aria-hidden="true">♙</span><span>Usuarios</span></button>
         </nav>
 
         <div class="top-actions">
@@ -99,7 +100,6 @@
             <div class="usermenu-menu" id="usermenu-menu" hidden>
               <div class="usermenu-title" id="usermenu-title">—</div>
               <div class="usermenu-meta" id="usermenu-meta">—</div>
-              <button class="btn btn-ghost reports-item" type="button" id="btn-admin-users" hidden>Administrar usuarios</button>
               <button class="btn btn-ghost reports-item" type="button" id="btn-logout">Cerrar sesión</button>
             </div>
           </div>
@@ -312,29 +312,44 @@
             <input type="text" id="f-action-detail" placeholder="Ej. Cambiar disco SSD de 480 GB y configurar Windows." />
           </label>
           <label class="field">
-            <span>Tipo de actividad</span>
+            <span>Formato de registro</span>
             <select id="f-equipment-type">
               <option value="Normal">Actividad general</option>
               <option value="Computadora">Computadora</option>
               <option value="Impresora">Impresora</option>
             </select>
           </label>
-          <label class="field">
-            <span>Tipo de mantenimiento (si aplica)</span>
-            <select id="f-maintenance-type">
-              <option value="">Sin especificar</option>
-              <option value="Preventivo">Preventivo</option>
-              <option value="Correctivo">Correctivo</option>
-              <option value="Formateo">Formateo</option>
-              <option value="Reparación">Reparación</option>
-              <option value="Limpieza interna">Limpieza interna</option>
-              <option value="Instalación">Instalación</option>
-              <option value="Configuración">Configuración</option>
-              <option value="Cambio de componente">Cambio de componente</option>
-              <option value="Diagnóstico">Diagnóstico</option>
-              <option value="Otro arreglo">Otro arreglo</option>
-            </select>
-          </label>
+          <section class="field field-wide activity-options" id="general-activity-section" hidden>
+            <label class="field">
+              <span>Tipo de actividad general</span>
+              <select id="f-general-activity"></select>
+            </label>
+            <label class="field" id="general-activity-custom-field" hidden>
+              <span>Escribe la actividad general</span>
+              <input type="text" id="f-general-activity-custom" maxlength="160" placeholder="Agrega una opción propia" />
+            </label>
+          </section>
+          <div class="field field-wide form-section-label maintenance-section-title">Clasificación del mantenimiento</div>
+          <section class="field field-wide activity-options maintenance-options" id="maintenance-section">
+            <label class="field">
+              <span>Selecciona solo una opción</span>
+              <select id="f-maintenance-type" required>
+                <option value="" selected disabled>Elige preventivo o correctivo</option>
+                <option value="Preventivo">Mantenimiento preventivo</option>
+                <option value="Correctivo">Mantenimiento correctivo</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Tipo de mantenimiento</span>
+              <select id="f-maintenance-task" disabled required>
+                <option value="">Primero selecciona preventivo o correctivo</option>
+              </select>
+            </label>
+            <label class="field" id="maintenance-custom-field" hidden>
+              <span>Especifica otro tipo de mantenimiento</span>
+              <input type="text" id="f-maintenance-detail" maxlength="160" placeholder="Escribe el tipo de mantenimiento" />
+            </label>
+          </section>
           <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
           <label class="field equipment-field" hidden>
             <span>Número de patrimonio</span>
@@ -343,10 +358,6 @@
           <label class="field equipment-field" hidden>
             <span>Número de serie</span>
             <input type="text" id="f-serial-number" placeholder="Ej. ABC123456" />
-          </label>
-          <label class="field field-wide" hidden>
-            <span>Especificar otro arreglo (opcional)</span>
-            <input type="text" id="f-maintenance-detail" placeholder="Ej. Cambiar rodillo, ajustar bandeja o reemplazar memoria." />
           </label>
           <div class="field field-wide form-section-label">Ubicación y responsables</div>
           <label class="field">
@@ -529,7 +540,7 @@
   </div>
 
   <script src="./js/config.js?v=1"></script>
-  <script type="module" src="./js/simple.js?v=65"></script>
+  <script type="module" src="./js/simple.js?v=66"></script>
 
   <script>
     // Service Worker (opcional)

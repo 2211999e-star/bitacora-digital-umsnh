@@ -1543,7 +1543,7 @@ body{
   #app .topnav{
     grid-area:nav;
     display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(64px,1fr));
     justify-self:stretch;
     width:100%;
     min-width:0;
@@ -2267,11 +2267,58 @@ body{
   min-width:0;
 }
 
+#app .activity-options{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin:0;
+  padding:16px;
+  border:1px solid #dce8f1;
+  border-radius:14px;
+  background:linear-gradient(145deg,#f8fbfd,#f3f8fc);
+}
+
+#app .activity-options .field{
+  min-width:0;
+}
+
+#app .maintenance-section{
+  border-color:#cfe2ef;
+  background:linear-gradient(145deg,#f1f8fd,#f8fbfd);
+}
+
+#app .maintenance-section select#f-maintenance-type{
+  border-color:#9fc4dc;
+  background:#fff;
+  font-weight:750;
+}
+
+#app .maintenance-section select#f-maintenance-task:disabled{
+  color:#71869a;
+  background:#edf2f5;
+}
+
+#app .form-section-label.maintenance-section-title{
+  margin-top:8px;
+  color:#145c87;
+  border-color:#cfe2ef;
+}
+
+#app .activity-options[hidden],
+#app .activity-options .field[hidden]{
+  display:none;
+}
+
 #users-message.is-error{
   color:#9b2424;
 }
 
 @media(max-width:640px){
+  #app .activity-options{
+    grid-template-columns:minmax(0,1fr);
+    gap:12px;
+    padding:13px;
+  }
   .admin-user-row{
     grid-template-columns:minmax(0,1fr);
   }

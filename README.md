@@ -5,6 +5,9 @@ Sistema **ultra simple** para registrar actividades de mantenimiento/soporte com
 ## Qué hace
 - Guardar actividades como **Pendiente** o **Realizada**
 - Registrar opcionalmente computadoras e impresoras con número de patrimonio, tipo de mantenimiento y número de serie
+- Clasificar cada registro como **Preventivo** o **Correctivo** y seleccionar el tipo correspondiente
+- Elegir una actividad general de la lista o escribir una opción personalizada
+- Administrar cuentas desde la sección **Usuarios** al iniciar como Iván (con PHP/MariaDB habilitados)
 - Marcar una actividad como **completada**
 - Filtrar por **mes** o por **rango de fechas**
 - Buscar por texto (equipo, lugar, persona, etc.)
@@ -74,7 +77,9 @@ La aplicación incluye una API PHP para autenticar usuarios y compartir activida
 
 Los cambios aparecen inicialmente como locales y el indicador del sistema informa si ya se sincronizaron. La API usa revisiones para impedir que una sesión sobrescriba silenciosamente cambios de otra; ante un conflicto, conserva la copia local y muestra un error. Descarga un respaldo antes de recargar y obtener la versión del servidor.
 
-Al iniciar sesión como `ivan`, abre el menú de usuario y selecciona **Administrar usuarios** para crear cuentas y cambiar contraseñas. Las altas y cambios se escriben directamente en la tabla `users` de MariaDB; las cuentas creadas desde el panel no reciben permisos de administración. Solo una cuenta marcada `is_admin` en la base de datos puede usar estas operaciones.
+Al iniciar sesión como `ivan`, selecciona **Usuarios** en la navegación para crear cuentas y cambiar contraseñas. Las altas y cambios se escriben directamente en la tabla `users` de MariaDB; las cuentas creadas desde el panel no reciben permisos de administración. Solo una cuenta marcada `is_admin` en la base de datos puede usar estas operaciones.
+
+El formulario separa la clasificación **Preventivo/Correctivo** de su tipo específico, con catálogos distintos según la clasificación y opción personalizada. Las actividades generales tienen un catálogo independiente y permiten capturar una opción propia. Las opciones personalizadas se guardan en los registros y se ofrecen en los siguientes formularios compartidos. En GitHub Pages Iván verá la sección **Usuarios**, pero aparecerá como no disponible hasta conectar la API del servidor.
 
 Para llevar datos del sitio anterior, descarga primero **Acciones → Descargar respaldo** desde el navegador antiguo. Entra al servidor, inicia sesión y usa **Acciones → Restaurar respaldo**. Restaurar reemplaza el estado compartido completo.
 

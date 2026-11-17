@@ -43,6 +43,7 @@ const USERS = {
     id: 'ivan',
     name: 'Iván',
     role: 'Comisionista / Coordinador del área',
+    is_admin: true,
     defaults: {
       full_name: 'Iván Fernández Mandujano',
       email: 'ivan.fernandez@umich.mx',
@@ -62,6 +63,39 @@ const USERS = {
     },
   },
 };
+
+const PREVENTIVE_TASKS = [
+  'Limpieza interna',
+  'Limpieza externa',
+  'Revisión de componentes',
+  'Actualización de sistema y programas',
+  'Revisión de antivirus',
+  'Optimización del equipo',
+  'Revisión de conexiones y cableado',
+  'Respaldo preventivo',
+];
+
+const CORRECTIVE_TASKS = [
+  'Diagnóstico de falla',
+  'Reparación de componente',
+  'Cambio de componente',
+  'Reinstalación de sistema o programa',
+  'Recuperación de información',
+  'Corrección de conexión o red',
+  'Reparación de impresora',
+  'Corrección de configuración',
+];
+
+const GENERAL_ACTIVITIES = [
+  'Instalación de software',
+  'Configuración de equipo o sistema',
+  'Soporte a usuario',
+  'Revisión de red e internet',
+  'Instalación de equipo',
+  'Configuración de impresora',
+  'Asesoría o capacitación',
+  'Inventario o registro de equipo',
+];
 
 function getCurrentUser() {
   try {
@@ -408,8 +442,15 @@ async function loadAdminUsers() {
 }
 
 function openUserAdministration() {
-  if (!API_URL || !getCurrentUser()?.is_admin) return;
+  if (!getCurrentUser()?.is_admin) return;
   document.getElementById('users-modal')?.showModal();
+  const inputs = els.userCreateForm?.querySelectorAll('input, button') || [];
+  inputs.forEach((input) => { input.disabled = !API_URL; });
+  if (!API_URL) {
+    els.usersList.textContent = 'Las cuentas se administran en la base de datos del servidor.';
+    setUsersMessage('La administración de usuarios requiere la API PHP/MariaDB. Esta vista de GitHub Pages es solo demostrativa; activa la API en js/config.js en el servidor Apache.');
+    return;
+  }
   setUsersMessage('');
   loadAdminUsers();
 }
@@ -763,6 +804,7 @@ function matchesSearch(rec, q) {
     rec.area,
     rec.assigned_to,
     rec.equipment_type,
+    rec.general_activity,
     rec.inventory_number,
     rec.maintenance_type,
     rec.maintenance_detail,
@@ -861,9 +903,15 @@ const els = {
   fDesc: document.getElementById('f-desc'),
   fActionDetail: document.getElementById('f-action-detail'),
   fEquipmentType: document.getElementById('f-equipment-type'),
+  generalActivitySection: document.getElementById('general-activity-section'),
+  fGeneralActivity: document.getElementById('f-general-activity'),
+  generalActivityCustomField: document.getElementById('general-activity-custom-field'),
+  fGeneralActivityCustom: document.getElementById('f-general-activity-custom'),
   fInventoryNumber: document.getElementById('f-inventory-number'),
   fMaintenanceType: document.getElementById('f-maintenance-type'),
+  fMaintenanceTask: document.getElementById('f-maintenance-task'),
   fMaintenanceDetail: document.getElementById('f-maintenance-detail'),
+  maintenanceCustomField: document.getElementById('maintenance-custom-field'),
   fSerialNumber: document.getElementById('f-serial-number'),
   fLocation: document.getElementById('f-location'),
   fArea: document.getElementById('f-area'),
@@ -1175,19 +1223,82 @@ function escapeHtml(text) {
 function maintenanceSummary(record) {
   const type = safeStr(record?.maintenance_type) || 'Sin especificar';
   const detail = safeStr(record?.maintenance_detail);
-  return detail ? `${type} · ${detail}` : type;
+  const generalActivity = safeStr(record?.general_activity);
+  const maintenance = type !== 'Sin especificar'
+    ? (detail ? `${type} · ${detail}` : type)
+    : '';
+  const general = generalActivity ? `Actividad general · ${generalActivity}` : '';
+  return [maintenance, general].filter(Boolean).join(' | ') || type;
 }
 
 function updateEquipmentFields() {
-  const isEquipment = ['Computadora', 'Impresora'].includes(safeStr(els.fEquipmentType.value));
+  const type = safeStr(els.fEquipmentType.value);
+  const isEquipment = ['Computadora', 'Impresora'].includes(type);
+  if (els.generalActivitySection) els.generalActivitySection.hidden = type !== 'Normal';
   document.querySelectorAll('.equipment-field').forEach((field) => {
     field.hidden = !isEquipment;
   });
 }
 
+function updateGeneralActivityOptions(selectedValue = '') {
+  if (!els.fGeneralActivity) return;
+  const savedOptions = [...new Set(loadRecords()
+    .map((record) => safeStr(record.general_activity))
+    .filter((activity) => activity && !GENERAL_ACTIVITIES.includes(activity)))];
+  const activities = [...GENERAL_ACTIVITIES, ...savedOptions];
+  const options = [
+    '<option value="">Selecciona una actividad general</option>',
+    ...activities.map((activity) => `<option value="${escapeHtml(activity)}">${escapeHtml(activity)}</option>`),
+    '<option value="__custom__">Agregar y guardar otra actividad…</option>',
+  ];
+  els.fGeneralActivity.innerHTML = options.join('');
+  const isKnown = activities.includes(selectedValue);
+  els.fGeneralActivity.value = isKnown ? selectedValue : (selectedValue ? '__custom__' : '');
+  if (!isKnown && selectedValue && els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = selectedValue;
+  updateGeneralActivityCustomField();
+}
+
+function updateGeneralActivityCustomField() {
+  const isCustom = els.fGeneralActivity?.value === '__custom__';
+  if (els.generalActivityCustomField) els.generalActivityCustomField.hidden = !isCustom;
+  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.required = isCustom;
+}
+
+function updateMaintenanceTaskOptions(selectedValue = '') {
+  if (!els.fMaintenanceTask) return;
+  const category = safeStr(els.fMaintenanceType?.value);
+  const tasks = category === 'Preventivo'
+    ? PREVENTIVE_TASKS
+    : category === 'Correctivo'
+      ? CORRECTIVE_TASKS
+      : [];
+  if (!tasks.length) {
+    els.fMaintenanceTask.innerHTML = '<option value="">Primero selecciona preventivo o correctivo</option>';
+    els.fMaintenanceTask.disabled = true;
+    updateMaintenanceDetailField();
+    return;
+  }
+  const savedTasks = [...new Set(loadRecords()
+    .filter((record) => safeStr(record.maintenance_type) === category)
+    .map((record) => safeStr(record.maintenance_detail))
+    .filter((task) => task && !tasks.includes(task)))];
+  const availableTasks = [...tasks, ...savedTasks];
+  els.fMaintenanceTask.disabled = false;
+  els.fMaintenanceTask.innerHTML = [
+    '<option value="">Selecciona el tipo de mantenimiento</option>',
+    ...availableTasks.map((task) => `<option value="${escapeHtml(task)}">${escapeHtml(task)}</option>`),
+    '<option value="__custom__">Agregar y guardar otro tipo…</option>',
+  ].join('');
+  const isKnown = availableTasks.includes(selectedValue);
+  els.fMaintenanceTask.value = isKnown ? selectedValue : (selectedValue ? '__custom__' : '');
+  if (!isKnown && selectedValue && els.fMaintenanceDetail) els.fMaintenanceDetail.value = selectedValue;
+  updateMaintenanceDetailField();
+}
+
 function updateMaintenanceDetailField() {
-  const isOther = safeStr(els.fMaintenanceType.value) === 'Otro arreglo';
-  if (els.fMaintenanceDetail) els.fMaintenanceDetail.closest('.field').hidden = !isOther;
+  const isOther = safeStr(els.fMaintenanceTask?.value) === '__custom__';
+  if (els.maintenanceCustomField) els.maintenanceCustomField.hidden = !isOther;
+  if (els.fMaintenanceDetail) els.fMaintenanceDetail.required = isOther;
 }
 
 function openModalForNew() {
@@ -1198,9 +1309,12 @@ function openModalForNew() {
   els.fDesc.value = '';
   els.fActionDetail.value = '';
   els.fEquipmentType.value = 'Normal';
+  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
+  updateGeneralActivityOptions();
   els.fInventoryNumber.value = '';
   els.fMaintenanceType.value = '';
   els.fMaintenanceDetail.value = '';
+  updateMaintenanceTaskOptions();
   els.fSerialNumber.value = '';
   els.fLocation.value = '';
   els.fArea.value = '';
@@ -1278,9 +1392,14 @@ function openModalForEdit(id) {
   els.fDesc.value = rec.desc || '';
   els.fActionDetail.value = rec.action_detail || '';
   els.fEquipmentType.value = rec.equipment_type || 'Normal';
+  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
+  updateGeneralActivityOptions(rec.general_activity || '');
   els.fInventoryNumber.value = rec.inventory_number || '';
-  els.fMaintenanceType.value = rec.maintenance_type || '';
-  els.fMaintenanceDetail.value = rec.maintenance_detail || '';
+  const maintenanceCategory = ['Preventivo', 'Correctivo'].includes(rec.maintenance_type) ? rec.maintenance_type : '';
+  const legacyMaintenance = rec.maintenance_type && !maintenanceCategory ? rec.maintenance_type : '';
+  els.fMaintenanceType.value = maintenanceCategory;
+  els.fMaintenanceDetail.value = rec.maintenance_detail || legacyMaintenance;
+  updateMaintenanceTaskOptions(rec.maintenance_detail || legacyMaintenance);
   els.fSerialNumber.value = rec.serial_number || '';
   els.fLocation.value = rec.location || '';
   els.fArea.value = rec.area || '';
@@ -1304,7 +1423,16 @@ function upsertFromForm() {
   const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
   const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
   const maintenance_type = safeStr(els.fMaintenanceType.value);
-  const maintenance_detail = maintenance_type === 'Otro arreglo' ? safeStr(els.fMaintenanceDetail.value) : '';
+  const maintenanceTask = safeStr(els.fMaintenanceTask.value);
+  const maintenance_detail = maintenanceTask === '__custom__'
+    ? safeStr(els.fMaintenanceDetail.value)
+    : maintenanceTask;
+  const selectedGeneralActivity = safeStr(els.fGeneralActivity?.value);
+  const general_activity = selectedType !== 'Normal'
+    ? ''
+    : selectedGeneralActivity === '__custom__'
+      ? safeStr(els.fGeneralActivityCustom?.value)
+      : selectedGeneralActivity;
   const serial_number = equipment_type ? safeStr(els.fSerialNumber.value) : '';
   const location = safeStr(els.fLocation.value);
   const area = safeStr(els.fArea.value);
@@ -1312,6 +1440,18 @@ function upsertFromForm() {
 
   if (!desc) {
     els.fDesc.focus();
+    return false;
+  }
+  if (!maintenance_type) {
+    els.fMaintenanceType.focus();
+    return false;
+  }
+  if (!maintenanceTask || (maintenanceTask === '__custom__' && !maintenance_detail)) {
+    (maintenanceTask === '__custom__' ? els.fMaintenanceDetail : els.fMaintenanceTask).focus();
+    return false;
+  }
+  if (selectedType === 'Normal' && selectedGeneralActivity === '__custom__' && !general_activity) {
+    els.fGeneralActivityCustom.focus();
     return false;
   }
 
@@ -1331,6 +1471,7 @@ function upsertFromForm() {
     status,
     desc,
     action_detail,
+    general_activity,
     equipment_type,
     inventory_number,
     maintenance_type,
@@ -2100,9 +2241,13 @@ els.filterQ.addEventListener('input', () => {
 
 els.fEquipmentType.addEventListener('change', () => {
   updateEquipmentFields();
-  updateMaintenanceDetailField();
+  updateGeneralActivityCustomField();
 });
-els.fMaintenanceType.addEventListener('change', updateMaintenanceDetailField);
+els.fGeneralActivity?.addEventListener('change', updateGeneralActivityCustomField);
+els.fMaintenanceType.addEventListener('change', () => {
+  updateMaintenanceTaskOptions(els.fMaintenanceDetail.value);
+});
+els.fMaintenanceTask.addEventListener('change', updateMaintenanceDetailField);
 
 els.form.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -2198,7 +2343,7 @@ function showAppForUser(user) {
   if (els.usermenu) els.usermenu.hidden = false;
   if (els.username) els.username.textContent = user?.name || 'Usuario';
   if (els.btnLogout) els.btnLogout.hidden = false;
-  if (els.btnAdminUsers) els.btnAdminUsers.hidden = !API_URL || !user?.is_admin;
+  if (els.btnAdminUsers) els.btnAdminUsers.hidden = !user?.is_admin;
 
   ensureProfileDefaults(user);
 
