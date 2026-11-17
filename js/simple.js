@@ -826,6 +826,11 @@ function renderPager(totalItems) {
 function render() {
   const all = loadRecords();
   const full = filteredRecords(all);
+  const table = document.getElementById('table');
+  const hasEquipment = full.some((record) =>
+    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
+  );
+  table?.classList.toggle('has-equipment', hasEquipment);
   const size = Number(uiState.pageSize) || 10;
   const pages = Math.max(1, Math.ceil(full.length / size));
   uiState.page = Math.min(Math.max(1, uiState.page), pages);
@@ -844,7 +849,7 @@ function render() {
 
   if (!els.rows) return;
   if (!list.length) {
-    els.rows.innerHTML = `<tr><td colspan="10" class="empty">Sin registros con esos filtros.</td></tr>`;
+    els.rows.innerHTML = `<tr><td colspan="${hasEquipment ? 10 : 9}" class="empty">Sin registros con esos filtros.</td></tr>`;
     return;
   }
 

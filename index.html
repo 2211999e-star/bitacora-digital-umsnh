@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=8" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=9" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -137,7 +137,7 @@
             </label>
             <label class="field field-wide">
               <span>Buscar</span>
-              <input type="search" id="filter-q" placeholder="Antena, laboratorio, etc." title="Atajo: Ctrl/Cmd + K" />
+              <input type="search" id="filter-q" placeholder="Actividad, equipo, ubicación..." title="Atajo: Ctrl/Cmd + K" />
             </label>
           </div>
 
@@ -154,7 +154,7 @@
               </button>
             </div>
 
-            <div class="filter-actions" aria-label="Acciones rápidas">
+            <div class="filter-actions" aria-label="Acciones rápidas de filtros">
               <button class="btn btn-ghost" type="button" id="btn-this-month"><span aria-hidden="true">▦</span> Este mes</button>
                 <button class="btn btn-ghost" type="button" id="btn-today"><span aria-hidden="true">◷</span> Hoy</button>
                 <button class="btn btn-ghost" type="button" id="btn-clear"><span aria-hidden="true">↺</span> Limpiar</button>
@@ -164,8 +164,20 @@
           <div class="summary" id="summary" aria-label="Resumen"></div>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap" role="region" aria-label="Listado completo de actividades registradas" tabindex="0">
           <table class="table" id="table">
+            <colgroup>
+              <col class="col-date" />
+              <col class="col-activity" />
+              <col class="col-equipment" />
+              <col class="col-maintenance" />
+              <col class="col-location" />
+              <col class="col-area" />
+              <col class="col-assigned" />
+              <col class="col-created" />
+              <col class="col-status" />
+              <col class="col-actions" />
+            </colgroup>
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -475,7 +487,7 @@
     </dialog>
   </div>
 
-  <script type="module" src="./js/simple.js?v=62"></script>
+  <script type="module" src="./js/simple.js?v=63"></script>
 
   <script>
     // Service Worker (opcional)
@@ -483,7 +495,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=66').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=68').catch(() => {});
       } catch {}
     })();
   </script>

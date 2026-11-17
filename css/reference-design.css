@@ -1078,3 +1078,377 @@ body{
   #app .summary-card:nth-child(2),
   #app .summary-card:nth-child(3){min-height:0}
 }
+
+/* Readable activity filters and table across desktop, tablet, and mobile */
+#app main>.panel .filters-compact{
+  gap:14px;
+  padding:16px;
+  border:1px solid #d5e4ef;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f5faff);
+  box-shadow:0 8px 22px rgba(31,76,108,.08);
+}
+#app main>.panel .filters .field{
+  min-width:0;
+  gap:7px;
+  color:#547087;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+#app main>.panel .filters .field input{
+  width:100%;
+  min-height:42px;
+  padding:9px 12px;
+  border:1px solid #cedde9;
+  border-radius:10px;
+  background:#fff;
+  color:#203b50;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:normal;
+  text-transform:none;
+  transition:border-color .16s ease,box-shadow .16s ease,background-color .16s ease;
+}
+#app main>.panel .filters .field input:hover{
+  border-color:#9bbbd0;
+}
+#app main>.panel .filters .field input:focus{
+  border-color:#287ba7;
+  background:#fff;
+  box-shadow:0 0 0 4px rgba(40,123,167,.13);
+}
+#app main>.panel .filter-row{
+  justify-content:space-between;
+  gap:12px;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #e3edf4;
+}
+#app main>.panel .tabs{
+  gap:7px;
+}
+#app main>.panel .tab{
+  min-height:40px;
+  padding:7px 12px;
+  border-color:#d1e0ea;
+  border-radius:999px;
+  background:#fff;
+  color:#3e5a70;
+  font-size:12px;
+  font-weight:750;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+#app main>.panel .tab:hover{
+  transform:translateY(-1px);
+  border-color:#9bbbd0;
+  background:#f4faff;
+}
+#app main>.panel .tab.is-active{
+  border-color:#176b9b;
+  background:linear-gradient(135deg,#287fae,#176b9b);
+  color:#fff;
+  box-shadow:0 4px 11px rgba(23,107,155,.18);
+}
+#app main>.panel .tab-count{
+  min-width:22px;
+  padding:2px 6px;
+  border-radius:999px;
+  font-size:10px;
+}
+#app main>.panel .tab.is-active .tab-count{
+  border-color:rgba(255,255,255,.28);
+  background:rgba(255,255,255,.16);
+  color:#fff;
+}
+#app main>.panel .filter-actions{
+  gap:8px;
+}
+#app main>.panel .filter-actions .btn-ghost{
+  min-height:40px;
+  padding:8px 12px;
+  border-radius:10px;
+  box-shadow:0 3px 8px rgba(23,107,155,.1);
+}
+#app .table-wrap{
+  position:relative;
+  max-width:100%;
+  margin-top:10px;
+  overflow:auto;
+  overscroll-behavior-x:contain;
+  border:1px solid #d5e4ef;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 8px 22px rgba(31,76,108,.08);
+  scrollbar-color:#91b5cc #edf4f9;
+  scrollbar-width:thin;
+}
+#app .table-wrap:focus-visible{
+  outline:3px solid rgba(40,123,167,.3);
+  outline-offset:3px;
+}
+#app .table-wrap::after{
+  position:sticky;
+  left:0;
+  display:none;
+  width:100%;
+  padding:7px 10px;
+  border-top:1px solid #e3edf4;
+  background:#f5faff;
+  color:#617d91;
+  content:"Si falta alguna columna, desplaza la tabla horizontalmente";
+  font-size:10px;
+  text-align:center;
+}
+#app .table-wrap:has(.table.has-equipment)::after{
+  display:block;
+}
+#app .table{
+  width:100%;
+  min-width:1360px;
+  table-layout:fixed;
+}
+#app .table:not(.has-equipment){
+  min-width:1240px;
+}
+#app .table:not(.has-equipment) .col-equipment,
+#app .table:not(.has-equipment) th:nth-child(3),
+#app .table:not(.has-equipment) td:nth-child(3){
+  display:none;
+}
+#app .table .col-date{width:100px}
+#app .table .col-activity{width:225px}
+#app .table .col-equipment{width:120px}
+#app .table .col-maintenance{width:140px}
+#app .table .col-location{width:125px}
+#app .table .col-area{width:175px}
+#app .table .col-assigned{width:130px}
+#app .table .col-created{width:145px}
+#app .table .col-status{width:100px}
+#app .table .col-actions{width:200px}
+#app .table th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  padding:12px 10px;
+  border-bottom:1px solid #c8dce9;
+  background:#e8f4fc;
+  color:#31566f;
+  font-size:10px;
+  font-weight:850;
+  line-height:1.35;
+  letter-spacing:.045em;
+  white-space:normal;
+}
+#app .table td{
+  padding:12px 10px;
+  border-bottom:1px solid #e8eff4;
+  color:#304b60;
+  font-size:12px;
+  line-height:1.45;
+  overflow-wrap:anywhere;
+  vertical-align:middle;
+}
+#app .table tbody tr{
+  transition:background-color .16s ease,box-shadow .16s ease;
+}
+#app .table tbody tr:nth-child(even){
+  background:#f8fbfe;
+}
+#app .table tbody tr:hover{
+  background:#edf7fd;
+  box-shadow:inset 3px 0 #3884aa;
+}
+#app .table td.td-date{
+  color:#48677d;
+  font-size:11px;
+  font-weight:750;
+  white-space:nowrap;
+}
+#app .table td.td-activity{
+  color:#1e3b52;
+  font-weight:700;
+}
+#app .table .activity-detail{
+  margin-top:5px;
+  color:#708699;
+  font-size:11px;
+  font-weight:500;
+}
+#app .table td.td-status{
+  white-space:nowrap;
+}
+#app .table td.td-actions{
+  min-width:200px;
+}
+#app .table td.td-actions .row-actions{
+  gap:6px;
+  justify-content:flex-start;
+}
+#app .table td.td-actions .btn{
+  min-height:34px;
+  padding:7px 9px;
+  border-radius:9px;
+  font-size:11px;
+}
+#app .table-footer{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px 16px;
+  padding:12px 16px;
+  border-top:1px solid #e0eaf1;
+  border-radius:0 0 14px 14px;
+  background:#f7fbfe;
+}
+#app .table-footer .pager{
+  margin-left:auto;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+@media (min-width:641px) and (max-width:1080px){
+  #app .table-wrap::after{
+    display:block;
+  }
+  #app main>.panel .filters{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #app main>.panel .filters .field-wide{
+    grid-column:1/-1;
+  }
+  #app main>.panel .filter-row{
+    flex-wrap:wrap;
+  }
+  #app main>.panel .tabs{
+    flex:1 1 100%;
+  }
+}
+@media (max-width:640px){
+  #app main>.panel .panel-head{
+    padding:18px 14px;
+  }
+  #app main>.panel .section-heading{
+    align-items:flex-start;
+    gap:6px;
+    margin-bottom:16px;
+  }
+  #app main>.panel .section-title{
+    font-size:23px;
+  }
+  #app main>.panel .section-note{
+    max-width:130px;
+    text-align:right;
+    font-size:10px;
+  }
+  #app main>.panel .filters{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  #app main>.panel .filters .field-wide{
+    grid-column:1/-1;
+  }
+  #app main>.panel .filters-compact{
+    padding:12px;
+    border-radius:13px;
+  }
+  #app main>.panel .filters .field{
+    gap:5px;
+    font-size:9px;
+  }
+  #app main>.panel .filters .field input{
+    min-height:40px;
+    padding:8px;
+    font-size:12px;
+  }
+  #app main>.panel .filter-row{
+    align-items:stretch;
+    gap:10px;
+    margin-top:12px;
+    padding-top:10px;
+  }
+  #app main>.panel .tabs{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:5px;
+  }
+  #app main>.panel .tab{
+    justify-content:center;
+    gap:4px;
+    min-width:0;
+    min-height:38px;
+    padding:6px 4px;
+    font-size:10px;
+  }
+  #app main>.panel .tab-count{
+    min-width:18px;
+    padding:2px 4px;
+  }
+  #app main>.panel .filter-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+  }
+  #app main>.panel .filter-actions .btn-ghost{
+    min-width:0;
+    min-height:38px;
+    gap:4px;
+    padding:6px 4px;
+    font-size:10px;
+  }
+  #app .table-wrap{
+    border-radius:12px;
+  }
+  #app .table{
+    width:100%;
+    min-width:0;
+    table-layout:auto;
+  }
+  #app .table:not(.has-equipment){
+    min-width:0;
+  }
+  #app .table-wrap::after{
+    display:none;
+  }
+  #app .table-footer{
+    justify-content:space-between;
+    gap:8px;
+    padding:10px;
+    font-size:11px;
+  }
+  #app .table-footer .pager{
+    width:100%;
+    justify-content:center;
+  }
+}
+@media print{
+  #app .table-wrap{
+    overflow:visible!important;
+    border:0;
+    box-shadow:none;
+  }
+  #app .table-wrap::after{
+    display:none!important;
+  }
+  #app .table{
+    width:100%!important;
+    min-width:0!important;
+    table-layout:auto!important;
+  }
+  #app .table col{
+    width:auto!important;
+  }
+  #app .table th{
+    position:static;
+    padding:5px 4px;
+    background:#f2f2f2;
+    color:#111;
+    font-size:9px;
+  }
+  #app .table td{
+    padding:5px 4px;
+    color:#111;
+    font-size:9px;
+  }
+}
