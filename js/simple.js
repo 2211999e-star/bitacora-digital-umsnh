@@ -1043,6 +1043,7 @@ const uiState = {
 };
 
 let formInitialSnapshot = '';
+let autoSuggestedNextMaintenance = '';
 let __toastTimer = null;
 function toast(msg) {
   const text = safeStr(msg);
@@ -1400,7 +1401,6 @@ function updateFormSections() {
   if (els.observationsField) els.observationsField.hidden = !isMaintenanceRecord();
   if (els.fGeneralActivity) els.fGeneralActivity.required = isGeneral;
   if (els.fInventoryNumber) els.fInventoryNumber.required = equipmentRequired;
-  if (els.fDeviceType) els.fDeviceType.required = equipmentRequired;
   if (els.fReportedFailure) els.fReportedFailure.required = isCorrective;
 
   if (els.retireEquipmentField) els.retireEquipmentField.hidden = !isCorrective;
@@ -1425,8 +1425,13 @@ function updateFormSections() {
   if (els.locationSection) els.locationSection.hidden = false;
   if (els.preventiveOtherField) els.preventiveOtherField.hidden = !Boolean(els.fPreventiveOther?.checked);
   if (els.fPreventiveOtherDetail) els.fPreventiveOtherDetail.required = isPreventive && Boolean(els.fPreventiveOther?.checked);
-  if (isPreventive && !wasPreventive && els.fNextMaintenance && !els.fNextMaintenance.value) {
-    els.fNextMaintenance.value = addMonthsToDate(els.fDate?.value || todayISO(), 6);
+  if (isPreventive && !wasPreventive && els.fNextMaintenance) {
+    if (!els.fNextMaintenance.value || els.fNextMaintenance.value === autoSuggestedNextMaintenance) {
+      autoSuggestedNextMaintenance = addMonthsToDate(els.fDate?.value || todayISO(), 6);
+      els.fNextMaintenance.value = autoSuggestedNextMaintenance;
+    } else {
+      autoSuggestedNextMaintenance = '';
+    }
   }
 
   syncActivityFormState();
@@ -1510,7 +1515,6 @@ function validateActivityForm(showErrors = false) {
     ...(isGeneral ? [['f-general-activity', safeStr(els.fGeneralActivity?.value), 'Selecciona el tipo de actividad general.']] : []),
     ...(isEquipment ? [
       ['f-inventory-number', safeStr(els.fInventoryNumber?.value), 'La clave de patrimonio es obligatoria.'],
-      ['f-device-type', safeStr(els.fDeviceType?.value), 'Selecciona el tipo de equipo.'],
     ] : []),
     ...(isCorrective ? [['f-reported-failure', safeStr(els.fReportedFailure?.value), 'Describe la falla reportada.']] : []),
     ...(isGeneral && safeStr(els.fGeneralActivity?.value) === '__custom__'
@@ -1569,6 +1573,7 @@ function closeActivityModal() {
 }
 
 function openModalForNew() {
+  autoSuggestedNextMaintenance = '';
   els.form.reset();
   els.modalTitle.textContent = 'Nueva actividad';
   els.fId.value = '';
@@ -1693,13 +1698,15 @@ function openModalForEdit(id) {
   els.fPreventiveOther.checked = Boolean(otherTask);
   els.fPreventiveOtherDetail.value = otherTask;
   els.fNextMaintenance.value = safeStr(maintenance.proximoMantenimiento || rec.proximo_mantenimiento);
+  autoSuggestedNextMaintenance = '';
   els.fReportedFailure.value = safeStr(maintenance.falla || rec.falla_reportada);
   els.fDiagnosis.value = safeStr(maintenance.diagnostico || rec.diagnostico);
   els.fSolution.value = safeStr(maintenance.solucion || rec.solucion_aplicada);
   els.fParts.value = safeStr(maintenance.refacciones || rec.refacciones);
   els.fObservations.value = safeStr(maintenance.observaciones || rec.observaciones);
   if (recordCategory(rec) === 'preventivo' && !els.fNextMaintenance.value) {
-    els.fNextMaintenance.value = addMonthsToDate(els.fDate.value, 6);
+    autoSuggestedNextMaintenance = addMonthsToDate(els.fDate.value, 6);
+    els.fNextMaintenance.value = autoSuggestedNextMaintenance;
   }
 
   const location = rec.ubicacion || {};
@@ -2662,10 +2669,15 @@ els.fCollectedBy?.addEventListener('input', () => {
   validateActivityForm(true);
 });
 els.fDate?.addEventListener('change', () => {
-  if (formCategory() === 'preventivo' && !els.fNextMaintenance.value) {
-    els.fNextMaintenance.value = addMonthsToDate(els.fDate.value, 6);
+  if (formCategory() === 'preventivo'
+    && (!els.fNextMaintenance.value || els.fNextMaintenance.value === autoSuggestedNextMaintenance)) {
+    autoSuggestedNextMaintenance = addMonthsToDate(els.fDate.value, 6);
+    els.fNextMaintenance.value = autoSuggestedNextMaintenance;
   }
   syncActivityFormState();
+});
+els.fNextMaintenance?.addEventListener('input', () => {
+  autoSuggestedNextMaintenance = '';
 });
 els.fInventoryNumber?.addEventListener('input', updateInventoryDuplicateWarning);
 els.form.addEventListener('input', (event) => {

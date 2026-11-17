@@ -373,8 +373,8 @@
               <small class="field-hint" id="inventory-warning" role="status" hidden></small>
             </label>
             <label class="field">
-              <span>Tipo de equipo <b class="required-mark" aria-hidden="true">*</b></span>
-              <select id="f-device-type" required>
+              <span>Tipo de equipo</span>
+              <select id="f-device-type">
                 <option value="">Selecciona el equipo</option>
                 <option>Computadora</option>
                 <option>Laptop</option>
@@ -568,7 +568,7 @@
           </label>
           <label class="field">
             <span>Comisión Académica / Dependencia</span>
-            <input type="text" id="p-area" placeholder="Ej. Comisión Académica de Servicios Informáticos" />
+            <input type="text" id="p-area" placeholder="Ej. Servicios Informáticos" />
           </label>
           <label class="field field-wide">
             <span>Rol</span>
@@ -700,7 +700,7 @@
   </div>
 
   <script src="./js/config.js?v=1"></script>
-  <script type="module" src="./js/simple.js?v=70"></script>
+  <script type="module" src="./js/simple.js?v=71"></script>
 
   <script>
     // Service Worker (opcional)
@@ -708,7 +708,7 @@
       try {
         if (!('serviceWorker' in navigator)) return;
         if (location.protocol !== 'http:' && location.protocol !== 'https:') return;
-        navigator.serviceWorker.register('./sw.js?v=70').catch(() => {});
+        navigator.serviceWorker.register('./sw.js?v=71').catch(() => {});
       } catch {}
     })();
   </script>
