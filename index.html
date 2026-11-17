@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./css/simple.css?v=57" />
   <link rel="stylesheet" href="./css/final-ui.css?v=8" />
   <link rel="stylesheet" href="./css/premium-dashboard.css?v=2" />
-  <link rel="stylesheet" href="./css/reference-design.css?v=12" />
+  <link rel="stylesheet" href="./css/reference-design.css?v=14" />
 </head>
 <body>
   <a class="skip" href="#main">Saltar al contenido</a>
@@ -134,9 +134,27 @@
               <span>Hasta</span>
               <input type="date" id="filter-end" />
             </label>
-            <label class="field field-wide">
+            <label class="field">
+              <span>Formato</span>
+              <select id="filter-record-type">
+                <option value="">Todos los formatos</option>
+                <option value="Normal">Actividad general</option>
+                <option value="Mantenimiento">Mantenimiento</option>
+                <option value="Computadora">Computadora</option>
+                <option value="Impresora">Impresora</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Mantenimiento</span>
+              <select id="filter-maintenance">
+                <option value="">Preventivo y correctivo</option>
+                <option value="Preventivo">Preventivo</option>
+                <option value="Correctivo">Correctivo</option>
+              </select>
+            </label>
+            <label class="field field-wide filter-search">
               <span>Buscar</span>
-              <input type="search" id="filter-q" placeholder="Actividad, equipo, ubicación..." title="Atajo: Ctrl/Cmd + K" />
+              <input type="search" id="filter-q" placeholder="Actividad, patrimonio, marca, modelo, serie, ubicación..." title="Atajo: Ctrl/Cmd + K" />
             </label>
           </div>
 
@@ -315,6 +333,7 @@
             <span>Formato de registro</span>
             <select id="f-equipment-type">
               <option value="Normal">Actividad general</option>
+              <option value="Mantenimiento">Mantenimiento (sin equipo identificado)</option>
               <option value="Computadora">Computadora</option>
               <option value="Impresora">Impresora</option>
             </select>
@@ -329,8 +348,17 @@
               <input type="text" id="f-general-activity-custom" maxlength="160" placeholder="Agrega una opción propia" />
             </label>
           </section>
-          <div class="field field-wide form-section-label maintenance-section-title">Clasificación del mantenimiento</div>
-          <section class="field field-wide activity-options maintenance-options" id="maintenance-section">
+          <div class="field field-wide form-section-label equipment-field" hidden>Identificación del equipo</div>
+          <label class="field equipment-field" hidden>
+            <span>Clave de patrimonio</span>
+            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
+          </label>
+          <label class="field field-wide equipment-field" hidden>
+            <span>Descripción del equipo</span>
+            <input type="text" id="f-equipment-description" maxlength="240" placeholder="Ej. Computadora de escritorio del laboratorio 2" />
+          </label>
+          <div class="field field-wide form-section-label maintenance-section-title" id="maintenance-section-title" hidden>Clasificación del mantenimiento</div>
+          <section class="field field-wide activity-options maintenance-options" id="maintenance-section" hidden>
             <label class="field">
               <span>Selecciona solo una opción</span>
               <select id="f-maintenance-type" required>
@@ -350,10 +378,14 @@
               <input type="text" id="f-maintenance-detail" maxlength="160" placeholder="Escribe el tipo de mantenimiento" />
             </label>
           </section>
-          <div class="field field-wide form-section-label equipment-field" hidden>Datos del equipo</div>
+          <div class="field field-wide form-section-label equipment-field" hidden>Marca, modelo y serie</div>
           <label class="field equipment-field" hidden>
-            <span>Número de patrimonio</span>
-            <input type="text" id="f-inventory-number" placeholder="Ej. UM-12345" />
+            <span>Marca</span>
+            <input type="text" id="f-brand" maxlength="100" placeholder="Ej. HP" />
+          </label>
+          <label class="field equipment-field" hidden>
+            <span>Modelo</span>
+            <input type="text" id="f-model" maxlength="120" placeholder="Ej. ProDesk 400 G6" />
           </label>
           <label class="field equipment-field" hidden>
             <span>Número de serie</span>
@@ -540,7 +572,7 @@
   </div>
 
   <script src="./js/config.js?v=1"></script>
-  <script type="module" src="./js/simple.js?v=66"></script>
+  <script type="module" src="./js/simple.js?v=68"></script>
 
   <script>
     // Service Worker (opcional)

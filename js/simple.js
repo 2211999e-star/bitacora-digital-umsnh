@@ -131,7 +131,10 @@ function seedJulyNotes() {
     desc,
     action_detail: 'Nota inicial del pizarrón de mantenimiento de julio.',
     equipment_type: '',
+    equipment_description: '',
     inventory_number: '',
+    brand: '',
+    model: '',
     maintenance_type: '',
     maintenance_detail: '',
     serial_number: '',
@@ -151,7 +154,10 @@ function seedJulyNotes() {
     desc,
     action_detail,
     equipment_type: '',
+    equipment_description: '',
     inventory_number: '',
+    brand: '',
+    model: '',
     maintenance_type: '',
     maintenance_detail: '',
     serial_number: '',
@@ -806,6 +812,9 @@ function matchesSearch(rec, q) {
     rec.equipment_type,
     rec.general_activity,
     rec.inventory_number,
+    rec.equipment_description,
+    rec.brand,
+    rec.model,
     rec.maintenance_type,
     rec.maintenance_detail,
     rec.serial_number,
@@ -896,6 +905,8 @@ const els = {
   filterStart: document.getElementById('filter-start'),
   filterEnd: document.getElementById('filter-end'),
   filterQ: document.getElementById('filter-q'),
+  filterRecordType: document.getElementById('filter-record-type'),
+  filterMaintenance: document.getElementById('filter-maintenance'),
 
   fId: document.getElementById('f-id'),
   fDate: document.getElementById('f-date'),
@@ -903,6 +914,11 @@ const els = {
   fDesc: document.getElementById('f-desc'),
   fActionDetail: document.getElementById('f-action-detail'),
   fEquipmentType: document.getElementById('f-equipment-type'),
+  fEquipmentDescription: document.getElementById('f-equipment-description'),
+  fBrand: document.getElementById('f-brand'),
+  fModel: document.getElementById('f-model'),
+  maintenanceSection: document.getElementById('maintenance-section'),
+  maintenanceSectionTitle: document.getElementById('maintenance-section-title'),
   generalActivitySection: document.getElementById('general-activity-section'),
   fGeneralActivity: document.getElementById('f-general-activity'),
   generalActivityCustomField: document.getElementById('general-activity-custom-field'),
@@ -987,14 +1003,30 @@ function getFilters() {
   const end = safeStr(rangeFromMonth?.end || els.filterEnd?.value);
   const q = safeStr(els.filterQ?.value);
   const status = safeStr(uiState.status);
-  return { start, end, q, status };
+  const recordType = safeStr(els.filterRecordType?.value);
+  const maintenance = safeStr(els.filterMaintenance?.value);
+  return { start, end, q, status, recordType, maintenance };
+}
+
+function matchesRecordType(record, type) {
+  if (!type) return true;
+  const recordType = safeStr(record.equipment_type)
+    || (record.maintenance_type ? 'Mantenimiento' : 'Normal');
+  return recordType === type;
+}
+
+function matchesMaintenance(record, maintenance) {
+  if (!maintenance) return true;
+  return safeStr(record.maintenance_type).toLowerCase() === maintenance.toLowerCase();
 }
 
 function updateCounts(records) {
-  const { start, end, q } = getFilters();
+  const { start, end, q, recordType, maintenance } = getFilters();
   const base = (records || [])
     .filter((r) => (start || end ? inRange(r.date, start, end) : true))
-    .filter((r) => matchesSearch(r, q));
+    .filter((r) => matchesSearch(r, q))
+    .filter((r) => matchesRecordType(r, recordType))
+    .filter((r) => matchesMaintenance(r, maintenance));
 
   const all = base.length;
   const pend = base.filter((r) => safeStr(r.status).toLowerCase() !== 'completado').length;
@@ -1006,11 +1038,13 @@ function updateCounts(records) {
 }
 
 function filteredRecords(records) {
-  const { start, end, q, status } = getFilters();
+  const { start, end, q, status, recordType, maintenance } = getFilters();
   return (records || [])
     .filter((r) => (status ? safeStr(r.status).toLowerCase() === status : true))
     .filter((r) => (start || end ? inRange(r.date, start, end) : true))
     .filter((r) => matchesSearch(r, q))
+    .filter((r) => matchesRecordType(r, recordType))
+    .filter((r) => matchesMaintenance(r, maintenance))
     .sort(sortNewest);
 }
 
@@ -1122,7 +1156,14 @@ function render() {
   const full = filteredRecords(all);
   const table = document.getElementById('table');
   const hasEquipment = full.some((record) =>
-    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
+    [
+      record.equipment_type,
+      record.equipment_description,
+      record.inventory_number,
+      record.brand,
+      record.model,
+      record.serial_number,
+    ].map(safeStr).some(Boolean),
   );
   table?.classList.toggle('has-equipment', hasEquipment);
   const size = Number(uiState.pageSize) || 10;
@@ -1156,8 +1197,11 @@ function render() {
       const area = safeStr(r.area) || '—';
       const assigned = safeStr(r.assigned_to) || '—';
       const equipmentParts = [
-        ['Tipo', r.equipment_type],
-        ['Patrimonio', r.inventory_number],
+        ['Formato', r.equipment_type],
+        ['Descripción', r.equipment_description],
+        ['Clave de patrimonio', r.inventory_number],
+        ['Marca', r.brand],
+        ['Modelo', r.model],
         ['Serie', r.serial_number],
       ].filter(([, value]) => safeStr(value));
       const equipment = equipmentParts.length
@@ -1234,14 +1278,25 @@ function maintenanceSummary(record) {
 function updateEquipmentFields() {
   const type = safeStr(els.fEquipmentType.value);
   const isEquipment = ['Computadora', 'Impresora'].includes(type);
+  const isMaintenance = type !== 'Normal';
   if (els.generalActivitySection) els.generalActivitySection.hidden = type !== 'Normal';
+  if (els.maintenanceSection) els.maintenanceSection.hidden = !isMaintenance;
+  if (els.maintenanceSectionTitle) els.maintenanceSectionTitle.hidden = !isMaintenance;
+  if (els.fMaintenanceType) els.fMaintenanceType.required = isMaintenance;
+  if (els.fMaintenanceTask) els.fMaintenanceTask.required = isMaintenance;
   document.querySelectorAll('.equipment-field').forEach((field) => {
     field.hidden = !isEquipment;
   });
+  if (!isMaintenance) {
+    els.fMaintenanceType.value = '';
+    els.fMaintenanceDetail.value = '';
+    updateMaintenanceTaskOptions();
+  }
 }
 
 function updateGeneralActivityOptions(selectedValue = '') {
   if (!els.fGeneralActivity) return;
+  if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
   const savedOptions = [...new Set(loadRecords()
     .map((record) => safeStr(record.general_activity))
     .filter((activity) => activity && !GENERAL_ACTIVITIES.includes(activity)))];
@@ -1283,6 +1338,7 @@ function updateMaintenanceTaskOptions(selectedValue = '') {
     .map((record) => safeStr(record.maintenance_detail))
     .filter((task) => task && !tasks.includes(task)))];
   const availableTasks = [...tasks, ...savedTasks];
+  if (els.fMaintenanceDetail) els.fMaintenanceDetail.value = '';
   els.fMaintenanceTask.disabled = false;
   els.fMaintenanceTask.innerHTML = [
     '<option value="">Selecciona el tipo de mantenimiento</option>',
@@ -1311,6 +1367,9 @@ function openModalForNew() {
   els.fEquipmentType.value = 'Normal';
   if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
   updateGeneralActivityOptions();
+  els.fEquipmentDescription.value = '';
+  els.fBrand.value = '';
+  els.fModel.value = '';
   els.fInventoryNumber.value = '';
   els.fMaintenanceType.value = '';
   els.fMaintenanceDetail.value = '';
@@ -1364,7 +1423,10 @@ function addBulkRecords() {
       desc,
       action_detail: '',
       equipment_type: '',
+      equipment_description: '',
       inventory_number: '',
+      brand: '',
+      model: '',
       maintenance_type: '',
       maintenance_detail: '',
       serial_number: '',
@@ -1391,9 +1453,14 @@ function openModalForEdit(id) {
   els.fStatus.value = rec.status || 'pendiente';
   els.fDesc.value = rec.desc || '';
   els.fActionDetail.value = rec.action_detail || '';
-  els.fEquipmentType.value = rec.equipment_type || 'Normal';
+  const legacyHasMaintenance = Boolean(rec.maintenance_type || rec.maintenance_detail);
+  els.fEquipmentType.value = rec.equipment_type
+    || (legacyHasMaintenance ? 'Mantenimiento' : 'Normal');
   if (els.fGeneralActivityCustom) els.fGeneralActivityCustom.value = '';
   updateGeneralActivityOptions(rec.general_activity || '');
+  els.fEquipmentDescription.value = rec.equipment_description || '';
+  els.fBrand.value = rec.brand || '';
+  els.fModel.value = rec.model || '';
   els.fInventoryNumber.value = rec.inventory_number || '';
   const maintenanceCategory = ['Preventivo', 'Correctivo'].includes(rec.maintenance_type) ? rec.maintenance_type : '';
   const legacyMaintenance = rec.maintenance_type && !maintenanceCategory ? rec.maintenance_type : '';
@@ -1421,12 +1488,16 @@ function upsertFromForm() {
   const action_detail = safeStr(els.fActionDetail.value);
   const selectedType = safeStr(els.fEquipmentType.value);
   const equipment_type = ['Computadora', 'Impresora'].includes(selectedType) ? selectedType : '';
+  const equipment_description = equipment_type ? safeStr(els.fEquipmentDescription.value) : '';
+  const brand = equipment_type ? safeStr(els.fBrand.value) : '';
+  const model = equipment_type ? safeStr(els.fModel.value) : '';
   const inventory_number = equipment_type ? safeStr(els.fInventoryNumber.value) : '';
-  const maintenance_type = safeStr(els.fMaintenanceType.value);
-  const maintenanceTask = safeStr(els.fMaintenanceTask.value);
+  const isMaintenanceRecord = selectedType !== 'Normal';
+  const maintenance_type = isMaintenanceRecord ? safeStr(els.fMaintenanceType.value) : '';
+  const maintenanceTask = isMaintenanceRecord ? safeStr(els.fMaintenanceTask.value) : '';
   const maintenance_detail = maintenanceTask === '__custom__'
     ? safeStr(els.fMaintenanceDetail.value)
-    : maintenanceTask;
+    : isMaintenanceRecord ? maintenanceTask : '';
   const selectedGeneralActivity = safeStr(els.fGeneralActivity?.value);
   const general_activity = selectedType !== 'Normal'
     ? ''
@@ -1442,11 +1513,11 @@ function upsertFromForm() {
     els.fDesc.focus();
     return false;
   }
-  if (!maintenance_type) {
+  if (isMaintenanceRecord && !maintenance_type) {
     els.fMaintenanceType.focus();
     return false;
   }
-  if (!maintenanceTask || (maintenanceTask === '__custom__' && !maintenance_detail)) {
+  if (isMaintenanceRecord && (!maintenanceTask || (maintenanceTask === '__custom__' && !maintenance_detail))) {
     (maintenanceTask === '__custom__' ? els.fMaintenanceDetail : els.fMaintenanceTask).focus();
     return false;
   }
@@ -1473,6 +1544,9 @@ function upsertFromForm() {
     action_detail,
     general_activity,
     equipment_type,
+    equipment_description,
+    brand,
+    model,
     inventory_number,
     maintenance_type,
     maintenance_detail,
@@ -1529,17 +1603,20 @@ function exportExcel({ orientation = 'portrait' } = {}) {
   const orientLabel = orientation === 'landscape' ? 'horizontal' : 'vertical';
   const file = `bitacora_${status || 'todas'}_${start || 'inicio'}_${end || 'fin'}_excel_${orientLabel}.xlsx`;
   const activityRows = [
-    ['Fecha', 'Actividad', 'Detalle de actividad', 'Equipo', 'Mantenimiento', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
+    ['Fecha', 'Actividad', 'Detalle de actividad', 'Formato', 'Descripción del equipo', 'Clave de patrimonio', 'Marca', 'Modelo', 'Número de serie', 'Actividad general', 'Clasificación de mantenimiento', 'Tipo de mantenimiento', 'Ubicación', 'Comisión Académica', 'Responsable(s)', 'Registró', 'Estado'],
     ...list.map((record) => [
       formatDateHuman(record.date),
       safeStr(record.desc),
       safeStr(record.action_detail),
-      [
-        ['Tipo', record.equipment_type],
-        ['Patrimonio', record.inventory_number],
-        ['Serie', record.serial_number],
-      ].filter(([, value]) => safeStr(value)).map(([label, value]) => `${label}: ${safeStr(value)}`).join(' · '),
-      maintenanceSummary(record),
+      safeStr(record.equipment_type) || (record.maintenance_type ? 'Mantenimiento' : 'Actividad general'),
+      safeStr(record.equipment_description),
+      safeStr(record.inventory_number),
+      safeStr(record.brand),
+      safeStr(record.model),
+      safeStr(record.serial_number),
+      safeStr(record.general_activity),
+      safeStr(record.maintenance_type),
+      safeStr(record.maintenance_detail),
       safeStr(record.location),
       safeStr(record.area),
       safeStr(record.assigned_to),
@@ -1568,7 +1645,7 @@ function exportExcel({ orientation = 'portrait' } = {}) {
 
   try {
     downloadXlsx(file, [
-      { name: 'Actividades', rows: activityRows, widths: [14, 36, 40, 32, 24, 24, 38, 28, 28, 16], orientation },
+      { name: 'Actividades', rows: activityRows, widths: [14, 36, 40, 22, 38, 22, 20, 24, 24, 30, 26, 34, 24, 38, 28, 28, 16], orientation },
       { name: 'Resumen', rows: summaryRows, widths: [30, 48] },
     ]);
     toast('Reporte de actividades descargado en Excel (.xlsx).');
@@ -1694,7 +1771,14 @@ function printCurrent({ orientation = 'portrait' } = {}) {
   preparePrintFooter(folio);
   const cleanupOrientation = applyPrintOrientation(orientation);
   const hasEquipment = filteredRecords(loadRecords()).some((record) =>
-    [record.equipment_type, record.inventory_number, record.serial_number].map(safeStr).some(Boolean),
+    [
+      record.equipment_type,
+      record.equipment_description,
+      record.inventory_number,
+      record.brand,
+      record.model,
+      record.serial_number,
+    ].map(safeStr).some(Boolean),
   );
   document.body.classList.toggle('print-without-equipment', !hasEquipment);
   let cleaned = false;
@@ -2168,6 +2252,8 @@ els.btnClear.addEventListener('click', () => {
   els.filterStart.value = '';
   els.filterEnd.value = '';
   els.filterQ.value = '';
+  if (els.filterRecordType) els.filterRecordType.value = '';
+  if (els.filterMaintenance) els.filterMaintenance.value = '';
   render();
 });
 els.btnToday?.addEventListener('click', () => {
@@ -2238,6 +2324,14 @@ els.filterQ.addEventListener('input', () => {
     render();
   }, 120);
 });
+els.filterRecordType?.addEventListener('change', () => {
+  uiState.page = 1;
+  render();
+});
+els.filterMaintenance?.addEventListener('change', () => {
+  uiState.page = 1;
+  render();
+});
 
 els.fEquipmentType.addEventListener('change', () => {
   updateEquipmentFields();
@@ -2245,7 +2339,8 @@ els.fEquipmentType.addEventListener('change', () => {
 });
 els.fGeneralActivity?.addEventListener('change', updateGeneralActivityCustomField);
 els.fMaintenanceType.addEventListener('change', () => {
-  updateMaintenanceTaskOptions(els.fMaintenanceDetail.value);
+  els.fMaintenanceDetail.value = '';
+  updateMaintenanceTaskOptions();
 });
 els.fMaintenanceTask.addEventListener('change', updateMaintenanceDetailField);
 

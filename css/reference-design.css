@@ -1325,6 +1325,7 @@ body{
     flex:1 1 100%;
   }
 }
+
 @media (max-width:640px){
   #app main>.panel .panel-head{
     padding:18px 14px;
@@ -2313,7 +2314,58 @@ body{
   color:#9b2424;
 }
 
+#app main>.panel .filters-compact{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:end;
+  gap:12px;
+  padding:18px;
+  border-color:#d5e4ef;
+  border-radius:16px;
+  background:linear-gradient(145deg,#fff,#f4f9fd);
+}
+
+#app main>.panel .filters .field input,
+#app main>.panel .filters .field select{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  padding:9px 11px;
+  border:1px solid #cbdbe8;
+  border-radius:11px;
+  background:#fff;
+  color:#203b50;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:normal;
+  text-transform:none;
+}
+
+#app main>.panel .filters .filter-search{
+  grid-column:1/-1;
+}
+
+#app main>.panel .filters .filter-search input{
+  min-height:48px;
+  border-color:#aac6d9;
+  background:#fafdff;
+}
+
+#app main>.panel .filters .field input:focus,
+#app main>.panel .filters .field select:focus{
+  border-color:#287ba7;
+  box-shadow:0 0 0 4px rgba(40,123,167,.13);
+  outline:none;
+}
+
 @media(max-width:640px){
+  #app main>.panel .filters-compact{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    padding:13px;
+  }
+  #app main>.panel .filters .filter-search{
+    grid-column:1/-1;
+  }
   #app .activity-options{
     grid-template-columns:minmax(0,1fr);
     gap:12px;
@@ -2325,5 +2377,11 @@ body{
   .admin-password-form{
     align-items:stretch;
     flex-direction:column;
+  }
+}
+
+@media(min-width:641px) and (max-width:920px){
+  #app main>.panel .filters-compact{
+    grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
